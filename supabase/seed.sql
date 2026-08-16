@@ -127,7 +127,7 @@ where winery_id = (select id from public.wineries where slug = 'arrington-vineya
 insert into public.winery_hours (winery_id, label, start_month, end_month, hours_text, sort_order)
 select w.id, v.label, v.start_month, v.end_month, v.hours_text, v.sort_order
 from public.wineries w
-join (
+cross join (
   values
     ('April – October', 4, 10, 'Mon–Thu 11am–8pm · Fri 11am–9pm · Sat 11am–8pm · Sun 12pm–8pm', 1),
     ('November – December', 11, 12, 'Mon–Sat 11am–8pm · Sun 12pm–6pm', 2),
