@@ -110,7 +110,6 @@ export interface SyncResult {
 
 export async function syncWineryWines(winery: Winery): Promise<SyncResult> {
   const sourceUrl = winery.wine_menu_url ?? winery.website_url;
-  const supabase = await createAdminClient();
   const base: Omit<SyncResult, "status" | "detail"> = { wineryId: winery.id, wineryName: winery.name, added: 0 };
 
   if (!sourceUrl) {
@@ -118,6 +117,7 @@ export async function syncWineryWines(winery: Winery): Promise<SyncResult> {
   }
 
   try {
+    const supabase = await createAdminClient();
     const { data: existingWines, error: fetchError } = await supabase
       .from("wines")
       .select("name, sort_order")

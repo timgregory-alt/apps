@@ -109,20 +109,31 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
   const winery = await getWineryByIdAdmin(wineryId);
   if (!winery) throw new Error("Winery not found");
 
-  const result = await syncWineryWines(winery);
+  try {
+    const result = await syncWineryWines(winery);
 
-  const supabase = await createClient();
-  await supabase.from("wine_sync_log").insert({
-    winery_id: winery.id,
-    wines_added: result.added,
-    status: result.status,
-    detail: result.detail ?? null,
-  });
+    const supabase = await createClient();
+    const { error: logError } = await supabase.from("wine_sync_log").insert({
+      winery_id: winery.id,
+      wines_added: result.added,
+      status: result.status,
+      detail: result.detail ?? null,
+    });
+    if (logError) console.error("wine_sync_log insert failed:", logError.message);
 
-  revalidatePath(`/admin/wineries/${wineryId}`);
-  revalidatePath(`/winery/${winery.slug}`);
-  revalidatePath("/passport");
-  revalidatePath("/explore");
+    revalidatePath(`/admin/wineries/${wineryId}`);
+    revalidatePath(`/winery/${winery.slug}`);
+    revalidatePath("/passport");
+    revalidatePath("/explore");
 
-  return result;
+    return result;
+  } catch (err) {
+    return {
+      wineryId: winery.id,
+      wineryName: winery.name,
+      added: 0,
+      status: "error",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
 }

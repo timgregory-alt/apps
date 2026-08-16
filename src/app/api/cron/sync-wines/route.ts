@@ -14,8 +14,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Supabase not configured" }, { status: 200 });
   }
 
-  const results = await syncAllWineries();
-  const totalAdded = results.reduce((sum, r) => sum + r.added, 0);
-
-  return NextResponse.json({ totalAdded, results });
+  try {
+    const results = await syncAllWineries();
+    const totalAdded = results.reduce((sum, r) => sum + r.added, 0);
+    return NextResponse.json({ totalAdded, results });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  }
 }
