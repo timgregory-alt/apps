@@ -25,25 +25,25 @@ insert into public.wineries (
     'https://arringtonvineyards.com', 'https://arringtonvineyards.com/wine-club',
     'Uncorked Club', 'A quarterly taste of what''s new in the barrel room, delivered to your door.',
     array['Exclusive small-batch releases', 'Member-only events on the hillside', 'Preferred member pricing', 'Discounts on bottle purchases'],
-    'Mon–Sat 11am–9pm · Sun 12pm–6pm (placeholder — confirm seasonal hours)',
+    'Mon–Thu 11am–8pm · Fri 11am–9pm · Sat 11am–8pm · Sun 12pm–8pm (Apr–Oct; shorter hours Nov–Mar)',
     228, true, 1
   ),
   (
     'Woodfeather Farm Vineyard & Winery', 'woodfeather-farm', 'Chapel Hill', 'Tennessee',
-    'Chapel Hill, TN', 35.6337, -86.6903,
+    '106 N Horton Pkwy, Chapel Hill, TN 37034', 35.6337, -86.6903,
     'A working family farm turned vineyard, pouring estate wines with a warm, unhurried farmhouse welcome.',
     null, null, 'Woodfeather Wine Club', 'Take a little of Woodfeather home with you, season after season.',
     array['Exclusive releases', 'Member events', 'Member pricing', 'Bottle discounts'],
-    'Fri–Sun 12pm–6pm (placeholder — confirm seasonal hours)',
+    'Closed Mon–Wed · Thu 2pm–8pm · Fri–Sat 1pm–9pm · Sun 1pm–6pm',
     228, true, 2
   ),
   (
     'Picker''s Creek Winery', 'pickers-creek', 'Lewisburg', 'Tennessee',
-    'Lewisburg, TN', 35.4495, -86.7911,
+    '1986 New Columbia Hwy, Lewisburg, TN 37091', 35.4495, -86.7911,
     'A creekside tasting room pouring approachable Southern wines, named for the old cotton-picking trails that once crossed the property.',
     null, null, 'Creekside Club', 'Seasonal pours and member-first access, straight from the creek.',
     array['Exclusive releases', 'Member events', 'Member pricing', 'Bottle discounts'],
-    'Thu–Sun 12pm–7pm (placeholder — confirm seasonal hours)',
+    'Closed Mon–Thu · Fri 11am–8pm (until 9pm w/ live music) · Sat 11am–9pm · Sun 12pm–6pm',
     228, true, 3
   ),
   (
@@ -52,7 +52,7 @@ insert into public.wineries (
     'Named for the historic rail switch that once ran through Hickman County, this Maury County tasting lounge — set in a converted 1950s tire shop — pours bold reds in a warm, unpretentious setting.',
     null, null, 'Switch Club', 'Members-first access to limited releases and barrel picks.',
     array['Exclusive releases', 'Member events', 'Member pricing', 'Bottle discounts'],
-    'Fri–Sun 12pm–6pm (placeholder — confirm seasonal hours)',
+    'Closed Mon · Tue–Fri 3pm–8pm · Sat 11am–7pm · Sun 1pm–7pm',
     228, true, 4
   )
 on conflict (slug) do update set
