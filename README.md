@@ -122,6 +122,13 @@ supabase/
   schema.sql, policies.sql, seed.sql
 ```
 
+## Installing it as a mobile app
+
+The app ships a web manifest (`src/app/manifest.ts`) and generated app icons (`src/app/app-icon/[size]/route.tsx`, `src/app/apple-icon.tsx`), so once it's deployed, visitors can add it to their home screen and it opens full-screen like a native app — no App Store build required:
+
+- **iPhone (Safari):** Share → Add to Home Screen
+- **Android (Chrome):** ⋮ menu → Add to Home Screen / Install App (Chrome may also prompt automatically)
+
 ## Design system
 
 Warm ivory backgrounds, deep burgundy and charcoal, muted gold accents, a serif display face (Fraunces) for headlines over a clean sans (Inter) for body text — defined as CSS custom properties in `src/app/globals.css` and consumed via Tailwind v4's `@theme inline`. Motion is deliberately restrained: soft fades, a spring-based stamp animation, and a brief gold sparkle on check-in — no cartoon bounce.
