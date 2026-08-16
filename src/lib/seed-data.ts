@@ -165,112 +165,115 @@ export const SEED_TRAIL_WINERIES: TrailWinery[] = SEED_WINERIES.map((w, i) => ({
 }));
 
 /**
- * A small tasting flight per winery — placeholder wine names, varietals, and
- * tasting notes to be replaced with each winery's real list via the admin
- * dashboard. Styles are deliberately spread across red/white/rosé/sweet so
- * the "wines you liked" recommendation logic has a real signal to work with.
+ * A small tasting flight per winery, drawn from each winery's actual
+ * published wine names/varietals where publicly available (Arrington,
+ * Picker's Creek, Grinder's Switch). Woodfeather Farm doesn't list specific
+ * bottle names publicly, so its two wines are named for the real estate
+ * grape varieties they grow (Chambourcin, Vidal Blanc) rather than an
+ * invented brand name. Tasting notes are written from each grape's real
+ * characteristics and any published description found — still worth
+ * replacing with each winery's official copy via the admin dashboard.
  */
 export const SEED_WINES: Wine[] = [
   {
-    id: "wine-arrington-cab",
+    id: "wine-arrington-scarlet",
     winery_id: "winery-arrington",
-    name: "Stony Ridge Cabernet Sauvignon",
-    slug: "stony-ridge-cabernet-sauvignon",
-    varietal: "Cabernet Sauvignon",
-    style: "red",
-    tasting_notes:
-      "Bold and structured, with dark cherry, cedar, and a firm tannic finish. A wine built for a hillside sunset.",
-    active: true,
-    sort_order: 1,
-    created_at: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "wine-arrington-chard",
-    winery_id: "winery-arrington",
-    name: "Hillside Chardonnay",
-    slug: "hillside-chardonnay",
-    varietal: "Chardonnay",
-    style: "white",
-    tasting_notes:
-      "Lightly oaked with notes of baked pear, vanilla, and a soft, buttery finish.",
-    active: true,
-    sort_order: 2,
-    created_at: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "wine-woodfeather-rose",
-    winery_id: "winery-woodfeather",
-    name: "Farmhouse Rosé",
-    slug: "farmhouse-rose",
-    varietal: "Rosé",
+    name: "Scarlet",
+    slug: "arrington-scarlet",
+    varietal: "Chambourcin",
     style: "rose",
     tasting_notes:
-      "Crisp and dry, with bright strawberry and watermelon rind. Porch-sipping, any season.",
+      "Arrington's signature pour: estate-grown Chambourcin pressed rosé-style, with bright red berry and a refreshing, off-dry finish.",
     active: true,
     sort_order: 1,
     created_at: "2026-01-01T00:00:00.000Z",
   },
   {
-    id: "wine-woodfeather-merlot",
-    winery_id: "winery-woodfeather",
-    name: "Estate Merlot",
-    slug: "estate-merlot",
-    varietal: "Merlot",
-    style: "red",
-    tasting_notes:
-      "Soft and approachable, with plum, cocoa, and gentle tannins — an easy, everyday red.",
+    id: "wine-arrington-chardonnay",
+    winery_id: "winery-arrington",
+    name: "Chardonnay",
+    slug: "arrington-chardonnay",
+    varietal: "Chardonnay",
+    style: "white",
+    tasting_notes: "Bright and food-friendly, with green apple, citrus, and a clean, crisp finish.",
     active: true,
     sort_order: 2,
     created_at: "2026-01-01T00:00:00.000Z",
   },
   {
-    id: "wine-pickers-creek-riesling",
-    winery_id: "winery-pickers-creek",
-    name: "Creekside Riesling",
-    slug: "creekside-riesling",
-    varietal: "Riesling",
-    style: "sweet",
-    tasting_notes:
-      "Off-dry and floral, with ripe peach and a honeyed finish. A warm-afternoon favorite.",
-    active: true,
-    sort_order: 1,
-    created_at: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "wine-pickers-creek-blend",
-    winery_id: "winery-pickers-creek",
-    name: "Cotton Trail Red Blend",
-    slug: "cotton-trail-red-blend",
+    id: "wine-woodfeather-working-dog",
+    winery_id: "winery-woodfeather",
+    name: "Working Dog",
+    slug: "woodfeather-working-dog",
     varietal: "Red Blend",
     style: "red",
     tasting_notes:
-      "Jammy and medium-bodied, blending blackberry and a whisper of black pepper spice.",
-    active: true,
-    sort_order: 2,
-    created_at: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "wine-grinders-switch-cab",
-    winery_id: "winery-grinders-switch",
-    name: "Rail Switch Cabernet",
-    slug: "rail-switch-cabernet",
-    varietal: "Cabernet Sauvignon",
-    style: "red",
-    tasting_notes:
-      "Full-bodied and dark, with blackcurrant, tobacco, and a long, smoky finish.",
+      "A bourbon barrel-aged red with dark fruit, vanilla, and toasted oak — as sturdy as its name.",
     active: true,
     sort_order: 1,
     created_at: "2026-01-01T00:00:00.000Z",
   },
   {
-    id: "wine-grinders-switch-muscadine",
-    winery_id: "winery-grinders-switch",
-    name: "Depot Muscadine",
-    slug: "depot-muscadine",
-    varietal: "Muscadine",
+    id: "wine-woodfeather-terrier-rosato",
+    winery_id: "winery-woodfeather",
+    name: "Terrier Rosato",
+    slug: "woodfeather-terrier-rosato",
+    varietal: "Rosato",
+    style: "rose",
+    tasting_notes:
+      "A dry, food-friendly rosato with strawberry and citrus zest, built for the porch.",
+    active: true,
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-pickers-creek-harmony",
+    winery_id: "winery-pickers-creek",
+    name: "Harmony",
+    slug: "pickers-creek-harmony",
+    varietal: "Chambourcin & Cabernet Sauvignon",
+    style: "red",
+    tasting_notes:
+      "A Chambourcin and Cabernet Sauvignon blend — dark berry fruit with soft, easy-drinking tannins.",
+    active: true,
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-pickers-creek-peach",
+    winery_id: "winery-pickers-creek",
+    name: "Give Peach a Chance",
+    slug: "pickers-creek-give-peach-a-chance",
+    varietal: "Peach",
     style: "sweet",
     tasting_notes:
-      "A true Southern classic — lush, sweet, and full of ripe muscadine grape and honeysuckle.",
+      "A playful, sun-ripened peach wine — juicy and sweet with a nostalgic, fruit-stand finish.",
+    active: true,
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-grinders-switch-cabernet",
+    winery_id: "winery-grinders-switch",
+    name: "Cabernet Sauvignon",
+    slug: "grinders-switch-cabernet-sauvignon",
+    varietal: "Cabernet Sauvignon",
+    style: "red",
+    tasting_notes:
+      "Bold and dry, with gripping tannins, leather, orange peel, and a hint of cracked pepper.",
+    active: true,
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-grinders-switch-honeysuckle-rose",
+    winery_id: "winery-grinders-switch",
+    name: "Honeysuckle Rose",
+    slug: "grinders-switch-honeysuckle-rose",
+    varietal: "Blush Blend",
+    style: "sweet",
+    tasting_notes:
+      "A gold medal-winning sweet blush, perfumed with honeysuckle and ripe stone fruit.",
     active: true,
     sort_order: 2,
     created_at: "2026-01-01T00:00:00.000Z",
