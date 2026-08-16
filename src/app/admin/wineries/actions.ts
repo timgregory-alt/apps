@@ -103,6 +103,18 @@ export async function saveWineryHoursAction(wineryId: string, rows: SeasonalHour
   revalidatePath(`/admin/wineries/${wineryId}`);
 }
 
+export async function setWineSoldOutAction(wineId: string, wineryId: string, soldOut: boolean) {
+  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("wines").update({ sold_out: soldOut }).eq("id", wineId);
+  if (error) throw new Error(error.message);
+
+  const winery = await getWineryByIdAdmin(wineryId);
+  revalidatePath(`/admin/wineries/${wineryId}`);
+  if (winery) revalidatePath(`/winery/${winery.slug}`);
+}
+
 export async function syncWineryNowAction(wineryId: string): Promise<SyncResult> {
   if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
 

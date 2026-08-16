@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
-import { getWineryByIdAdmin } from "@/lib/admin";
+import { getWineryByIdAdmin, getWineryWinesAdmin } from "@/lib/admin";
 import { getWineryHours } from "@/lib/data";
 import { WineryForm } from "@/components/admin/WineryForm";
 import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
 import { WineSyncPanel } from "@/components/admin/WineSyncPanel";
+import { WineSoldOutList } from "@/components/admin/WineSoldOutList";
 import { QrCode } from "@/components/ui/QrCode";
 import { updateWineryAction } from "@/app/admin/wineries/actions";
 
@@ -16,7 +17,10 @@ export default async function EditWineryPage({
   const winery = await getWineryByIdAdmin(id);
   if (!winery) notFound();
 
-  const hoursSeasons = await getWineryHours(winery.id);
+  const [hoursSeasons, wines] = await Promise.all([
+    getWineryHours(winery.id),
+    getWineryWinesAdmin(winery.id),
+  ]);
   const boundAction = updateWineryAction.bind(null, winery.id);
   const qrUrl = `https://tennesseewinepassport.com/winery/${winery.slug}`;
 
@@ -39,6 +43,10 @@ export default async function EditWineryPage({
             wineMenuUrl={winery.wine_menu_url}
             websiteUrl={winery.website_url}
           />
+        </div>
+
+        <div className="mt-6">
+          <WineSoldOutList wineryId={winery.id} wines={wines} />
         </div>
       </div>
 

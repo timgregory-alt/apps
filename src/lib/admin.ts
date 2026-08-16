@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { SEED_WINERIES } from "@/lib/seed-data";
-import type { Winery } from "@/lib/types";
+import { SEED_WINERIES, SEED_WINES } from "@/lib/seed-data";
+import type { Winery, Wine } from "@/lib/types";
 
 export async function isCurrentUserAdmin(): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
@@ -109,5 +109,22 @@ export async function getWineryByIdAdmin(id: string): Promise<Winery | null> {
     return (data as Winery) ?? null;
   } catch {
     return null;
+  }
+}
+
+export async function getWineryWinesAdmin(wineryId: string): Promise<Wine[]> {
+  if (!isSupabaseConfigured) {
+    return SEED_WINES.filter((w) => w.winery_id === wineryId).sort((a, b) => a.sort_order - b.sort_order);
+  }
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("wines")
+      .select("*")
+      .eq("winery_id", wineryId)
+      .order("sort_order");
+    return (data as Wine[]) ?? [];
+  } catch {
+    return [];
   }
 }

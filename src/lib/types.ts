@@ -145,6 +145,7 @@ export interface Wine {
   style: WineStyle;
   tasting_notes: string;
   food_pairing: string | null;
+  sold_out: boolean;
   active: boolean;
   sort_order: number;
   created_at: string;

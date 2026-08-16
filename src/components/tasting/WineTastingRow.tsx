@@ -23,6 +23,7 @@ export function WineTastingRow({
   const [flipped, setFlipped] = useState(false);
   const rated = wine.tasting != null;
   const isNew = isRecentlyAdded(wine.created_at);
+  const soldOut = wine.sold_out;
 
   return (
     <div className="h-72 [perspective:1200px]">
@@ -35,8 +36,11 @@ export function WineTastingRow({
         <button
           type="button"
           onClick={() => setFlipped(true)}
-          aria-label={`${wine.name} — tap to see tasting notes and food pairing`}
-          className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-3xl border border-[var(--color-line)] bg-white/70 p-6 text-center backdrop-blur-sm [backface-visibility:hidden]"
+          aria-label={`${wine.name}${soldOut ? " — sold out" : ""} — tap to see tasting notes and food pairing`}
+          className={cn(
+            "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-3xl border border-[var(--color-line)] bg-white/70 p-6 text-center backdrop-blur-sm [backface-visibility:hidden]",
+            soldOut && "grayscale opacity-60"
+          )}
         >
           {rated && (
             <span className="absolute right-4 top-4 flex items-center gap-1 text-xs text-[var(--color-charcoal)]/40">
@@ -44,10 +48,16 @@ export function WineTastingRow({
               Tasted
             </span>
           )}
-          {isNew && (
-            <span className="absolute left-4 top-4 rounded-full bg-[var(--color-burgundy)] px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
-              New
+          {soldOut ? (
+            <span className="absolute left-4 top-4 rounded-full bg-[var(--color-charcoal)] px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
+              Sold Out
             </span>
+          ) : (
+            isNew && (
+              <span className="absolute left-4 top-4 rounded-full bg-[var(--color-burgundy)] px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
+                New
+              </span>
+            )
           )}
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]/50">
             <WineIcon size={20} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
@@ -58,7 +68,9 @@ export function WineTastingRow({
           <span className="rounded-full bg-black/5 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--color-charcoal)]/60">
             {STYLE_BADGE[wine.style]}
           </span>
-          <p className="text-xs text-[var(--color-charcoal)]/40">Tap to see tasting notes</p>
+          <p className="text-xs text-[var(--color-charcoal)]/40">
+            {soldOut ? "Sold out — tap to see tasting notes" : "Tap to see tasting notes"}
+          </p>
         </button>
 
         {/* Back */}
