@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Winery, WineStyle } from "@/lib/types";
 
-const MAX_PAGE_CHARS = 30000;
+const MAX_PAGE_CHARS = 60000;
 
 interface ExtractedWine {
   name: string;
@@ -11,6 +11,7 @@ interface ExtractedWine {
   style: WineStyle;
   tasting_notes: string;
   food_pairing: string | null;
+  sold_out: boolean;
 }
 
 const WINE_LIST_SCHEMA = {
@@ -31,8 +32,9 @@ const WINE_LIST_SCHEMA = {
           food_pairing: {
             anyOf: [{ type: "string" as const }, { type: "null" as const }],
           },
+          sold_out: { type: "boolean" as const },
         },
-        required: ["name", "varietal", "style", "tasting_notes", "food_pairing"],
+        required: ["name", "varietal", "style", "tasting_notes", "food_pairing", "sold_out"],
         additionalProperties: false,
       },
     },
@@ -71,12 +73,17 @@ async function extractNewWines(
     max_tokens: 4096,
     system:
       "You extract wine listings from a winery's own web page text for a wine-trail app. " +
-      "Only extract wines that are clearly and currently offered by this winery — ignore navigation, " +
-      "unrelated products, other wineries mentioned in passing, and past/discontinued vintages called out as sold out. " +
+      "Extract every distinct wine this winery currently sells or pours, including ones marked sold out, " +
+      "out of stock, or unavailable — set sold_out to true for those instead of skipping them. Only exclude " +
+      "navigation, unrelated products, and other wineries mentioned in passing. Go through the whole page " +
+      "carefully and list every product you find, not just the most prominent ones — small or easy-to-miss " +
+      "listings matter just as much as flagship wines. " +
       "Write tasting_notes as 1-2 concise sentences using only what the page actually says or clearly implies — " +
-      "never invent flavor notes the page doesn't support. Set food_pairing to a short pairing suggestion only if " +
-      "the page mentions one; otherwise null. Never include a wine whose name matches (even loosely — same wine, " +
-      "different capitalization or vintage year) one of the already-known wines listed below.",
+      "never invent flavor notes the page doesn't support. If the page gives no descriptive text for a wine at " +
+      "all, write a plain factual sentence from just its name/varietal/style rather than inventing tasting notes. " +
+      "Set food_pairing to a short pairing suggestion only if the page mentions one; otherwise null. Never include " +
+      "a wine whose name matches (even loosely — same wine, different capitalization or vintage year) one of the " +
+      "already-known wines listed below.",
     messages: [
       {
         role: "user",
@@ -143,6 +150,7 @@ export async function syncWineryWines(winery: Winery): Promise<SyncResult> {
       style: w.style,
       tasting_notes: w.tasting_notes,
       food_pairing: w.food_pairing,
+      sold_out: w.sold_out,
       sort_order: nextSort++,
     }));
 
