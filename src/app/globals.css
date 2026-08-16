@@ -132,6 +132,92 @@ body {
   animation: var(--animate-fade-up);
 }
 
+@keyframes wine-pour-stream {
+  0%,
+  8% {
+    opacity: 0;
+    transform: scaleY(0.4);
+  }
+  16%,
+  62% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: scaleY(0.4);
+  }
+}
+
+@keyframes wine-pour-fill {
+  0%,
+  10% {
+    y: 132px;
+    height: 0px;
+  }
+  68%,
+  80% {
+    y: 66px;
+    height: 66px;
+  }
+  100% {
+    y: 132px;
+    height: 0px;
+  }
+}
+
+@keyframes wine-pour-wave {
+  0%,
+  10% {
+    cy: 132px;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  68%,
+  80% {
+    cy: 66px;
+    opacity: 1;
+  }
+  100% {
+    cy: 66px;
+    opacity: 0;
+  }
+}
+
+@keyframes wine-pour-droplet {
+  0%,
+  14% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  22% {
+    opacity: 1;
+    transform: translateY(4px);
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.wine-pour-stream {
+  transform-origin: top center;
+  animation: wine-pour-stream 2.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.wine-pour-fill {
+  animation: wine-pour-fill 2.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.wine-pour-wave {
+  animation: wine-pour-wave 2.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.wine-pour-droplet {
+  animation: wine-pour-droplet 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 ::selection {
   background: var(--color-gold-pale);
   color: var(--color-burgundy-deep);
