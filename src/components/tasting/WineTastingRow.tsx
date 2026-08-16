@@ -2,37 +2,27 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Wine as WineIcon,
-  ThumbsUp,
-  ThumbsDown,
-  Check,
-  RotateCcw,
-  UtensilsCrossed,
-} from "lucide-react";
+import { Wine as WineIcon, Star, Check, RotateCcw, UtensilsCrossed } from "lucide-react";
 import { STYLE_BADGE } from "@/lib/recommendations";
 import type { WineWithTasting } from "@/lib/types";
 import { cn, isRecentlyAdded } from "@/lib/utils";
 
 /** A flip card: front shows just the wine name, tap to reveal the back with
- * full tasting notes, food pairing, and the rate buttons. */
+ * full tasting notes, food pairing, and a 1-5 star rating. Rating does not
+ * flip the card back — only the flip-back button (the half-circle arrow)
+ * does, so someone can change their mind before closing it. */
 export function WineTastingRow({
   wine,
   onRate,
   pending,
 }: {
   wine: WineWithTasting;
-  onRate: (liked: boolean) => void;
+  onRate: (rating: number) => void;
   pending: boolean;
 }) {
   const [flipped, setFlipped] = useState(false);
   const rated = wine.tasting != null;
   const isNew = isRecentlyAdded(wine.created_at);
-
-  function handleRate(liked: boolean) {
-    onRate(liked);
-    setFlipped(false);
-  }
 
   return (
     <div className="h-72 [perspective:1200px]">
@@ -113,22 +103,14 @@ export function WineTastingRow({
             </p>
           )}
 
-          <div className="mt-auto flex items-center gap-2 pt-3">
-            <RateButton
-              active={wine.tasting?.liked === true}
-              onClick={() => handleRate(true)}
+          <div className="mt-auto flex flex-col items-center gap-1.5 pt-3">
+            <p className="text-xs text-[var(--color-charcoal)]/50">
+              {wine.tasting ? "Your rating" : "How was it?"}
+            </p>
+            <StarRating
+              value={wine.tasting?.rating ?? 0}
+              onRate={onRate}
               disabled={pending}
-              icon={ThumbsUp}
-              label="Liked it"
-              activeClass="bg-[var(--color-gold)] text-[var(--color-charcoal)] border-[var(--color-gold)]"
-            />
-            <RateButton
-              active={wine.tasting?.liked === false}
-              onClick={() => handleRate(false)}
-              disabled={pending}
-              icon={ThumbsDown}
-              label="Not for me"
-              activeClass="bg-black/10 text-[var(--color-charcoal)]/70 border-black/10"
             />
           </div>
         </div>
@@ -137,36 +119,42 @@ export function WineTastingRow({
   );
 }
 
-function RateButton({
-  active,
-  onClick,
+function StarRating({
+  value,
+  onRate,
   disabled,
-  icon: Icon,
-  label,
-  activeClass,
 }: {
-  active: boolean;
-  onClick: () => void;
+  value: number;
+  onRate: (rating: number) => void;
   disabled: boolean;
-  icon: typeof ThumbsUp;
-  label: string;
-  activeClass: string;
 }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const displayValue = hovered ?? value;
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-pressed={active}
-      className={cn(
-        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
-        active
-          ? activeClass
-          : "border-[var(--color-line)] text-[var(--color-charcoal)]/60 hover:border-[var(--color-gold)]"
-      )}
-    >
-      <Icon size={13} strokeWidth={2} />
-      {label}
-    </button>
+    <div className="flex items-center gap-1" onMouseLeave={() => setHovered(null)}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onRate(star)}
+          onMouseEnter={() => setHovered(star)}
+          disabled={disabled}
+          aria-label={`Rate ${star} star${star === 1 ? "" : "s"}`}
+          className="p-0.5 disabled:opacity-50"
+        >
+          <Star
+            size={26}
+            strokeWidth={1.75}
+            className={cn(
+              "transition-colors",
+              star <= displayValue
+                ? "fill-[var(--color-gold)] text-[var(--color-gold)]"
+                : "fill-transparent text-[var(--color-charcoal)]/30"
+            )}
+          />
+        </button>
+      ))}
+    </div>
   );
 }

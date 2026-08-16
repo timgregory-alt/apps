@@ -38,7 +38,7 @@ export function WineTastingList({
     router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
   }
 
-  async function handleRate(wineId: string, liked: boolean) {
+  async function handleRate(wineId: string, rating: number) {
     if (!isLoggedIn) return requireLogin();
 
     setPendingId(wineId);
@@ -51,7 +51,7 @@ export function WineTastingList({
                 id: w.tasting?.id ?? `local-${wineId}`,
                 user_id: "",
                 wine_id: wineId,
-                liked,
+                rating,
                 created_at: new Date().toISOString(),
               },
             }
@@ -63,7 +63,7 @@ export function WineTastingList({
       await fetch("/api/wine-tasting", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wineId, liked }),
+        body: JSON.stringify({ wineId, rating }),
       });
     } catch {
       // Optimistic update stays even if the network call fails silently.
@@ -125,7 +125,7 @@ export function WineTastingList({
             key={wine.id}
             wine={wine}
             pending={pendingId === wine.id}
-            onRate={(liked) => handleRate(wine.id, liked)}
+            onRate={(rating) => handleRate(wine.id, rating)}
           />
         ))}
         {customTastings.map((tasting) => (

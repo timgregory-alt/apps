@@ -154,7 +154,8 @@ export interface WineTasting {
   id: UUID;
   user_id: UUID;
   wine_id: UUID;
-  liked: boolean;
+  /** 1-5 stars. */
+  rating: number;
   created_at: string;
 }
 

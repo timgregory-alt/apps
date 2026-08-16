@@ -31,17 +31,21 @@ export interface TastingRecommendations {
 
 const EMPTY: TastingRecommendations = { topStyles: [], wines: [], wineries: [] };
 
+/** 4-5 stars counts as "liked" for recommendation purposes. */
+const LIKED_RATING_THRESHOLD = 4;
+
 /**
  * Content-based recommendations from a user's wine tasting flight: the
- * style(s) they've rated "liked" most often drive both a shortlist of
- * untasted wines to try next and the wineries most likely to have them.
+ * style(s) they've rated highly (4-5 stars) most often drive both a
+ * shortlist of untasted wines to try next and the wineries most likely to
+ * have them.
  */
 export function computeRecommendations(
   wines: WineWithTasting[],
   wineries: WineryWithStatus[],
   customTastings: CustomWineTasting[] = []
 ): TastingRecommendations {
-  const liked = wines.filter((w) => w.tasting?.liked === true);
+  const liked = wines.filter((w) => (w.tasting?.rating ?? 0) >= LIKED_RATING_THRESHOLD);
   const likedCustom = customTastings.filter((t) => t.liked);
   if (liked.length === 0 && likedCustom.length === 0) return EMPTY;
 
