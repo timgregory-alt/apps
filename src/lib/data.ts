@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { FOUNDING_TRAIL, SEED_WINERIES, SEED_WINES } from "@/lib/seed-data";
+import { FOUNDING_TRAIL, SEED_WINERIES, SEED_WINES, SEED_WINERY_HOURS } from "@/lib/seed-data";
 import type {
   Checkin,
   CheckinStatus,
@@ -11,6 +11,7 @@ import type {
   WineTasting,
   WineWithTasting,
   Winery,
+  WineryHours,
   WineryWithStatus,
 } from "@/lib/types";
 
@@ -71,6 +72,28 @@ export async function getWineryBySlug(slug: string): Promise<Winery | null> {
     return (data as Winery) ?? null;
   } catch {
     return SEED_WINERIES.find((w) => w.slug === slug) ?? null;
+  }
+}
+
+export async function getWineryHours(wineryId: string): Promise<WineryHours[]> {
+  if (!isSupabaseConfigured) {
+    return SEED_WINERY_HOURS.filter((h) => h.winery_id === wineryId).sort(
+      (a, b) => a.sort_order - b.sort_order
+    );
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("winery_hours")
+      .select("*")
+      .eq("winery_id", wineryId)
+      .order("sort_order", { ascending: true });
+    if (error || !data) throw error;
+    return data as WineryHours[];
+  } catch {
+    return SEED_WINERY_HOURS.filter((h) => h.winery_id === wineryId).sort(
+      (a, b) => a.sort_order - b.sort_order
+    );
   }
 }
 

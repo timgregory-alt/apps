@@ -55,6 +55,17 @@ create policy "Admins manage wineries" on public.wineries
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- ---------------------------------------------------------------------------
+-- winery_hours — publicly readable; admin-managed
+-- ---------------------------------------------------------------------------
+alter table public.winery_hours enable row level security;
+
+create policy "Winery hours are public" on public.winery_hours
+  for select using (true);
+
+create policy "Admins manage winery hours" on public.winery_hours
+  for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---------------------------------------------------------------------------
 -- trail_wineries — publicly readable; admin-managed
 -- ---------------------------------------------------------------------------
 alter table public.trail_wineries enable row level security;

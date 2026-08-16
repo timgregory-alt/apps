@@ -43,6 +43,19 @@ export interface Winery {
   created_at: string;
 }
 
+/** One seasonal block of a winery's hours (e.g. "Apr–Oct"). A winery with no
+ * rows here just displays its plain `hours` text field as-is. */
+export interface WineryHours {
+  id: UUID;
+  winery_id: UUID;
+  label: string;
+  start_month: number;
+  end_month: number;
+  hours_text: string;
+  sort_order: number;
+  created_at: string;
+}
+
 export interface TrailWinery {
   id: UUID;
   trail_id: UUID;

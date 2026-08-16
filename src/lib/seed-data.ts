@@ -1,4 +1,4 @@
-import type { Trail, TrailWinery, Winery, Wine } from "./types";
+import type { Trail, TrailWinery, Winery, Wine, WineryHours } from "./types";
 import { feetToMeters } from "./geo";
 
 /**
@@ -444,6 +444,55 @@ export const SEED_WINES: Wine[] = [
     food_pairing: "Vanilla cake or dark chocolate",
     active: true,
     sort_order: 5,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+];
+
+/**
+ * Seasonal hour breakdowns. Only Arrington Vineyards publishes a detailed
+ * seasonal schedule; the other three wineries don't have public seasonal
+ * data yet, so they fall back to their single `hours` text field until
+ * seasonal rows are added for them via the admin dashboard.
+ */
+export const SEED_WINERY_HOURS: WineryHours[] = [
+  {
+    id: "hours-arrington-peak",
+    winery_id: "winery-arrington",
+    label: "April – October",
+    start_month: 4,
+    end_month: 10,
+    hours_text: "Mon–Thu 11am–8pm · Fri 11am–9pm · Sat 11am–8pm · Sun 12pm–8pm",
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "hours-arrington-latefall",
+    winery_id: "winery-arrington",
+    label: "November – December",
+    start_month: 11,
+    end_month: 12,
+    hours_text: "Mon–Sat 11am–8pm · Sun 12pm–6pm",
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "hours-arrington-winter",
+    winery_id: "winery-arrington",
+    label: "January – February",
+    start_month: 1,
+    end_month: 2,
+    hours_text: "Mon–Sat 11am–6pm · Sun 12pm–6pm",
+    sort_order: 3,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "hours-arrington-march",
+    winery_id: "winery-arrington",
+    label: "March",
+    start_month: 3,
+    end_month: 3,
+    hours_text: "Mon–Thu 11am–7pm · Fri–Sat 11am–8pm · Sun 12pm–7pm",
+    sort_order: 4,
     created_at: "2026-01-01T00:00:00.000Z",
   },
 ];

@@ -117,3 +117,21 @@ on conflict (slug) do update set
   tasting_notes = excluded.tasting_notes,
   food_pairing = excluded.food_pairing,
   sort_order = excluded.sort_order;
+
+-- Seasonal hours (only Arrington publishes a detailed seasonal schedule;
+-- the other three fall back to their plain `hours` field until seasonal
+-- rows are added for them via the admin dashboard).
+delete from public.winery_hours
+where winery_id = (select id from public.wineries where slug = 'arrington-vineyards');
+
+insert into public.winery_hours (winery_id, label, start_month, end_month, hours_text, sort_order)
+select w.id, v.label, v.start_month, v.end_month, v.hours_text, v.sort_order
+from public.wineries w
+join (
+  values
+    ('April – October', 4, 10, 'Mon–Thu 11am–8pm · Fri 11am–9pm · Sat 11am–8pm · Sun 12pm–8pm', 1),
+    ('November – December', 11, 12, 'Mon–Sat 11am–8pm · Sun 12pm–6pm', 2),
+    ('January – February', 1, 2, 'Mon–Sat 11am–6pm · Sun 12pm–6pm', 3),
+    ('March', 3, 3, 'Mon–Thu 11am–7pm · Fri–Sat 11am–8pm · Sun 12pm–7pm', 4)
+) as v(label, start_month, end_month, hours_text, sort_order)
+where w.slug = 'arrington-vineyards';

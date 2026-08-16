@@ -6,6 +6,7 @@ import {
   getWineryBySlug,
   getWinesWithTastings,
   getCustomWineTastings,
+  getWineryHours,
 } from "@/lib/data";
 import { WineryHero } from "@/components/winery/WineryHero";
 import {
@@ -44,10 +45,11 @@ export default async function WineryDetailPage({
   if (!winery) notFound();
 
   const user = await getCurrentUser();
-  const [wineries, allWines, customTastings] = await Promise.all([
+  const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
     getWineriesWithStatus(user?.id ?? null),
     getWinesWithTastings(user?.id ?? null),
     user ? getCustomWineTastings(user.id) : Promise.resolve([]),
+    getWineryHours(winery.id),
   ]);
   const wineryWithStatus = wineries.find((w) => w.id === winery.id) ?? {
     ...winery,
@@ -98,7 +100,7 @@ export default async function WineryDetailPage({
           />
         </div>
 
-        <WineryDetailsList winery={winery} />
+        <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 
         <WinerySocialRow winery={winery} />
 

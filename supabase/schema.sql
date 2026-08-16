@@ -96,6 +96,23 @@ create index if not exists wineries_active_idx on public.wineries (active);
 create index if not exists wineries_slug_idx on public.wineries (slug);
 
 -- ---------------------------------------------------------------------------
+-- winery_hours  (seasonal hour breakdowns — a winery with no rows here just
+-- falls back to displaying wineries.hours as-is)
+-- ---------------------------------------------------------------------------
+create table if not exists public.winery_hours (
+  id uuid primary key default gen_random_uuid(),
+  winery_id uuid not null references public.wineries (id) on delete cascade,
+  label text not null,
+  start_month smallint not null check (start_month between 1 and 12),
+  end_month smallint not null check (end_month between 1 and 12),
+  hours_text text not null,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists winery_hours_winery_idx on public.winery_hours (winery_id, sort_order);
+
+-- ---------------------------------------------------------------------------
 -- trail_wineries  (join table — ordered stops of a trail)
 -- ---------------------------------------------------------------------------
 create table if not exists public.trail_wineries (

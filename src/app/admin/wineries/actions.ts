@@ -62,3 +62,41 @@ export async function updateWineryAction(wineryId: string, formData: FormData) {
   revalidatePath(`/admin/wineries/${wineryId}`);
   revalidatePath(`/winery/${winery.slug}`);
 }
+
+export interface SeasonalHoursInput {
+  label: string;
+  start_month: number;
+  end_month: number;
+  hours_text: string;
+}
+
+export async function saveWineryHoursAction(wineryId: string, rows: SeasonalHoursInput[]) {
+  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+
+  const supabase = await createClient();
+  const { error: deleteError } = await supabase
+    .from("winery_hours")
+    .delete()
+    .eq("winery_id", wineryId);
+  if (deleteError) throw new Error(deleteError.message);
+
+  const cleaned = rows
+    .map((r) => ({ ...r, label: r.label.trim(), hours_text: r.hours_text.trim() }))
+    .filter((r) => r.label && r.hours_text);
+
+  if (cleaned.length > 0) {
+    const { error: insertError } = await supabase.from("winery_hours").insert(
+      cleaned.map((r, i) => ({
+        winery_id: wineryId,
+        label: r.label,
+        start_month: r.start_month,
+        end_month: r.end_month,
+        hours_text: r.hours_text,
+        sort_order: i + 1,
+      }))
+    );
+    if (insertError) throw new Error(insertError.message);
+  }
+
+  revalidatePath(`/admin/wineries/${wineryId}`);
+}

@@ -1,6 +1,7 @@
 import { Clock, Globe, MapPin } from "lucide-react";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/BrandIcons";
-import type { Winery } from "@/lib/types";
+import { WineryHoursRow } from "@/components/winery/WineryHoursRow";
+import type { Winery, WineryHours } from "@/lib/types";
 
 export function WineryDescription({ winery }: { winery: Winery }) {
   return (
@@ -12,11 +13,17 @@ export function WineryDescription({ winery }: { winery: Winery }) {
   );
 }
 
-export function WineryDetailsList({ winery }: { winery: Winery }) {
+export function WineryDetailsList({
+  winery,
+  hoursSeasons = [],
+}: {
+  winery: Winery;
+  hoursSeasons?: WineryHours[];
+}) {
   return (
     <dl className="flex flex-col divide-y divide-[var(--color-line)] rounded-2xl border border-[var(--color-line)] bg-white/60">
       <Row icon={MapPin} label="Address" value={winery.address} />
-      <Row icon={Clock} label="Hours" value={winery.hours ?? "Hours coming soon"} />
+      <WineryHoursRow fallbackHours={winery.hours} seasons={hoursSeasons} />
       {winery.phone && <Row icon={Clock} label="Phone" value={winery.phone} />}
     </dl>
   );

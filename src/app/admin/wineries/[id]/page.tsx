@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getWineryByIdAdmin } from "@/lib/admin";
+import { getWineryHours } from "@/lib/data";
 import { WineryForm } from "@/components/admin/WineryForm";
+import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
 import { QrCode } from "@/components/ui/QrCode";
 import { updateWineryAction } from "@/app/admin/wineries/actions";
 
@@ -13,6 +15,7 @@ export default async function EditWineryPage({
   const winery = await getWineryByIdAdmin(id);
   if (!winery) notFound();
 
+  const hoursSeasons = await getWineryHours(winery.id);
   const boundAction = updateWineryAction.bind(null, winery.id);
   const qrUrl = `https://tennesseewinepassport.com/winery/${winery.slug}`;
 
@@ -24,6 +27,10 @@ export default async function EditWineryPage({
           Editing this winery updates the live app immediately.
         </p>
         <WineryForm winery={winery} action={boundAction} />
+
+        <div className="mt-6">
+          <SeasonalHoursEditor wineryId={winery.id} initialSeasons={hoursSeasons} />
+        </div>
       </div>
 
       <div className="w-full max-w-xs shrink-0 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
