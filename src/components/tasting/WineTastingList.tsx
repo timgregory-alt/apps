@@ -76,6 +76,7 @@ export function WineTastingList({
     name: string;
     style: WineStyle;
     notes: string;
+    foodPairing: string;
     liked: boolean;
   }) {
     if (!isLoggedIn) return requireLogin();

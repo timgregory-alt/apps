@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     name?: string;
     style?: WineStyle;
     notes?: string;
+    foodPairing?: string;
     liked?: boolean;
   };
 
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
       name,
       style: body.style,
       notes: body.notes?.trim() || null,
+      food_pairing: body.foodPairing?.trim() || null,
       liked: body.liked,
     })
     .select()

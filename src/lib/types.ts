@@ -120,6 +120,7 @@ export interface Wine {
   varietal: string;
   style: WineStyle;
   tasting_notes: string;
+  food_pairing: string | null;
   active: boolean;
   sort_order: number;
   created_at: string;
@@ -141,6 +142,7 @@ export interface CustomWineTasting {
   name: string;
   style: WineStyle;
   notes: string | null;
+  food_pairing: string | null;
   liked: boolean;
   created_at: string;
 }

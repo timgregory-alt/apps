@@ -17,13 +17,20 @@ export function AddWineCard({
 }: {
   isLoggedIn: boolean;
   redirectTo: string;
-  onAdd: (input: { name: string; style: WineStyle; notes: string; liked: boolean }) => Promise<void>;
+  onAdd: (input: {
+    name: string;
+    style: WineStyle;
+    notes: string;
+    foodPairing: string;
+    liked: boolean;
+  }) => Promise<void>;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [style, setStyle] = useState<WineStyle>("red");
   const [notes, setNotes] = useState("");
+  const [foodPairing, setFoodPairing] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   function startAdding() {
@@ -39,13 +46,20 @@ export function AddWineCard({
     setName("");
     setStyle("red");
     setNotes("");
+    setFoodPairing("");
   }
 
   async function handleSubmit(liked: boolean) {
     if (!name.trim() || submitting) return;
     setSubmitting(true);
     try {
-      await onAdd({ name: name.trim(), style, notes: notes.trim(), liked });
+      await onAdd({
+        name: name.trim(),
+        style,
+        notes: notes.trim(),
+        foodPairing: foodPairing.trim(),
+        liked,
+      });
       reset();
     } finally {
       setSubmitting(false);
@@ -128,6 +142,20 @@ export function AddWineCard({
           maxLength={280}
           rows={2}
           className="rounded-lg border border-[var(--color-line)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-gold)] focus:ring-2 focus:ring-[var(--color-gold)]/25"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+          Food pairing (optional)
+        </span>
+        <input
+          type="text"
+          value={foodPairing}
+          onChange={(e) => setFoodPairing(e.target.value)}
+          placeholder="What would you serve it with?"
+          maxLength={120}
+          className="h-11 rounded-lg border border-[var(--color-line)] bg-white px-3 text-sm outline-none focus:border-[var(--color-gold)] focus:ring-2 focus:ring-[var(--color-gold)]/25"
         />
       </label>
 

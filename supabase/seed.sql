@@ -83,36 +83,37 @@ on conflict (trail_id, winery_id) do update set display_order = excluded.display
 -- Grinder's Switch). Woodfeather Farm doesn't list specific bottle names
 -- publicly, so its two wines are named for the real grape varieties they
 -- grow instead of an invented brand name.
-insert into public.wines (winery_id, name, slug, varietal, style, tasting_notes, sort_order)
-select w.id, v.name, v.slug, v.varietal, v.style, v.tasting_notes, v.sort_order
+insert into public.wines (winery_id, name, slug, varietal, style, tasting_notes, food_pairing, sort_order)
+select w.id, v.name, v.slug, v.varietal, v.style, v.tasting_notes, v.food_pairing, v.sort_order
 from public.wineries w
 join (
   values
-    ('arrington-vineyards', 'Scarlet', 'arrington-scarlet', 'Chambourcin', 'rose', 'Arrington''s signature pour: estate-grown Chambourcin pressed rosé-style, with bright red berry and a refreshing, off-dry finish.', 1),
-    ('arrington-vineyards', 'Chardonnay', 'arrington-chardonnay', 'Chardonnay', 'white', 'Bright and food-friendly, with green apple, citrus, and a clean, crisp finish.', 2),
-    ('arrington-vineyards', 'Riesling', 'arrington-riesling', 'Riesling', 'sweet', 'Off-dry and floral, with ripe stone fruit and a crisp mineral finish.', 3),
-    ('arrington-vineyards', 'Cabernet Sauvignon', 'arrington-cabernet-sauvignon', 'Cabernet Sauvignon', 'red', 'Structured and dry, with dark currant, cedar, and firm tannins.', 4),
-    ('arrington-vineyards', 'Red Fox Red', 'arrington-red-fox-red', 'Sangiovese, Petit Verdot & Chambourcin', 'red', 'A bold field blend of Sangiovese, Petit Verdot, and Chambourcin, rounded out with a whisper of Viognier.', 5),
-    ('woodfeather-farm', 'Working Dog', 'woodfeather-working-dog', 'Red Blend', 'red', 'A bourbon barrel-aged red with dark fruit, vanilla, and toasted oak — as sturdy as its name.', 1),
-    ('woodfeather-farm', 'Terrier Rosato', 'woodfeather-terrier-rosato', 'Rosato', 'rose', 'A dry, food-friendly rosato with strawberry and citrus zest, built for the porch.', 2),
-    ('woodfeather-farm', 'Papillon Blanc', 'woodfeather-papillon-blanc', 'White Blend', 'white', 'Oak-aged and elegant, with baked apple, vanilla, and a rounded, creamy finish.', 3),
-    ('woodfeather-farm', 'Herding Dog Red Blend', 'woodfeather-herding-dog-red-blend', 'Red Blend', 'red', 'An easy-drinking red blend of estate varietals, soft tannins and ripe berry fruit.', 4),
-    ('woodfeather-farm', 'Sporting Dog', 'woodfeather-sporting-dog', 'Red Blend', 'red', 'Oak-aged and full-bodied, with dark fruit, baking spice, and a long, smoky finish.', 5),
-    ('pickers-creek', 'Harmony', 'pickers-creek-harmony', 'Chambourcin & Cabernet Sauvignon', 'red', 'A Chambourcin and Cabernet Sauvignon blend — dark berry fruit with soft, easy-drinking tannins.', 1),
-    ('pickers-creek', 'Give Peach a Chance', 'pickers-creek-give-peach-a-chance', 'Peach', 'sweet', 'A playful, sun-ripened peach wine — juicy and sweet with a nostalgic, fruit-stand finish.', 2),
-    ('pickers-creek', 'Three Dog White', 'pickers-creek-three-dog-white', 'White Blend', 'white', 'A crisp, easy-drinking white blend named for the porch dogs who inspired it.', 3),
-    ('pickers-creek', 'Rockabilly Red', 'pickers-creek-rockabilly-red', 'Muscadine', 'sweet', 'Made from Southern muscadine grapes — sweet, musky, and full of old-school Tennessee character.', 4),
-    ('pickers-creek', 'Blackberry Blues', 'pickers-creek-blackberry-blues', 'Blackberry', 'sweet', 'A jammy blackberry fruit wine, deep purple and sweet down to the last sip.', 5),
-    ('grinders-switch', 'Cabernet Sauvignon', 'grinders-switch-cabernet-sauvignon', 'Cabernet Sauvignon', 'red', 'Bold and dry, with gripping tannins, leather, orange peel, and a hint of cracked pepper.', 1),
-    ('grinders-switch', 'Honeysuckle Rose', 'grinders-switch-honeysuckle-rose', 'Blush Blend', 'sweet', 'A gold medal-winning sweet blush, perfumed with honeysuckle and ripe stone fruit.', 2),
-    ('grinders-switch', 'Switch Red', 'grinders-switch-switch-red', 'Concord', 'sweet', 'The best-seller: a sweet Concord red, juicy and jam-forward — welcome-mat wine.', 3),
-    ('grinders-switch', 'Blondy', 'grinders-switch-blondy', 'White Blend', 'sweet', 'A gold medal sweet white, honeyed and smooth.', 4),
-    ('grinders-switch', 'Blackberry Express', 'grinders-switch-blackberry-express', 'Blackberry', 'sweet', 'A sweet blackberry fruit wine, bursting with ripe bramble and a syrupy finish.', 5)
-) as v(winery_slug, name, slug, varietal, style, tasting_notes, sort_order)
+    ('arrington-vineyards', 'Scarlet', 'arrington-scarlet', 'Chambourcin', 'rose', 'Arrington''s signature pour: estate-grown Chambourcin pressed rosé-style, with bright red berry and a refreshing, off-dry finish.', 'Grilled salmon or a summer charcuterie board', 1),
+    ('arrington-vineyards', 'Chardonnay', 'arrington-chardonnay', 'Chardonnay', 'white', 'Bright and food-friendly, with green apple, citrus, and a clean, crisp finish.', 'Roast chicken or creamy pasta', 2),
+    ('arrington-vineyards', 'Riesling', 'arrington-riesling', 'Riesling', 'sweet', 'Off-dry and floral, with ripe stone fruit and a crisp mineral finish.', 'Spicy Thai food or a fruit tart', 3),
+    ('arrington-vineyards', 'Cabernet Sauvignon', 'arrington-cabernet-sauvignon', 'Cabernet Sauvignon', 'red', 'Structured and dry, with dark currant, cedar, and firm tannins.', 'Grilled steak or aged cheddar', 4),
+    ('arrington-vineyards', 'Red Fox Red', 'arrington-red-fox-red', 'Sangiovese, Petit Verdot & Chambourcin', 'red', 'A bold field blend of Sangiovese, Petit Verdot, and Chambourcin, rounded out with a whisper of Viognier.', 'Braised short ribs or a hearty stew', 5),
+    ('woodfeather-farm', 'Working Dog', 'woodfeather-working-dog', 'Red Blend', 'red', 'A bourbon barrel-aged red with dark fruit, vanilla, and toasted oak — as sturdy as its name.', 'Smoked brisket or dark chocolate', 1),
+    ('woodfeather-farm', 'Terrier Rosato', 'woodfeather-terrier-rosato', 'Rosato', 'rose', 'A dry, food-friendly rosato with strawberry and citrus zest, built for the porch.', 'Goat cheese salad or grilled shrimp', 2),
+    ('woodfeather-farm', 'Papillon Blanc', 'woodfeather-papillon-blanc', 'White Blend', 'white', 'Oak-aged and elegant, with baked apple, vanilla, and a rounded, creamy finish.', 'Roast pork or buttered lobster', 3),
+    ('woodfeather-farm', 'Herding Dog Red Blend', 'woodfeather-herding-dog-red-blend', 'Red Blend', 'red', 'An easy-drinking red blend of estate varietals, soft tannins and ripe berry fruit.', 'Burgers or a charcuterie board', 4),
+    ('woodfeather-farm', 'Sporting Dog', 'woodfeather-sporting-dog', 'Red Blend', 'red', 'Oak-aged and full-bodied, with dark fruit, baking spice, and a long, smoky finish.', 'Barbecue ribs or smoked gouda', 5),
+    ('pickers-creek', 'Harmony', 'pickers-creek-harmony', 'Chambourcin & Cabernet Sauvignon', 'red', 'A Chambourcin and Cabernet Sauvignon blend — dark berry fruit with soft, easy-drinking tannins.', 'Pulled pork or grilled sausage', 1),
+    ('pickers-creek', 'Give Peach a Chance', 'pickers-creek-give-peach-a-chance', 'Peach', 'sweet', 'A playful, sun-ripened peach wine — juicy and sweet with a nostalgic, fruit-stand finish.', 'Vanilla ice cream or a cheese plate', 2),
+    ('pickers-creek', 'Three Dog White', 'pickers-creek-three-dog-white', 'White Blend', 'white', 'A crisp, easy-drinking white blend named for the porch dogs who inspired it.', 'Fried catfish or a garden salad', 3),
+    ('pickers-creek', 'Rockabilly Red', 'pickers-creek-rockabilly-red', 'Muscadine', 'sweet', 'Made from Southern muscadine grapes — sweet, musky, and full of old-school Tennessee character.', 'Barbecue or spicy wings', 4),
+    ('pickers-creek', 'Blackberry Blues', 'pickers-creek-blackberry-blues', 'Blackberry', 'sweet', 'A jammy blackberry fruit wine, deep purple and sweet down to the last sip.', 'Dark chocolate or a cheese board', 5),
+    ('grinders-switch', 'Cabernet Sauvignon', 'grinders-switch-cabernet-sauvignon', 'Cabernet Sauvignon', 'red', 'Bold and dry, with gripping tannins, leather, orange peel, and a hint of cracked pepper.', 'Grilled steak or sharp cheddar', 1),
+    ('grinders-switch', 'Honeysuckle Rose', 'grinders-switch-honeysuckle-rose', 'Blush Blend', 'sweet', 'A gold medal-winning sweet blush, perfumed with honeysuckle and ripe stone fruit.', 'Fresh fruit or a light salad', 2),
+    ('grinders-switch', 'Switch Red', 'grinders-switch-switch-red', 'Concord', 'sweet', 'The best-seller: a sweet Concord red, juicy and jam-forward — welcome-mat wine.', 'Barbecue or burgers', 3),
+    ('grinders-switch', 'Blondy', 'grinders-switch-blondy', 'White Blend', 'sweet', 'A gold medal sweet white, honeyed and smooth.', 'Baked ham or fruit tart', 4),
+    ('grinders-switch', 'Blackberry Express', 'grinders-switch-blackberry-express', 'Blackberry', 'sweet', 'A sweet blackberry fruit wine, bursting with ripe bramble and a syrupy finish.', 'Vanilla cake or dark chocolate', 5)
+) as v(winery_slug, name, slug, varietal, style, tasting_notes, food_pairing, sort_order)
   on v.winery_slug = w.slug
 on conflict (slug) do update set
   name = excluded.name,
   varietal = excluded.varietal,
   style = excluded.style,
   tasting_notes = excluded.tasting_notes,
+  food_pairing = excluded.food_pairing,
   sort_order = excluded.sort_order;

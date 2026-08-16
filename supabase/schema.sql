@@ -120,6 +120,7 @@ create table if not exists public.wines (
   varietal text not null,
   style text not null check (style in ('red', 'white', 'rose', 'sweet', 'sparkling')),
   tasting_notes text not null default '',
+  food_pairing text,
   active boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
@@ -154,6 +155,7 @@ create table if not exists public.custom_wine_tastings (
   name text not null,
   style text not null check (style in ('red', 'white', 'rose', 'sweet', 'sparkling')),
   notes text,
+  food_pairing text,
   liked boolean not null,
   created_at timestamptz not null default now()
 );

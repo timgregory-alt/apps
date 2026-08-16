@@ -1,6 +1,6 @@
 "use client";
 
-import { Wine as WineIcon, ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
+import { Wine as WineIcon, ThumbsUp, ThumbsDown, Trash2, UtensilsCrossed } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { STYLE_BADGE } from "@/lib/recommendations";
 import type { CustomWineTasting } from "@/lib/types";
@@ -37,6 +37,13 @@ export function CustomWineRow({
           {tasting.notes && (
             <p className="mt-2 text-sm leading-relaxed text-[var(--color-charcoal)]/70">
               {tasting.notes}
+            </p>
+          )}
+
+          {tasting.food_pairing && (
+            <p className="mt-2 flex items-start gap-1.5 text-xs text-[var(--color-charcoal)]/55">
+              <UtensilsCrossed size={13} strokeWidth={1.75} className="mt-0.5 shrink-0 text-[var(--color-gold)]" />
+              {tasting.food_pairing}
             </p>
           )}
 
