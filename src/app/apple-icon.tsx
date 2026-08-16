@@ -27,29 +27,16 @@ export default function AppleIcon() {
             justifyContent: "center",
           }}
         >
-          <svg width="122" height="122" viewBox="0 0 64 64">
-            <path
-              d="M32 12 C27 10, 21 14, 23 20 C27 18, 31 14, 32 12 Z"
-              fill="#cfb579"
-            />
-            <path
-              d="M32 12 Q30 18 32 24"
-              stroke="#cfb579"
-              strokeWidth="1.6"
-              fill="none"
-              strokeLinecap="round"
-            />
-            <g fill="#e8dcb8">
-              <circle cx="25" cy="26" r="6.5" />
-              <circle cx="39" cy="26" r="6.5" />
-              <circle cx="18" cy="37" r="6.5" />
-              <circle cx="32" cy="37" r="6.5" />
-              <circle cx="46" cy="37" r="6.5" />
-              <circle cx="25" cy="48" r="6.5" />
-              <circle cx="39" cy="48" r="6.5" />
-              <circle cx="32" cy="57" r="6" />
-            </g>
-          </svg>
+          <span
+            style={{
+              fontSize: 58,
+              color: "#f2ead9",
+              fontFamily: "Georgia, serif",
+              letterSpacing: -2,
+            }}
+          >
+            TW
+          </span>
         </div>
       </div>
     ),
