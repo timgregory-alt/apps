@@ -41,6 +41,17 @@ export interface Winery {
   active: boolean;
   sort_order: number;
   created_at: string;
+  /** Optional page to check for new wines. Falls back to website_url when unset. */
+  wine_menu_url: string | null;
+}
+
+export interface WineSyncLogEntry {
+  id: UUID;
+  winery_id: UUID;
+  ran_at: string;
+  wines_added: number;
+  status: "ok" | "error";
+  detail: string | null;
 }
 
 /** One seasonal block of a winery's hours (e.g. "Apr–Oct"). A winery with no

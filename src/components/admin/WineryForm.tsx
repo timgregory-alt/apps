@@ -168,6 +168,21 @@ export function WineryForm({
         </div>
       </div>
 
+      <div className="rounded-xl border border-[var(--color-line)] bg-white/40 p-4">
+        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+          Automatic Wine List Sync
+        </p>
+        <p className="mb-3 text-xs text-[var(--color-charcoal)]/55">
+          A scheduled check periodically reads this page and adds any new wines it finds to this
+          winery&rsquo;s tasting list automatically. Leave blank to use the Website URL above, or
+          point at a more specific wine list / menu page.
+        </p>
+        <label className={labelClass}>
+          <span className={labelTextClass}>Wine List / Menu URL (optional)</span>
+          <input name="wine_menu_url" defaultValue={winery?.wine_menu_url ?? ""} className={inputClass} />
+        </label>
+      </div>
+
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="active" defaultChecked={winery?.active ?? true} className="h-4 w-4" />
         Active (visible to guests)

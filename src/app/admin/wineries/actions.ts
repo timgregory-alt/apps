@@ -35,6 +35,7 @@ function parseWineryForm(formData: FormData) {
     facebook_url: String(formData.get("facebook_url") ?? "").trim() || null,
     checkin_radius_meters: Math.round(feetToMeters(radiusFeet)),
     active: formData.get("active") === "on",
+    wine_menu_url: String(formData.get("wine_menu_url") ?? "").trim() || null,
   };
 }
 
