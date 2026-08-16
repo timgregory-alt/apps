@@ -9,7 +9,8 @@ import { WineryPopupCard } from "@/components/map/WineryPopupCard";
 import type { WineryWithStatus } from "@/lib/types";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-const MAPBOX_STYLE = process.env.NEXT_PUBLIC_MAPBOX_STYLE || "mapbox://styles/mapbox/light-v11";
+const MAPBOX_STYLE =
+  process.env.NEXT_PUBLIC_MAPBOX_STYLE || "mapbox://styles/mapbox/streets-v12";
 
 function createMarkerElement(visited: boolean): HTMLDivElement {
   const el = document.createElement("div");
