@@ -93,3 +93,22 @@ export function computeRecommendations(
 
   return { topStyles, wines: recommendedWines, wineries: recommendedWineries };
 }
+
+export interface WineryTastingProgress {
+  tried: number;
+  total: number;
+  pct: number;
+}
+
+/** How much of a winery's curated tasting flight the current user has tried
+ * (liked or not) — the denominator naturally grows as the winery adds new
+ * wines, so the fill drops until the new arrivals are tried too. */
+export function getWineryTastingProgress(
+  wines: WineWithTasting[],
+  wineryId: string
+): WineryTastingProgress {
+  const wineryWines = wines.filter((w) => w.winery_id === wineryId);
+  const total = wineryWines.length;
+  const tried = wineryWines.filter((w) => w.tasting != null).length;
+  return { tried, total, pct: total > 0 ? tried / total : 0 };
+}

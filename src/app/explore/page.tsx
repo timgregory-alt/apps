@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getCurrentUser, getTrail, getWineriesWithStatus } from "@/lib/data";
+import { getCurrentUser, getTrail, getWineriesWithStatus, getWinesWithTastings } from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
+import { getWineryTastingProgress } from "@/lib/recommendations";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { WineryImage } from "@/components/winery/WineryImage";
+import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 
 export default async function ExplorePage() {
   const user = await getCurrentUser();
-  const [trail, wineries] = await Promise.all([getTrail(), getWineriesWithStatus(user?.id ?? null)]);
+  const [trail, wineries, wines] = await Promise.all([
+    getTrail(),
+    getWineriesWithStatus(user?.id ?? null),
+    getWinesWithTastings(user?.id ?? null),
+  ]);
   const visited = visitedCount(wineries);
 
   return (
@@ -65,6 +71,7 @@ export default async function ExplorePage() {
                 <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
                 <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
               </div>
+              <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={26} />
               <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
             </Card>
           </Link>

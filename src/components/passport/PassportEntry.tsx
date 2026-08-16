@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { WineryImage } from "@/components/winery/WineryImage";
 import { PassportStamp } from "@/components/passport/PassportStamp";
+import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { Card } from "@/components/ui/Card";
 import { formatCheckinDate } from "@/lib/utils";
 import type { WineryWithStatus } from "@/lib/types";
+import type { WineryTastingProgress } from "@/lib/recommendations";
 
 const STATUS_LABEL: Record<WineryWithStatus["status"], string> = {
   not_visited: "Not Visited",
@@ -11,7 +13,13 @@ const STATUS_LABEL: Record<WineryWithStatus["status"], string> = {
   completed: "Completed",
 };
 
-export function PassportEntry({ winery }: { winery: WineryWithStatus }) {
+export function PassportEntry({
+  winery,
+  tastingProgress,
+}: {
+  winery: WineryWithStatus;
+  tastingProgress?: WineryTastingProgress;
+}) {
   const visited = winery.status !== "not_visited";
 
   return (
@@ -46,6 +54,16 @@ export function PassportEntry({ winery }: { winery: WineryWithStatus }) {
               </span>
             )}
           </div>
+          {tastingProgress && tastingProgress.total > 0 && (
+            <div className="mt-1.5">
+              <WineryTastingGlass
+                tried={tastingProgress.tried}
+                total={tastingProgress.total}
+                size={16}
+                layout="inline"
+              />
+            </div>
+          )}
         </div>
 
         <PassportStamp name={winery.name} city={winery.city} status={winery.status} size="sm" />

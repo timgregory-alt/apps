@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { PassportEntry } from "@/components/passport/PassportEntry";
 import { CompletionBanner } from "@/components/completion/CompletionBanner";
 import { WineTastingSection } from "@/components/tasting/WineTastingSection";
+import { getWineryTastingProgress } from "@/lib/recommendations";
 
 export default async function PassportPage() {
   const user = await getCurrentUser();
@@ -42,7 +43,7 @@ export default async function PassportPage() {
 
       <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-6">
         {wineries.map((w) => (
-          <PassportEntry key={w.id} winery={w} />
+          <PassportEntry key={w.id} winery={w} tastingProgress={getWineryTastingProgress(wines, w.id)} />
         ))}
       </div>
 
