@@ -110,6 +110,40 @@ create index if not exists trail_wineries_trail_idx on public.trail_wineries (tr
 create index if not exists trail_wineries_winery_idx on public.trail_wineries (winery_id);
 
 -- ---------------------------------------------------------------------------
+-- wines  (a small tasting flight per winery)
+-- ---------------------------------------------------------------------------
+create table if not exists public.wines (
+  id uuid primary key default gen_random_uuid(),
+  winery_id uuid not null references public.wineries (id) on delete cascade,
+  name text not null,
+  slug text not null unique,
+  varietal text not null,
+  style text not null check (style in ('red', 'white', 'rose', 'sweet', 'sparkling')),
+  tasting_notes text not null default '',
+  active boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists wines_winery_idx on public.wines (winery_id);
+create index if not exists wines_active_idx on public.wines (active);
+
+-- ---------------------------------------------------------------------------
+-- wine_tastings  (a user's like/pass on a wine — powers recommendations)
+-- ---------------------------------------------------------------------------
+create table if not exists public.wine_tastings (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  wine_id uuid not null references public.wines (id) on delete cascade,
+  liked boolean not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, wine_id)
+);
+
+create index if not exists wine_tastings_user_idx on public.wine_tastings (user_id);
+create index if not exists wine_tastings_wine_idx on public.wine_tastings (wine_id);
+
+-- ---------------------------------------------------------------------------
 -- checkins  (one verified GPS check-in per user per winery)
 -- ---------------------------------------------------------------------------
 create table if not exists public.checkins (

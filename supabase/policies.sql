@@ -66,6 +66,31 @@ create policy "Admins manage trail stops" on public.trail_wineries
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- ---------------------------------------------------------------------------
+-- wines — publicly readable when active; admin-managed
+-- ---------------------------------------------------------------------------
+alter table public.wines enable row level security;
+
+create policy "Active wines are public" on public.wines
+  for select using (active or public.is_admin());
+
+create policy "Admins manage wines" on public.wines
+  for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---------------------------------------------------------------------------
+-- wine_tastings — users see and create only their own ratings
+-- ---------------------------------------------------------------------------
+alter table public.wine_tastings enable row level security;
+
+create policy "Users view their own wine tastings" on public.wine_tastings
+  for select using (auth.uid() = user_id or public.is_admin());
+
+create policy "Users record their own wine tastings" on public.wine_tastings
+  for insert with check (auth.uid() = user_id);
+
+create policy "Users update their own wine tastings" on public.wine_tastings
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
 -- checkins — users see and create only their own; immutable once written
 -- ---------------------------------------------------------------------------
 alter table public.checkins enable row level security;

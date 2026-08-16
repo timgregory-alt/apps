@@ -77,3 +77,27 @@ join public.wineries w on w.slug in (
 )
 where t.slug = 'founding-trail'
 on conflict (trail_id, winery_id) do update set display_order = excluded.display_order;
+
+-- A small tasting flight per winery, spread across red/white/rosé/sweet so
+-- the "wines you liked" recommendations have a real signal to work with.
+insert into public.wines (winery_id, name, slug, varietal, style, tasting_notes, sort_order)
+select w.id, v.name, v.slug, v.varietal, v.style, v.tasting_notes, v.sort_order
+from public.wineries w
+join (
+  values
+    ('arrington-vineyards', 'Stony Ridge Cabernet Sauvignon', 'stony-ridge-cabernet-sauvignon', 'Cabernet Sauvignon', 'red', 'Bold and structured, with dark cherry, cedar, and a firm tannic finish. A wine built for a hillside sunset.', 1),
+    ('arrington-vineyards', 'Hillside Chardonnay', 'hillside-chardonnay', 'Chardonnay', 'white', 'Lightly oaked with notes of baked pear, vanilla, and a soft, buttery finish.', 2),
+    ('woodfeather-farm', 'Farmhouse Rosé', 'farmhouse-rose', 'Rosé', 'rose', 'Crisp and dry, with bright strawberry and watermelon rind. Porch-sipping, any season.', 1),
+    ('woodfeather-farm', 'Estate Merlot', 'estate-merlot', 'Merlot', 'red', 'Soft and approachable, with plum, cocoa, and gentle tannins — an easy, everyday red.', 2),
+    ('pickers-creek', 'Creekside Riesling', 'creekside-riesling', 'Riesling', 'sweet', 'Off-dry and floral, with ripe peach and a honeyed finish. A warm-afternoon favorite.', 1),
+    ('pickers-creek', 'Cotton Trail Red Blend', 'cotton-trail-red-blend', 'Red Blend', 'red', 'Jammy and medium-bodied, blending blackberry and a whisper of black pepper spice.', 2),
+    ('grinders-switch', 'Rail Switch Cabernet', 'rail-switch-cabernet', 'Cabernet Sauvignon', 'red', 'Full-bodied and dark, with blackcurrant, tobacco, and a long, smoky finish.', 1),
+    ('grinders-switch', 'Depot Muscadine', 'depot-muscadine', 'Muscadine', 'sweet', 'A true Southern classic — lush, sweet, and full of ripe muscadine grape and honeysuckle.', 2)
+) as v(winery_slug, name, slug, varietal, style, tasting_notes, sort_order)
+  on v.winery_slug = w.slug
+on conflict (slug) do update set
+  name = excluded.name,
+  varietal = excluded.varietal,
+  style = excluded.style,
+  tasting_notes = excluded.tasting_notes,
+  sort_order = excluded.sort_order;

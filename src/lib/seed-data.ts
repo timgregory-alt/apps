@@ -1,4 +1,4 @@
-import type { Trail, TrailWinery, Winery } from "./types";
+import type { Trail, TrailWinery, Winery, Wine } from "./types";
 import { feetToMeters } from "./geo";
 
 /**
@@ -163,3 +163,116 @@ export const SEED_TRAIL_WINERIES: TrailWinery[] = SEED_WINERIES.map((w, i) => ({
   winery_id: w.id,
   display_order: i + 1,
 }));
+
+/**
+ * A small tasting flight per winery — placeholder wine names, varietals, and
+ * tasting notes to be replaced with each winery's real list via the admin
+ * dashboard. Styles are deliberately spread across red/white/rosé/sweet so
+ * the "wines you liked" recommendation logic has a real signal to work with.
+ */
+export const SEED_WINES: Wine[] = [
+  {
+    id: "wine-arrington-cab",
+    winery_id: "winery-arrington",
+    name: "Stony Ridge Cabernet Sauvignon",
+    slug: "stony-ridge-cabernet-sauvignon",
+    varietal: "Cabernet Sauvignon",
+    style: "red",
+    tasting_notes:
+      "Bold and structured, with dark cherry, cedar, and a firm tannic finish. A wine built for a hillside sunset.",
+    active: true,
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-arrington-chard",
+    winery_id: "winery-arrington",
+    name: "Hillside Chardonnay",
+    slug: "hillside-chardonnay",
+    varietal: "Chardonnay",
+    style: "white",
+    tasting_notes:
+      "Lightly oaked with notes of baked pear, vanilla, and a soft, buttery finish.",
+    active: true,
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-woodfeather-rose",
+    winery_id: "winery-woodfeather",
+    name: "Farmhouse Rosé",
+    slug: "farmhouse-rose",
+    varietal: "Rosé",
+    style: "rose",
+    tasting_notes:
+      "Crisp and dry, with bright strawberry and watermelon rind. Porch-sipping, any season.",
+    active: true,
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-woodfeather-merlot",
+    winery_id: "winery-woodfeather",
+    name: "Estate Merlot",
+    slug: "estate-merlot",
+    varietal: "Merlot",
+    style: "red",
+    tasting_notes:
+      "Soft and approachable, with plum, cocoa, and gentle tannins — an easy, everyday red.",
+    active: true,
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-pickers-creek-riesling",
+    winery_id: "winery-pickers-creek",
+    name: "Creekside Riesling",
+    slug: "creekside-riesling",
+    varietal: "Riesling",
+    style: "sweet",
+    tasting_notes:
+      "Off-dry and floral, with ripe peach and a honeyed finish. A warm-afternoon favorite.",
+    active: true,
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-pickers-creek-blend",
+    winery_id: "winery-pickers-creek",
+    name: "Cotton Trail Red Blend",
+    slug: "cotton-trail-red-blend",
+    varietal: "Red Blend",
+    style: "red",
+    tasting_notes:
+      "Jammy and medium-bodied, blending blackberry and a whisper of black pepper spice.",
+    active: true,
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-grinders-switch-cab",
+    winery_id: "winery-grinders-switch",
+    name: "Rail Switch Cabernet",
+    slug: "rail-switch-cabernet",
+    varietal: "Cabernet Sauvignon",
+    style: "red",
+    tasting_notes:
+      "Full-bodied and dark, with blackcurrant, tobacco, and a long, smoky finish.",
+    active: true,
+    sort_order: 1,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "wine-grinders-switch-muscadine",
+    winery_id: "winery-grinders-switch",
+    name: "Depot Muscadine",
+    slug: "depot-muscadine",
+    varietal: "Muscadine",
+    style: "sweet",
+    tasting_notes:
+      "A true Southern classic — lush, sweet, and full of ripe muscadine grape and honeysuckle.",
+    active: true,
+    sort_order: 2,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+];

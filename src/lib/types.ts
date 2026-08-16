@@ -110,6 +110,47 @@ export interface WineryWithStatus extends Winery {
   checkin: Checkin | null;
 }
 
+export type WineStyle = "red" | "white" | "rose" | "sweet" | "sparkling";
+
+export interface Wine {
+  id: UUID;
+  winery_id: UUID;
+  name: string;
+  slug: string;
+  varietal: string;
+  style: WineStyle;
+  tasting_notes: string;
+  active: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface WineTasting {
+  id: UUID;
+  user_id: UUID;
+  wine_id: UUID;
+  liked: boolean;
+  created_at: string;
+}
+
+/** A wine merged with the current user's rating, plus its winery for display. */
+export interface WineWithTasting extends Wine {
+  winery: Winery;
+  tasting: WineTasting | null;
+}
+
+export interface WineRecommendation {
+  wine: Wine;
+  winery: Winery;
+  reason: string;
+}
+
+export interface WineryRecommendation {
+  winery: WineryWithStatus;
+  matchingWines: Wine[];
+  reason: string;
+}
+
 export interface DistanceResult {
   meters: number;
   miles: number;

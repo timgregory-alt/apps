@@ -1,11 +1,14 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { FOUNDING_TRAIL, SEED_WINERIES } from "@/lib/seed-data";
+import { FOUNDING_TRAIL, SEED_WINERIES, SEED_WINES } from "@/lib/seed-data";
 import type {
   Checkin,
   CheckinStatus,
   Profile,
   Trail,
+  Wine,
+  WineTasting,
+  WineWithTasting,
   Winery,
   WineryWithStatus,
 } from "@/lib/types";
@@ -147,6 +150,60 @@ export async function getPassportCompletions(userId: string) {
   } catch {
     return [];
   }
+}
+
+/** All active wines across the trail's wineries, ordered for display. */
+export async function getAllWines(): Promise<Wine[]> {
+  if (!isSupabaseConfigured) {
+    return [...SEED_WINES].sort((a, b) => a.sort_order - b.sort_order);
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("wines")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
+    if (error || !data) throw error;
+    return data as Wine[];
+  } catch {
+    return [...SEED_WINES].sort((a, b) => a.sort_order - b.sort_order);
+  }
+}
+
+export async function getUserWineTastings(userId: string): Promise<WineTasting[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("wine_tastings")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true });
+    return (data as WineTasting[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Every tasting-flight wine merged with its winery and the current user's rating, if any. */
+export async function getWinesWithTastings(userId: string | null): Promise<WineWithTasting[]> {
+  const [wines, wineries] = await Promise.all([getAllWines(), getFoundingTrailWineries()]);
+  const wineryById = new Map(wineries.map((w) => [w.id, w]));
+  const tastings = userId ? await getUserWineTastings(userId) : [];
+  const tastingByWineId = new Map(tastings.map((t) => [t.wine_id, t]));
+
+  return wines
+    .map((wine) => {
+      const winery = wineryById.get(wine.winery_id);
+      if (!winery) return null;
+      return {
+        ...wine,
+        winery,
+        tasting: tastingByWineId.get(wine.id) ?? null,
+      };
+    })
+    .filter((w): w is WineWithTasting => !!w);
 }
 
 export async function getPassportCompletion(userId: string, trailId: string) {

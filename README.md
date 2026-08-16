@@ -60,6 +60,12 @@ Without Supabase configured, the app is still fully browsable (home, passport, m
 
 `wineries` and `trails` also carry `sponsored`, `featured`, and (on wineries) `subscription_status` columns so participating-winery subscriptions, sponsored placements, and featured trails can be turned on later without another migration.
 
+`wines` and `wine_tastings` power the Wine Tasting section on the Passport screen — a small tasting flight per winery that a signed-in user rates liked/not liked, which drives the "Recommended For You" wines and wineries (see `src/lib/recommendations.ts`).
+
+### Applying schema changes to an already-running project
+
+Once a Supabase project has `schema.sql`/`policies.sql`/`seed.sql` applied, re-running `policies.sql` in full will error (Postgres policies can't be re-created without dropping them first). Incremental changes ship instead as numbered files in `supabase/migrations/` — run each new one once, in order, the same way as the initial three files (SQL Editor → New query → paste → Run). `schema.sql` and `seed.sql` stay safe to re-run any time; migration files fold their changes into those two as well, so a brand-new project only ever needs the original three files.
+
 ## 4. Configure Mapbox
 
 1. Create a free account at [mapbox.com](https://mapbox.com) and generate a public token under **Account → Access tokens**.
