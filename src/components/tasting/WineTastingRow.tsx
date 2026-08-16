@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { STYLE_BADGE } from "@/lib/recommendations";
 import type { WineWithTasting } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, isRecentlyAdded } from "@/lib/utils";
 
 /** A flip card: front shows just the wine name, tap to reveal the back with
  * full tasting notes, food pairing, and the rate buttons. */
@@ -27,6 +27,7 @@ export function WineTastingRow({
 }) {
   const [flipped, setFlipped] = useState(false);
   const rated = wine.tasting != null;
+  const isNew = isRecentlyAdded(wine.created_at);
 
   function handleRate(liked: boolean) {
     onRate(liked);
@@ -51,6 +52,11 @@ export function WineTastingRow({
             <span className="absolute right-4 top-4 flex items-center gap-1 text-xs text-[var(--color-charcoal)]/40">
               <Check size={13} strokeWidth={2.5} />
               Tasted
+            </span>
+          )}
+          {isNew && (
+            <span className="absolute left-4 top-4 rounded-full bg-[var(--color-burgundy)] px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
+              New
             </span>
           )}
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]/50">
