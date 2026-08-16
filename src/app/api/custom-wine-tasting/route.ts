@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { WineStyle } from "@/lib/types";
 
-const STYLES: WineStyle[] = ["red", "white", "rose", "sweet", "sparkling"];
+const STYLES: WineStyle[] = ["red", "white", "rose", "sweet", "sparkling", "mead"];
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as {

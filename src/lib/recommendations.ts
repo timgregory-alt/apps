@@ -13,6 +13,7 @@ export const STYLE_LABELS: Record<WineStyle, string> = {
   rose: "dry rosés",
   sweet: "sweet, fruit-forward wines",
   sparkling: "sparkling wines",
+  mead: "honey meads",
 };
 
 export const STYLE_BADGE: Record<WineStyle, string> = {
@@ -21,6 +22,7 @@ export const STYLE_BADGE: Record<WineStyle, string> = {
   rose: "Rosé",
   sweet: "Sweet",
   sparkling: "Sparkling",
+  mead: "Mead",
 };
 
 export interface TastingRecommendations {

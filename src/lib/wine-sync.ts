@@ -26,7 +26,7 @@ const WINE_LIST_SCHEMA = {
           varietal: { type: "string" as const },
           style: {
             type: "string" as const,
-            enum: ["red", "white", "rose", "sweet", "sparkling"],
+            enum: ["red", "white", "rose", "sweet", "sparkling", "mead"],
           },
           tasting_notes: { type: "string" as const },
           food_pairing: {

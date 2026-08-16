@@ -56,7 +56,9 @@ export default async function WineryDetailPage({
     status: "not_visited" as const,
     checkin: null,
   };
-  const wineryWines = allWines.filter((w) => w.winery_id === winery.id);
+  const allWineryWines = allWines.filter((w) => w.winery_id === winery.id);
+  const wineryWines = allWineryWines.filter((w) => w.style !== "mead");
+  const meadWines = allWineryWines.filter((w) => w.style === "mead");
   const wineryCustomTastings = customTastings.filter((t) => t.winery_id === winery.id);
 
   return (
@@ -99,6 +101,26 @@ export default async function WineryDetailPage({
             showProgress={false}
           />
         </div>
+
+        {meadWines.length > 0 && (
+          <div>
+            <SectionEyebrow>A Rare Find</SectionEyebrow>
+            <p className="font-serif-display mt-1 mb-1 text-xl text-[var(--color-charcoal)]">
+              Mead
+            </p>
+            <p className="mb-4 text-sm text-[var(--color-charcoal)]/55">
+              Honey wine — not something you&rsquo;ll find at most Tennessee wineries.
+            </p>
+            <WineTastingList
+              initialWines={meadWines}
+              wineryId={winery.id}
+              isLoggedIn={!!user}
+              redirectTo={`/winery/${winery.slug}`}
+              showProgress={false}
+              allowCustom={false}
+            />
+          </div>
+        )}
 
         <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 

@@ -8,7 +8,7 @@ import { STYLE_BADGE } from "@/lib/recommendations";
 import { cn } from "@/lib/utils";
 import type { WineStyle } from "@/lib/types";
 
-const STYLES: WineStyle[] = ["red", "white", "rose", "sweet", "sparkling"];
+const STYLES: WineStyle[] = ["red", "white", "rose", "sweet", "sparkling", "mead"];
 
 export function AddWineCard({
   isLoggedIn,

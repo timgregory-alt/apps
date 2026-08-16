@@ -134,7 +134,7 @@ export interface WineryWithStatus extends Winery {
   checkin: Checkin | null;
 }
 
-export type WineStyle = "red" | "white" | "rose" | "sweet" | "sparkling";
+export type WineStyle = "red" | "white" | "rose" | "sweet" | "sparkling" | "mead";
 
 export interface Wine {
   id: UUID;
