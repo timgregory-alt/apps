@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isCurrentUserAdmin } from "@/lib/admin";
+import { isCurrentUserAdmin, getWineryByIdAdmin } from "@/lib/admin";
 import { feetToMeters } from "@/lib/geo";
+import { syncWineryWines, type SyncResult } from "@/lib/wine-sync";
 
 function parseWineryForm(formData: FormData) {
   const benefits = String(formData.get("wine_club_benefits") ?? "")
@@ -100,4 +101,28 @@ export async function saveWineryHoursAction(wineryId: string, rows: SeasonalHour
   }
 
   revalidatePath(`/admin/wineries/${wineryId}`);
+}
+
+export async function syncWineryNowAction(wineryId: string): Promise<SyncResult> {
+  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+
+  const winery = await getWineryByIdAdmin(wineryId);
+  if (!winery) throw new Error("Winery not found");
+
+  const result = await syncWineryWines(winery);
+
+  const supabase = await createClient();
+  await supabase.from("wine_sync_log").insert({
+    winery_id: winery.id,
+    wines_added: result.added,
+    status: result.status,
+    detail: result.detail ?? null,
+  });
+
+  revalidatePath(`/admin/wineries/${wineryId}`);
+  revalidatePath(`/winery/${winery.slug}`);
+  revalidatePath("/passport");
+  revalidatePath("/explore");
+
+  return result;
 }

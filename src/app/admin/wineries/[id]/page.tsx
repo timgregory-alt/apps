@@ -3,6 +3,7 @@ import { getWineryByIdAdmin } from "@/lib/admin";
 import { getWineryHours } from "@/lib/data";
 import { WineryForm } from "@/components/admin/WineryForm";
 import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
+import { WineSyncPanel } from "@/components/admin/WineSyncPanel";
 import { QrCode } from "@/components/ui/QrCode";
 import { updateWineryAction } from "@/app/admin/wineries/actions";
 
@@ -30,6 +31,14 @@ export default async function EditWineryPage({
 
         <div className="mt-6">
           <SeasonalHoursEditor wineryId={winery.id} initialSeasons={hoursSeasons} />
+        </div>
+
+        <div className="mt-6">
+          <WineSyncPanel
+            wineryId={winery.id}
+            wineMenuUrl={winery.wine_menu_url}
+            websiteUrl={winery.website_url}
+          />
         </div>
       </div>
 

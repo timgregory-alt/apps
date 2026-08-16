@@ -21,6 +21,6 @@ create index if not exists wine_sync_log_winery_idx on public.wine_sync_log (win
 
 alter table public.wine_sync_log enable row level security;
 
-drop policy if exists "Admins read wine sync log" on public.wine_sync_log;
-create policy "Admins read wine sync log" on public.wine_sync_log
-  for select using (public.is_admin());
+drop policy if exists "Admins manage wine sync log" on public.wine_sync_log;
+create policy "Admins manage wine sync log" on public.wine_sync_log
+  for all using (public.is_admin()) with check (public.is_admin());
