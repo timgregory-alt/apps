@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getCurrentUser, getWineriesWithStatus, getWineryBySlug } from "@/lib/data";
+import {
+  getCurrentUser,
+  getWineriesWithStatus,
+  getWineryBySlug,
+  getWinesWithTastings,
+} from "@/lib/data";
 import { WineryHero } from "@/components/winery/WineryHero";
 import {
   WineryDescription,
@@ -10,7 +15,9 @@ import {
 import { DirectionsButton } from "@/components/winery/DirectionsButton";
 import { WineClubSection } from "@/components/wineclub/WineClubSection";
 import { CheckInFlow } from "@/components/checkin/CheckInFlow";
+import { WineTastingList } from "@/components/tasting/WineTastingList";
 import { LinkButton } from "@/components/ui/Button";
+import { SectionEyebrow } from "@/components/ui/Card";
 
 export async function generateMetadata({
   params,
@@ -36,12 +43,16 @@ export default async function WineryDetailPage({
   if (!winery) notFound();
 
   const user = await getCurrentUser();
-  const wineries = await getWineriesWithStatus(user?.id ?? null);
+  const [wineries, allWines] = await Promise.all([
+    getWineriesWithStatus(user?.id ?? null),
+    getWinesWithTastings(user?.id ?? null),
+  ]);
   const wineryWithStatus = wineries.find((w) => w.id === winery.id) ?? {
     ...winery,
     status: "not_visited" as const,
     checkin: null,
   };
+  const wineryWines = allWines.filter((w) => w.winery_id === winery.id);
 
   return (
     <main className="mx-auto flex max-w-md flex-col pb-10">
@@ -68,6 +79,21 @@ export default async function WineryDetailPage({
         </div>
 
         <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn={!!user} />
+
+        {wineryWines.length > 0 && (
+          <div>
+            <SectionEyebrow>Wine Tasting</SectionEyebrow>
+            <p className="font-serif-display mt-1 mb-4 text-xl text-[var(--color-charcoal)]">
+              Wines Poured Here
+            </p>
+            <WineTastingList
+              initialWines={wineryWines}
+              isLoggedIn={!!user}
+              redirectTo={`/winery/${winery.slug}`}
+              showProgress={false}
+            />
+          </div>
+        )}
 
         <WineryDetailsList winery={winery} />
 

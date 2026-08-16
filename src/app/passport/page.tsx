@@ -42,7 +42,7 @@ export default async function PassportPage() {
 
       <div className="mx-auto w-full max-w-md px-6">
         <div className="gold-divider mb-8" />
-        <WineTastingSection initialWines={wines} wineries={wineries} isLoggedIn={!!user} />
+        <WineTastingSection wines={wines} wineries={wineries} />
       </div>
     </main>
   );
