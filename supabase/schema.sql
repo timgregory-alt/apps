@@ -144,6 +144,24 @@ create index if not exists wine_tastings_user_idx on public.wine_tastings (user_
 create index if not exists wine_tastings_wine_idx on public.wine_tastings (wine_id);
 
 -- ---------------------------------------------------------------------------
+-- custom_wine_tastings  (a wine a user tried that isn't in the curated
+-- flight — personal to them, not shown to other guests)
+-- ---------------------------------------------------------------------------
+create table if not exists public.custom_wine_tastings (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  winery_id uuid not null references public.wineries (id) on delete cascade,
+  name text not null,
+  style text not null check (style in ('red', 'white', 'rose', 'sweet', 'sparkling')),
+  notes text,
+  liked boolean not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists custom_wine_tastings_user_idx on public.custom_wine_tastings (user_id);
+create index if not exists custom_wine_tastings_winery_idx on public.custom_wine_tastings (winery_id);
+
+-- ---------------------------------------------------------------------------
 -- checkins  (one verified GPS check-in per user per winery)
 -- ---------------------------------------------------------------------------
 create table if not exists public.checkins (

@@ -1,4 +1,5 @@
 import type {
+  CustomWineTasting,
   WineRecommendation,
   WineryRecommendation,
   WineryWithStatus,
@@ -37,14 +38,19 @@ const EMPTY: TastingRecommendations = { topStyles: [], wines: [], wineries: [] }
  */
 export function computeRecommendations(
   wines: WineWithTasting[],
-  wineries: WineryWithStatus[]
+  wineries: WineryWithStatus[],
+  customTastings: CustomWineTasting[] = []
 ): TastingRecommendations {
   const liked = wines.filter((w) => w.tasting?.liked === true);
-  if (liked.length === 0) return EMPTY;
+  const likedCustom = customTastings.filter((t) => t.liked);
+  if (liked.length === 0 && likedCustom.length === 0) return EMPTY;
 
   const styleCounts = new Map<WineStyle, number>();
   for (const wine of liked) {
     styleCounts.set(wine.style, (styleCounts.get(wine.style) ?? 0) + 1);
+  }
+  for (const tasting of likedCustom) {
+    styleCounts.set(tasting.style, (styleCounts.get(tasting.style) ?? 0) + 1);
   }
   const maxCount = Math.max(...styleCounts.values());
   const topStyles = [...styleCounts.entries()]

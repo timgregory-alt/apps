@@ -91,6 +91,20 @@ create policy "Users update their own wine tastings" on public.wine_tastings
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------------------
+-- custom_wine_tastings — fully private to the user who logged them
+-- ---------------------------------------------------------------------------
+alter table public.custom_wine_tastings enable row level security;
+
+create policy "Users view their own custom wine tastings" on public.custom_wine_tastings
+  for select using (auth.uid() = user_id or public.is_admin());
+
+create policy "Users create their own custom wine tastings" on public.custom_wine_tastings
+  for insert with check (auth.uid() = user_id);
+
+create policy "Users delete their own custom wine tastings" on public.custom_wine_tastings
+  for delete using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
 -- checkins — users see and create only their own; immutable once written
 -- ---------------------------------------------------------------------------
 alter table public.checkins enable row level security;

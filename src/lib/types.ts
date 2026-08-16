@@ -133,6 +133,18 @@ export interface WineTasting {
   created_at: string;
 }
 
+/** A wine a user tried that isn't in the winery's curated flight — logged by them, visible only to them. */
+export interface CustomWineTasting {
+  id: UUID;
+  user_id: UUID;
+  winery_id: UUID;
+  name: string;
+  style: WineStyle;
+  notes: string | null;
+  liked: boolean;
+  created_at: string;
+}
+
 /** A wine merged with the current user's rating, plus its winery for display. */
 export interface WineWithTasting extends Wine {
   winery: Winery;

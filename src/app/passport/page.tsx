@@ -1,4 +1,9 @@
-import { getCurrentUser, getWineriesWithStatus, getWinesWithTastings } from "@/lib/data";
+import {
+  getCurrentUser,
+  getWineriesWithStatus,
+  getWinesWithTastings,
+  getCustomWineTastings,
+} from "@/lib/data";
 import { visitedCount, isTrailComplete } from "@/lib/trail";
 import { Header } from "@/components/layout/Header";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -8,9 +13,10 @@ import { WineTastingSection } from "@/components/tasting/WineTastingSection";
 
 export default async function PassportPage() {
   const user = await getCurrentUser();
-  const [wineries, wines] = await Promise.all([
+  const [wineries, wines, customTastings] = await Promise.all([
     getWineriesWithStatus(user?.id ?? null),
     getWinesWithTastings(user?.id ?? null),
+    user ? getCustomWineTastings(user.id) : Promise.resolve([]),
   ]);
   const visited = visitedCount(wineries);
   const complete = isTrailComplete(wineries);
@@ -42,7 +48,7 @@ export default async function PassportPage() {
 
       <div className="mx-auto w-full max-w-md px-6">
         <div className="gold-divider mb-8" />
-        <WineTastingSection wines={wines} wineries={wineries} />
+        <WineTastingSection wines={wines} wineries={wineries} customTastings={customTastings} />
       </div>
     </main>
   );

@@ -3,19 +3,21 @@ import { SectionEyebrow } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { RecommendationsPanel } from "@/components/tasting/RecommendationsPanel";
 import { computeRecommendations } from "@/lib/recommendations";
-import type { WineWithTasting, WineryWithStatus } from "@/lib/types";
+import type { CustomWineTasting, WineWithTasting, WineryWithStatus } from "@/lib/types";
 
 /** Passport-page summary: overall tasting progress plus recommendations —
  * the actual "rate this wine" cards live on each winery's own page. */
 export function WineTastingSection({
   wines,
   wineries,
+  customTastings = [],
 }: {
   wines: WineWithTasting[];
   wineries: WineryWithStatus[];
+  customTastings?: CustomWineTasting[];
 }) {
   const tastedCount = wines.filter((w) => w.tasting != null).length;
-  const recommendations = computeRecommendations(wines, wineries);
+  const recommendations = computeRecommendations(wines, wineries, customTastings);
 
   return (
     <section className="flex flex-col gap-4">

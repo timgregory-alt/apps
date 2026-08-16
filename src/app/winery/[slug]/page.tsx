@@ -5,6 +5,7 @@ import {
   getWineriesWithStatus,
   getWineryBySlug,
   getWinesWithTastings,
+  getCustomWineTastings,
 } from "@/lib/data";
 import { WineryHero } from "@/components/winery/WineryHero";
 import {
@@ -43,9 +44,10 @@ export default async function WineryDetailPage({
   if (!winery) notFound();
 
   const user = await getCurrentUser();
-  const [wineries, allWines] = await Promise.all([
+  const [wineries, allWines, customTastings] = await Promise.all([
     getWineriesWithStatus(user?.id ?? null),
     getWinesWithTastings(user?.id ?? null),
+    user ? getCustomWineTastings(user.id) : Promise.resolve([]),
   ]);
   const wineryWithStatus = wineries.find((w) => w.id === winery.id) ?? {
     ...winery,
@@ -53,6 +55,7 @@ export default async function WineryDetailPage({
     checkin: null,
   };
   const wineryWines = allWines.filter((w) => w.winery_id === winery.id);
+  const wineryCustomTastings = customTastings.filter((t) => t.winery_id === winery.id);
 
   return (
     <main className="mx-auto flex max-w-md flex-col pb-10">
@@ -80,20 +83,20 @@ export default async function WineryDetailPage({
 
         <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn={!!user} />
 
-        {wineryWines.length > 0 && (
-          <div>
-            <SectionEyebrow>Wine Tasting</SectionEyebrow>
-            <p className="font-serif-display mt-1 mb-4 text-xl text-[var(--color-charcoal)]">
-              Wines Poured Here
-            </p>
-            <WineTastingList
-              initialWines={wineryWines}
-              isLoggedIn={!!user}
-              redirectTo={`/winery/${winery.slug}`}
-              showProgress={false}
-            />
-          </div>
-        )}
+        <div>
+          <SectionEyebrow>Wine Tasting</SectionEyebrow>
+          <p className="font-serif-display mt-1 mb-4 text-xl text-[var(--color-charcoal)]">
+            Wines Poured Here
+          </p>
+          <WineTastingList
+            initialWines={wineryWines}
+            initialCustomTastings={wineryCustomTastings}
+            wineryId={winery.id}
+            isLoggedIn={!!user}
+            redirectTo={`/winery/${winery.slug}`}
+            showProgress={false}
+          />
+        </div>
 
         <WineryDetailsList winery={winery} />
 

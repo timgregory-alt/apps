@@ -4,6 +4,7 @@ import { FOUNDING_TRAIL, SEED_WINERIES, SEED_WINES } from "@/lib/seed-data";
 import type {
   Checkin,
   CheckinStatus,
+  CustomWineTasting,
   Profile,
   Trail,
   Wine,
@@ -135,6 +136,21 @@ export async function getWineriesWithStatus(userId: string | null): Promise<Wine
       checkin: checkin ?? null,
     };
   });
+}
+
+export async function getCustomWineTastings(userId: string): Promise<CustomWineTasting[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("custom_wine_tastings")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true });
+    return (data as CustomWineTasting[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getPassportCompletions(userId: string) {
