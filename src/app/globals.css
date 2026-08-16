@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --color-ivory: #faf6ee;
+  --color-ivory-deep: #f2ead9;
+  --color-parchment: #efe7d8;
+  --color-charcoal: #24211d;
+  --color-charcoal-soft: #3a352e;
+  --color-burgundy: #5e1a2e;
+  --color-burgundy-deep: #43101f;
+  --color-burgundy-soft: #7c2a41;
+  --color-gold: #b0904f;
+  --color-gold-soft: #cfb579;
+  --color-gold-pale: #e8dcb8;
+  --color-line: rgba(36, 33, 29, 0.12);
+
+  --background: var(--color-ivory);
+  --foreground: var(--color-charcoal);
+}
+
+@theme inline {
+  --color-ivory: var(--color-ivory);
+  --color-ivory-deep: var(--color-ivory-deep);
+  --color-parchment: var(--color-parchment);
+  --color-charcoal: var(--color-charcoal);
+  --color-charcoal-soft: var(--color-charcoal-soft);
+  --color-burgundy: var(--color-burgundy);
+  --color-burgundy-deep: var(--color-burgundy-deep);
+  --color-burgundy-soft: var(--color-burgundy-soft);
+  --color-gold: var(--color-gold);
+  --color-gold-soft: var(--color-gold-soft);
+  --color-gold-pale: var(--color-gold-pale);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-serif: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+  --animate-stamp-in: stamp-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-sparkle: sparkle 1.6s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(176, 144, 79, 0.06), transparent 45%),
+    radial-gradient(circle at 90% 10%, rgba(94, 26, 46, 0.05), transparent 40%);
+}
+
+.font-serif-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+/* Subtle paper/grain texture overlay used across premium surfaces */
+.texture-grain {
+  position: relative;
+}
+.texture-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+.gold-divider {
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+  height: 1px;
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-14deg);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.92) rotate(-8deg);
+    filter: blur(0);
+  }
+  80% {
+    transform: scale(1.05) rotate(-9deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-8deg);
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stamp-in {
+  animation: var(--animate-stamp-in);
+}
+.animate-sparkle {
+  animation: var(--animate-sparkle);
+}
+.animate-fade-up {
+  animation: var(--animate-fade-up);
+}
+
+::selection {
+  background: var(--color-gold-pale);
+  color: var(--color-burgundy-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
