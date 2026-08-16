@@ -9,7 +9,7 @@ The Founding Trail ships with four wineries:
 - Arrington Vineyards — Arrington, TN
 - Woodfeather Farm Vineyard & Winery — Chapel Hill, TN
 - Picker's Creek Winery — Lewisburg, TN
-- Grinder's Switch Winery — Centerville, TN
+- Grinder's Switch Winery — Columbia, TN
 
 The app runs without any environment variables configured — it falls back to local seed data so you can explore the UI immediately. Check-ins won't persist and auth is disabled until Supabase is connected.
 

@@ -47,9 +47,9 @@ insert into public.wineries (
     228, true, 3
   ),
   (
-    'Grinder''s Switch Winery', 'grinders-switch', 'Centerville', 'Tennessee',
-    'Centerville, TN', 35.7768, -87.4736,
-    'Named for the historic rail switch that once ran through town, this Hickman County winery pours bold reds in a rustic, unpretentious setting.',
+    'Grinder''s Switch Winery', 'grinders-switch', 'Columbia', 'Tennessee',
+    '510 North Garden Street, Suite D, Columbia, TN 38401', 35.6151, -87.0353,
+    'Named for the historic rail switch that once ran through Hickman County, this Maury County tasting lounge — set in a converted 1950s tire shop — pours bold reds in a warm, unpretentious setting.',
     null, null, 'Switch Club', 'Members-first access to limited releases and barrel picks.',
     array['Exclusive releases', 'Member events', 'Member pricing', 'Bottle discounts'],
     'Fri–Sun 12pm–6pm (placeholder — confirm seasonal hours)',
