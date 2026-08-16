@@ -67,15 +67,38 @@ export function WineryHoursRow({
           )}
 
           {expanded && (
-            <ul className="mt-2 flex flex-col gap-1.5 border-t border-[var(--color-line)] pt-2">
-              {seasons.map((s) => (
-                <li key={s.id} className="flex items-baseline justify-between gap-3 text-xs">
-                  <span className="shrink-0 font-medium text-[var(--color-charcoal)]/70">
-                    {s.label}
-                  </span>
-                  <span className="text-right text-[var(--color-charcoal)]/60">{s.hours_text}</span>
-                </li>
-              ))}
+            <ul className="mt-3 flex flex-col divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
+              {seasons.map((s) => {
+                const isCurrent = s.id === current?.id;
+                return (
+                  <li
+                    key={s.id}
+                    className={cn(
+                      "py-2 pl-2.5",
+                      isCurrent && "border-l-2 border-[var(--color-gold)] bg-[var(--color-gold-pale)]/15"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <p
+                        className={cn(
+                          "text-xs font-semibold",
+                          isCurrent ? "text-[var(--color-burgundy-deep)]" : "text-[var(--color-charcoal)]/70"
+                        )}
+                      >
+                        {s.label}
+                      </p>
+                      {isCurrent && (
+                        <span className="shrink-0 text-[0.6rem] font-semibold uppercase tracking-wide text-[var(--color-gold)]">
+                          Now
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs leading-relaxed text-[var(--color-charcoal)]/55">
+                      {s.hours_text}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
