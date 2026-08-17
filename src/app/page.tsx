@@ -5,8 +5,10 @@ import { visitedCount } from "@/lib/trail";
 import { getWineryTastingProgress } from "@/lib/recommendations";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
+import { LinkButton } from "@/components/ui/Button";
 import { WineryImage } from "@/components/winery/WineryImage";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
+import { TrailMap } from "@/components/map/TrailMap";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -22,21 +24,26 @@ export default async function HomePage() {
       <Header eyebrow="Wine Trails" title="Explore Tennessee Wine Country" />
 
       <div className="px-6">
-        <Link href="/map" className="block">
-          <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
-            <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
-              {wineries.length} Stops · Middle Tennessee
-            </p>
-            <p className="font-serif-display mt-2 text-2xl leading-tight">{trail.name}</p>
-            {trail.description && (
-              <p className="mt-2 text-sm text-[var(--color-ivory)]/70">{trail.description}</p>
-            )}
-            <div className="mt-4 flex items-center gap-1.5 text-sm font-medium text-[var(--color-gold-pale)]">
-              {visited} of {wineries.length} visited
-              <ArrowRight size={15} />
-            </div>
-          </Card>
-        </Link>
+        <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
+          <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
+            {wineries.length} Stops · Middle Tennessee
+          </p>
+          <p className="font-serif-display mt-2 text-2xl leading-tight">{trail.name}</p>
+          {trail.description && (
+            <p className="mt-2 text-sm text-[var(--color-ivory)]/70">{trail.description}</p>
+          )}
+          <p className="mt-4 text-sm font-medium text-[var(--color-gold-pale)]">
+            {visited} of {wineries.length} visited
+          </p>
+        </Card>
+      </div>
+
+      <TrailMap wineries={wineries} />
+
+      <div className="px-6">
+        <LinkButton href="/trail/plan" variant="primary" size="lg" fullWidth>
+          Plan My Wine Trail
+        </LinkButton>
       </div>
 
       <div className="px-6">
