@@ -22,7 +22,7 @@ import type {
   WineWithTasting,
   Winery,
   WineryEvent,
-  WineryEventWithWinery,
+  WineryEventGroup,
   WineryHours,
   WineryWithStatus,
 } from "@/lib/types";
@@ -349,19 +349,26 @@ async function getAllWineryEvents(): Promise<WineryEvent[]> {
   }
 }
 
-/** Upcoming events across every winery on the trail, soonest first —
- * public, so it's fine to show a logged-out Explore visitor too. */
-export async function getUpcomingEvents(limit = 6): Promise<WineryEventWithWinery[]> {
+/** Upcoming events grouped one entry per winery (trail order, including
+ * wineries with none scheduled) — public, so it's fine to show a logged-out
+ * Explore visitor too. Grouped rather than a single soonest-first list so a
+ * winery with lots of upcoming events can't crowd the others out. */
+export async function getUpcomingEventsByWinery(): Promise<WineryEventGroup[]> {
   const [events, wineries] = await Promise.all([getAllWineryEvents(), getFoundingTrailWineries()]);
-  const wineryById = new Map(wineries.map((w) => [w.id, w]));
   const todayISO = new Date().toISOString().slice(0, 10);
 
-  return events
-    .filter((e) => e.event_date >= todayISO && wineryById.has(e.winery_id))
-    .map((e) => {
-      const winery = wineryById.get(e.winery_id)!;
-      return { ...e, winery_name: winery.name, winery_slug: winery.slug };
-    })
-    .sort((a, b) => a.event_date.localeCompare(b.event_date))
-    .slice(0, limit);
+  const eventsByWinery = new Map<string, WineryEvent[]>();
+  for (const e of events) {
+    if (e.event_date < todayISO) continue;
+    const list = eventsByWinery.get(e.winery_id) ?? [];
+    list.push(e);
+    eventsByWinery.set(e.winery_id, list);
+  }
+
+  return wineries.map((w) => ({
+    winery_id: w.id,
+    winery_name: w.name,
+    winery_slug: w.slug,
+    events: (eventsByWinery.get(w.id) ?? []).sort((a, b) => a.event_date.localeCompare(b.event_date)),
+  }));
 }

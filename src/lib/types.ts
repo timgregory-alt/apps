@@ -70,11 +70,13 @@ export interface WineryEvent {
   created_at: string;
 }
 
-/** A winery event merged with the winery's own name/slug — the shape the
- * Explore page's upcoming-events list actually consumes. */
-export interface WineryEventWithWinery extends WineryEvent {
+/** One winery's upcoming events (may be empty) — the shape the Explore
+ * page's by-winery events carousel consumes, one slide per winery. */
+export interface WineryEventGroup {
+  winery_id: UUID;
   winery_name: string;
   winery_slug: string;
+  events: WineryEvent[];
 }
 
 export interface EventSyncLogEntry {

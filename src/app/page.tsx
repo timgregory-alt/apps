@@ -5,7 +5,7 @@ import {
   getTrail,
   getWineriesWithStatus,
   getWinesWithTastings,
-  getUpcomingEvents,
+  getUpcomingEventsByWinery,
 } from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
 import { getWineryTastingProgress } from "@/lib/recommendations";
@@ -20,11 +20,11 @@ import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection
 
 export default async function HomePage() {
   const user = await getCurrentUser();
-  const [trail, wineries, wines, events] = await Promise.all([
+  const [trail, wineries, wines, eventGroups] = await Promise.all([
     getTrail(),
     getWineriesWithStatus(user?.id ?? null),
     getWinesWithTastings(user?.id ?? null),
-    getUpcomingEvents(),
+    getUpcomingEventsByWinery(),
   ]);
   const visited = visitedCount(wineries);
 
@@ -87,7 +87,7 @@ export default async function HomePage() {
         ))}
       </div>
 
-      <UpcomingEventsSection events={events} />
+      <UpcomingEventsSection groups={eventGroups} />
 
       <TrailMap wineries={wineries} />
 
