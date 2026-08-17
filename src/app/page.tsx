@@ -38,12 +38,25 @@ export default async function HomePage() {
         </Card>
       </div>
 
-      <TrailMap wineries={wineries} />
-
-      <div className="px-6">
-        <LinkButton href="/trail/plan" variant="primary" size="lg" fullWidth>
-          Plan My Wine Trail
-        </LinkButton>
+      <div className="flex flex-col gap-3 px-6">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
+          All Wineries
+        </p>
+        {wineries.map((w) => (
+          <Link key={w.id} href={`/winery/${w.slug}`}>
+            <Card className="flex items-center gap-4 overflow-hidden p-3">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+                <WineryImage name={w.name} slug={w.slug} src={w.hero_image} rows={false} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
+                <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
+              </div>
+              <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={26} />
+              <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
+            </Card>
+          </Link>
+        ))}
       </div>
 
       <div className="px-6">
@@ -64,25 +77,12 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 px-6">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
-          All Wineries
-        </p>
-        {wineries.map((w) => (
-          <Link key={w.id} href={`/winery/${w.slug}`}>
-            <Card className="flex items-center gap-4 overflow-hidden p-3">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                <WineryImage name={w.name} slug={w.slug} src={w.hero_image} rows={false} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
-                <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
-              </div>
-              <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={26} />
-              <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
-            </Card>
-          </Link>
-        ))}
+      <TrailMap wineries={wineries} />
+
+      <div className="px-6">
+        <LinkButton href="/trail/plan" variant="primary" size="lg" fullWidth>
+          Plan My Wine Trail
+        </LinkButton>
       </div>
     </main>
   );
