@@ -20,6 +20,7 @@ import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
+import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
 
 export default async function RewardsPage() {
   const user = await getCurrentUser();
@@ -76,12 +77,13 @@ export default async function RewardsPage() {
       )}
 
       <div className="px-6">
-        <Card className="texture-grain bg-[var(--color-burgundy)] p-6 text-[var(--color-ivory)]">
-          <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
+        <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] p-6 text-[var(--color-ivory)]">
+          <PassportCoverFrame />
+          <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
             Total Points
           </p>
-          <p className="font-serif-display mt-1 text-4xl">{points.total}</p>
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[var(--color-ivory)]/70">
+          <p className="font-serif-display relative mt-1 text-4xl">{points.total}</p>
+          <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[var(--color-ivory)]/70">
             <span>{points.checkins} check-ins</span>
             <span>{points.winesRated} wines rated</span>
             {points.completionBonus > 0 && <span>Trail completion bonus</span>}

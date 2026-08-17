@@ -132,6 +132,69 @@ body {
   animation: var(--animate-fade-up);
 }
 
+/* Timed to land right as the stamp-in animation's overshoot settles, so the
+   ring/flash/shake read as one physical "thud" instead of three effects. */
+@keyframes impact-ring {
+  0%,
+  38% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  55% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes impact-flash {
+  0%,
+  38% {
+    opacity: 0;
+  }
+  48% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes impact-shake {
+  0%,
+  38% {
+    transform: translateX(0);
+  }
+  44% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  56% {
+    transform: translateX(-3px);
+  }
+  62% {
+    transform: translateX(3px);
+  }
+  70%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-impact-ring {
+  animation: impact-ring 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-impact-flash {
+  animation: impact-flash 0.9s ease-out forwards;
+}
+.animate-impact-shake {
+  animation: impact-shake 0.9s ease-out forwards;
+}
+
 @keyframes wine-pour-stream {
   0%,
   8% {

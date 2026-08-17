@@ -98,6 +98,10 @@ export function PassportStamp({
 
         {justStamped && (
           <>
+            <div
+              className="animate-impact-ring pointer-events-none absolute inset-0 rounded-full border-4 border-[var(--color-gold)]"
+              aria-hidden="true"
+            />
             <Sparkle className="absolute -right-1 top-2" delay="0s" />
             <Sparkle className="absolute -left-2 bottom-6" delay="0.3s" />
             <Sparkle className="absolute right-6 -top-2" delay="0.6s" />

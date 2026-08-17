@@ -50,6 +50,13 @@ export function CelebrationOverlay({
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(176,144,79,0.14),transparent_55%)]" />
 
+      {stage !== "welcome" && (
+        <div
+          className="animate-impact-flash pointer-events-none absolute inset-0 bg-[var(--color-gold-pale)]"
+          aria-hidden="true"
+        />
+      )}
+
       <AnimatePresence mode="wait">
         {stage === "welcome" && (
           <motion.p
@@ -68,7 +75,7 @@ export function CelebrationOverlay({
             key="stamp"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="relative flex flex-col items-center"
+            className="animate-impact-shake relative flex flex-col items-center"
           >
             <PassportStamp
               name={wineryName}
