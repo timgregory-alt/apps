@@ -20,8 +20,6 @@ export function PassportEntry({
   winery: WineryWithStatus;
   tastingProgress?: WineryTastingProgress;
 }) {
-  const visited = winery.status !== "not_visited";
-
   return (
     <Card className="overflow-hidden">
       <Link
@@ -38,22 +36,11 @@ export function PassportEntry({
             {winery.name}
           </p>
           <p className="text-sm text-[var(--color-charcoal)]/60">{winery.city}, TN</p>
-          <div className="mt-1.5 flex items-center gap-2">
-            <span
-              className={
-                visited
-                  ? "rounded-full bg-[var(--color-gold-pale)] px-2.5 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-burgundy-deep)]"
-                  : "rounded-full bg-black/5 px-2.5 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-charcoal)]/50"
-              }
-            >
-              {STATUS_LABEL[winery.status]}
-            </span>
-            {winery.checkin && (
-              <span className="text-xs text-[var(--color-charcoal)]/50">
-                {formatCheckinDate(winery.checkin.checkin_date)}
-              </span>
-            )}
-          </div>
+          {winery.checkin && (
+            <p className="mt-1.5 text-xs text-[var(--color-charcoal)]/50">
+              Visited {formatCheckinDate(winery.checkin.checkin_date)}
+            </p>
+          )}
           {tastingProgress && tastingProgress.total > 0 && (
             <div className="mt-1.5">
               <WineryTastingGlass
