@@ -1,4 +1,4 @@
-import { getAdminStats, getAllWineriesAdmin } from "@/lib/admin";
+import { getAdminStats, getAllWineriesAdmin, getWineLikeStats, LIKED_RATING_THRESHOLD } from "@/lib/admin";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -10,7 +10,11 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default async function AdminDashboardPage() {
-  const [stats, wineries] = await Promise.all([getAdminStats(), getAllWineriesAdmin()]);
+  const [stats, wineries, wineLikeStats] = await Promise.all([
+    getAdminStats(),
+    getAllWineriesAdmin(),
+    getWineLikeStats(),
+  ]);
 
   const mostPopular = Object.entries(stats.checkinsByWinery).sort((a, b) => b[1] - a[1])[0];
   const mostPopularWinery = wineries.find((w) => w.id === mostPopular?.[0]);
@@ -78,6 +82,63 @@ export default async function AdminDashboardPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Most Liked</h2>
+        <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
+          A {LIKED_RATING_THRESHOLD}-5 star rating counts as &ldquo;liked.&rdquo;
+        </p>
+
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div className="overflow-x-auto rounded-2xl border border-[var(--color-line)] bg-white">
+            <table className="w-full min-w-[320px] text-left text-sm">
+              <thead className="border-b border-[var(--color-line)] text-xs uppercase tracking-wide text-[var(--color-charcoal)]/50">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Winery</th>
+                  <th className="px-4 py-3 font-medium">Wines Liked</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wineLikeStats.byWinery.map((w) => (
+                  <tr key={w.wineryId} className="border-b border-[var(--color-line)] last:border-0">
+                    <td className="px-4 py-3">{w.wineryName}</td>
+                    <td className="px-4 py-3">{w.likedCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-[var(--color-line)] bg-white">
+            <table className="w-full min-w-[320px] text-left text-sm">
+              <thead className="border-b border-[var(--color-line)] text-xs uppercase tracking-wide text-[var(--color-charcoal)]/50">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Wine</th>
+                  <th className="px-4 py-3 font-medium">Winery</th>
+                  <th className="px-4 py-3 font-medium">Liked</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wineLikeStats.topWines.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-3 text-[var(--color-charcoal)]/45">
+                      No liked wines yet.
+                    </td>
+                  </tr>
+                ) : (
+                  wineLikeStats.topWines.map((w) => (
+                    <tr key={w.wineId} className="border-b border-[var(--color-line)] last:border-0">
+                      <td className="px-4 py-3">{w.wineName}</td>
+                      <td className="px-4 py-3 text-[var(--color-charcoal)]/60">{w.wineryName}</td>
+                      <td className="px-4 py-3">{w.likedCount}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

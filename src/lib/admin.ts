@@ -141,3 +141,84 @@ export async function getAllRewardTiersAdmin(): Promise<RewardTier[]> {
     return [];
   }
 }
+
+/** A 4 or 5 star rating counts as "liked" — there's no separate like/dislike field anymore. */
+export const LIKED_RATING_THRESHOLD = 4;
+
+export interface WineryLikeStat {
+  wineryId: string;
+  wineryName: string;
+  likedCount: number;
+}
+
+export interface WineLikeStat {
+  wineId: string;
+  wineName: string;
+  wineryId: string;
+  wineryName: string;
+  likedCount: number;
+}
+
+export interface WineLikeStats {
+  byWinery: WineryLikeStat[];
+  topWines: WineLikeStat[];
+}
+
+const EMPTY_WINE_LIKE_STATS: WineLikeStats = { byWinery: [], topWines: [] };
+
+export async function getWineLikeStats(): Promise<WineLikeStats> {
+  if (!isSupabaseConfigured) return EMPTY_WINE_LIKE_STATS;
+  try {
+    const supabase = await createClient();
+    const [{ data: tastings }, wineries] = await Promise.all([
+      supabase
+        .from("wine_tastings")
+        .select("wines(id, name, winery_id)")
+        .gte("rating", LIKED_RATING_THRESHOLD),
+      getAllWineriesAdmin(),
+    ]);
+    if (!tastings) return EMPTY_WINE_LIKE_STATS;
+
+    const wineryNameById = new Map(wineries.map((w) => [w.id, w.name]));
+    const wineryLikedCounts = new Map<string, number>();
+    const wineStats = new Map<string, WineLikeStat>();
+
+    for (const row of tastings as unknown as {
+      wines: { id: string; name: string; winery_id: string } | null;
+    }[]) {
+      const wine = row.wines;
+      if (!wine) continue;
+
+      wineryLikedCounts.set(wine.winery_id, (wineryLikedCounts.get(wine.winery_id) ?? 0) + 1);
+
+      const existing = wineStats.get(wine.id);
+      if (existing) {
+        existing.likedCount += 1;
+      } else {
+        wineStats.set(wine.id, {
+          wineId: wine.id,
+          wineName: wine.name,
+          wineryId: wine.winery_id,
+          wineryName: wineryNameById.get(wine.winery_id) ?? "Unknown",
+          likedCount: 1,
+        });
+      }
+    }
+
+    const byWinery = wineries
+      .map((w) => ({
+        wineryId: w.id,
+        wineryName: w.name,
+        likedCount: wineryLikedCounts.get(w.id) ?? 0,
+      }))
+      .sort((a, b) => b.likedCount - a.likedCount);
+
+    const topWines = Array.from(wineStats.values())
+      .sort((a, b) => b.likedCount - a.likedCount)
+      .slice(0, 10);
+
+    return { byWinery, topWines };
+  } catch {
+    return EMPTY_WINE_LIKE_STATS;
+  }
+}
