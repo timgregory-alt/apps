@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import {
   getCurrentUser,
@@ -45,10 +45,12 @@ export default async function WineryDetailPage({
   if (!winery) notFound();
 
   const user = await getCurrentUser();
+  if (!user) redirect(`/login?redirectTo=${encodeURIComponent(`/winery/${slug}`)}`);
+
   const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
-    getWineriesWithStatus(user?.id ?? null),
-    getWinesWithTastings(user?.id ?? null),
-    user ? getCustomWineTastings(user.id) : Promise.resolve([]),
+    getWineriesWithStatus(user.id),
+    getWinesWithTastings(user.id),
+    getCustomWineTastings(user.id),
     getWineryHours(winery.id),
   ]);
   const wineryWithStatus = wineries.find((w) => w.id === winery.id) ?? {
@@ -89,7 +91,7 @@ export default async function WineryDetailPage({
 
         <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 
-        <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn={!!user} />
+        <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn />
 
         <div>
           <SectionEyebrow>Wine Tasting</SectionEyebrow>
@@ -100,7 +102,7 @@ export default async function WineryDetailPage({
             initialWines={wineryWines}
             initialCustomTastings={wineryCustomTastings}
             wineryId={winery.id}
-            isLoggedIn={!!user}
+            isLoggedIn
             redirectTo={`/winery/${winery.slug}`}
             showProgress={false}
           />
