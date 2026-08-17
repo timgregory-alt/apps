@@ -6,7 +6,12 @@ import {
   getActiveRewardTiers,
   getUserRewardRedemptions,
 } from "@/lib/data";
-import { computeRewardsPoints } from "@/lib/rewards";
+import {
+  computeRewardsPoints,
+  POINTS_PER_CHECKIN,
+  POINTS_PER_WINE_RATED,
+  COMPLETION_BONUS,
+} from "@/lib/rewards";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
@@ -62,6 +67,34 @@ export default async function RewardsPage() {
         </Card>
       </div>
 
+      <div className="px-6">
+        <Card className="flex flex-col gap-3 p-5">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
+            How to Earn Points
+          </p>
+          <ul className="flex flex-col divide-y divide-[var(--color-line)]">
+            <li className="flex items-center justify-between gap-3 py-2 first:pt-0">
+              <span className="text-sm text-[var(--color-charcoal)]/80">Check in at a winery</span>
+              <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                +{POINTS_PER_CHECKIN} pts
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3 py-2">
+              <span className="text-sm text-[var(--color-charcoal)]/80">Rate a wine</span>
+              <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                +{POINTS_PER_WINE_RATED} pts
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3 py-2 last:pb-0">
+              <span className="text-sm text-[var(--color-charcoal)]/80">Complete the full trail</span>
+              <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                +{COMPLETION_BONUS} pts
+              </span>
+            </li>
+          </ul>
+        </Card>
+      </div>
+
       <div className="flex flex-col gap-3 px-6">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
           Rewards
@@ -84,11 +117,11 @@ export default async function RewardsPage() {
 
       <div className="px-6">
         <p className="text-center text-xs text-[var(--color-charcoal)]/45">
-          Earn points by checking in at wineries, rating wines on your{" "}
+          Check in and rate wines on your{" "}
           <Link href="/passport" className="underline">
             passport
-          </Link>
-          , and completing the full trail.
+          </Link>{" "}
+          to start earning.
         </p>
       </div>
     </main>
