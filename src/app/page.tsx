@@ -70,7 +70,7 @@ export default async function HomePage() {
                 <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
                 <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
               </div>
-              <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={26} />
+              <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={40} />
               <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
             </Card>
           </Link>
