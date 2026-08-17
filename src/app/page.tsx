@@ -38,6 +38,24 @@ export default async function HomePage() {
         </Card>
       </div>
 
+      <div className="px-6">
+        <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
+          More trails coming soon
+        </p>
+        <div className="flex gap-3 overflow-x-auto pb-1">
+          {["Nashville Wine Trail", "Upper Cumberland Wine Trail", "East Tennessee Wine Trail"].map(
+            (name) => (
+              <div
+                key={name}
+                className="flex h-20 w-40 shrink-0 items-center justify-center rounded-2xl border border-dashed border-[var(--color-line)] bg-white/40 px-3 text-center text-xs text-[var(--color-charcoal)]/45"
+              >
+                {name}
+              </div>
+            )
+          )}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3 px-6">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
           All Wineries
@@ -57,24 +75,6 @@ export default async function HomePage() {
             </Card>
           </Link>
         ))}
-      </div>
-
-      <div className="px-6">
-        <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
-          More trails coming soon
-        </p>
-        <div className="flex gap-3 overflow-x-auto pb-1">
-          {["Nashville Wine Trail", "Upper Cumberland Wine Trail", "East Tennessee Wine Trail"].map(
-            (name) => (
-              <div
-                key={name}
-                className="flex h-20 w-40 shrink-0 items-center justify-center rounded-2xl border border-dashed border-[var(--color-line)] bg-white/40 px-3 text-center text-xs text-[var(--color-charcoal)]/45"
-              >
-                {name}
-              </div>
-            )
-          )}
-        </div>
       </div>
 
       <TrailMap wineries={wineries} />
