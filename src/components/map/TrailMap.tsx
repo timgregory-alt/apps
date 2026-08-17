@@ -12,10 +12,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const MAPBOX_STYLE =
   process.env.NEXT_PUBLIC_MAPBOX_STYLE || "mapbox://styles/mapbox/light-v11";
 
-/** A pin with a tiny wine glass inside — empty outline when not visited,
- * poured full once it is, echoing the same fill motif used everywhere else
- * in the app (the tasting glass, the stamp). */
-function createMarkerElement(wineryId: string, visited: boolean): HTMLDivElement {
+function createMarkerElement(visited: boolean): HTMLDivElement {
   const el = document.createElement("div");
   el.className = "twp-marker";
   el.setAttribute("role", "button");
@@ -23,24 +20,15 @@ function createMarkerElement(wineryId: string, visited: boolean): HTMLDivElement
   el.style.width = "34px";
   el.style.height = "44px";
   el.style.cursor = "pointer";
-  const clipId = `twp-glass-${wineryId}`;
   el.innerHTML = `
     <svg width="34" height="44" viewBox="0 0 34 44" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M17 0C7.6 0 0 7.6 0 17c0 12 17 27 17 27s17-15 17-27C34 7.6 26.4 0 17 0Z"
         fill="${visited ? "#b0904f" : "#5e1a2e"}" stroke="#faf6ee" stroke-width="1.5"/>
       ${
         visited
-          ? `<defs><clipPath id="${clipId}"><path d="M13,10 C13,16 15,21 17,24 C19,21 21,16 21,10 Z"/></clipPath></defs>
-             <g clip-path="url(#${clipId})"><rect x="12" y="8" width="10" height="18" fill="#5e1a2e"/></g>`
-          : ""
+          ? '<path d="M11 17.5l4 4 8-8.5" stroke="#faf6ee" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+          : '<circle cx="17" cy="17" r="5" fill="#faf6ee"/>'
       }
-      <g fill="none" stroke="#faf6ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M13,10 Q17,12.5 21,10"/>
-        <path d="M13,10 C13,16 15,21 17,24"/>
-        <path d="M21,10 C21,16 19,21 17,24"/>
-        <path d="M17,24 L17,30"/>
-        <path d="M14,31.5 L20,31.5"/>
-      </g>
     </svg>`;
   return el;
 }
@@ -141,7 +129,7 @@ export function TrailMap({ wineries }: { wineries: WineryWithStatus[] }) {
     const syncMarkersAndRoute = () => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = wineries.map((w) => {
-        const el = createMarkerElement(w.id, w.status !== "not_visited");
+        const el = createMarkerElement(w.status !== "not_visited");
         const marker = new mapboxgl.Marker({ element: el, anchor: "bottom" })
           .setLngLat([w.longitude, w.latitude])
           .addTo(map);
