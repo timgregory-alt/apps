@@ -119,6 +119,16 @@ export interface PassportCompletion {
   completed_at: string;
 }
 
+/** A guest's 1-5 star rating of the app itself (not a wine), with optional feedback. */
+export interface AppRating {
+  id: UUID;
+  user_id: UUID;
+  rating: number;
+  feedback: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Profile {
   id: UUID;
   name: string | null;

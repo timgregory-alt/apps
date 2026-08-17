@@ -222,3 +222,49 @@ export async function getWineLikeStats(): Promise<WineLikeStats> {
     return EMPTY_WINE_LIKE_STATS;
   }
 }
+
+export interface AppRatingStats {
+  average: number;
+  count: number;
+  distribution: Record<1 | 2 | 3 | 4 | 5, number>;
+  recentFeedback: { rating: number; feedback: string; created_at: string }[];
+}
+
+const EMPTY_APP_RATING_STATS: AppRatingStats = {
+  average: 0,
+  count: 0,
+  distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  recentFeedback: [],
+};
+
+export async function getAppRatingStats(): Promise<AppRatingStats> {
+  if (!isSupabaseConfigured) return EMPTY_APP_RATING_STATS;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("app_ratings")
+      .select("rating, feedback, created_at")
+      .order("created_at", { ascending: false });
+    if (!data || data.length === 0) return EMPTY_APP_RATING_STATS;
+
+    const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<1 | 2 | 3 | 4 | 5, number>;
+    let total = 0;
+    for (const row of data) {
+      distribution[row.rating as 1 | 2 | 3 | 4 | 5]++;
+      total += row.rating;
+    }
+
+    const recentFeedback = data
+      .filter((r): r is { rating: number; feedback: string; created_at: string } => !!r.feedback)
+      .slice(0, 10);
+
+    return {
+      average: total / data.length,
+      count: data.length,
+      distribution,
+      recentFeedback,
+    };
+  } catch {
+    return EMPTY_APP_RATING_STATS;
+  }
+}

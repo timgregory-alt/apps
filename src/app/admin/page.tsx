@@ -1,4 +1,11 @@
-import { getAdminStats, getAllWineriesAdmin, getWineLikeStats, LIKED_RATING_THRESHOLD } from "@/lib/admin";
+import {
+  getAdminStats,
+  getAllWineriesAdmin,
+  getWineLikeStats,
+  getAppRatingStats,
+  LIKED_RATING_THRESHOLD,
+} from "@/lib/admin";
+import { formatCheckinDate } from "@/lib/utils";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -10,10 +17,11 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default async function AdminDashboardPage() {
-  const [stats, wineries, wineLikeStats] = await Promise.all([
+  const [stats, wineries, wineLikeStats, appRatingStats] = await Promise.all([
     getAdminStats(),
     getAllWineriesAdmin(),
     getWineLikeStats(),
+    getAppRatingStats(),
   ]);
 
   const mostPopular = Object.entries(stats.checkinsByWinery).sort((a, b) => b[1] - a[1])[0];
@@ -46,6 +54,10 @@ export default async function AdminDashboardPage() {
               ? `${Math.round((stats.totalCompletions / stats.totalAccounts) * 100)}%`
               : "—"
           }
+        />
+        <StatCard
+          label="Avg App Rating"
+          value={appRatingStats.count > 0 ? `${appRatingStats.average.toFixed(1)} ★ (${appRatingStats.count})` : "—"}
         />
       </div>
 
@@ -140,6 +152,34 @@ export default async function AdminDashboardPage() {
             </table>
           </div>
         </div>
+      </div>
+
+      <div>
+        <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">App Feedback</h2>
+        <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
+          {appRatingStats.count > 0
+            ? `${appRatingStats.average.toFixed(1)} average from ${appRatingStats.count} rating${appRatingStats.count === 1 ? "" : "s"}.`
+            : "No ratings yet."}
+        </p>
+
+        {appRatingStats.recentFeedback.length > 0 && (
+          <div className="mt-3 flex flex-col gap-3">
+            {appRatingStats.recentFeedback.map((f, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 text-sm"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[var(--color-gold)]">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
+                  <span className="text-xs text-[var(--color-charcoal)]/45">
+                    {formatCheckinDate(f.created_at)}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {stats.totalAccounts === 0 && (

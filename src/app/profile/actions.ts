@@ -46,3 +46,29 @@ export async function updateProfileAction(input: { name: string; birth_date: str
 
   revalidatePath("/profile");
 }
+
+/** Submits or updates the guest's 1-5 star rating of the app itself. */
+export async function submitAppRatingAction(rating: number, feedback: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Sign in to rate the app");
+
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    throw new Error("Rating must be 1-5 stars");
+  }
+
+  const { error } = await supabase.from("app_ratings").upsert(
+    {
+      user_id: user.id,
+      rating,
+      feedback: feedback.trim() || null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/profile");
+}

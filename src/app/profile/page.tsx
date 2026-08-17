@@ -1,5 +1,11 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser, getProfile, getPassportCompletions, getWineriesWithStatus } from "@/lib/data";
+import {
+  getCurrentUser,
+  getProfile,
+  getPassportCompletions,
+  getWineriesWithStatus,
+  getUserAppRating,
+} from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
 import { formatCheckinDate } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
@@ -7,15 +13,17 @@ import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
+import { AppRatingCard } from "@/components/profile/AppRatingCard";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?redirectTo=/profile");
 
-  const [profile, completions, wineries] = await Promise.all([
+  const [profile, completions, wineries, appRating] = await Promise.all([
     getProfile(user.id),
     getPassportCompletions(user.id),
     getWineriesWithStatus(user.id),
+    getUserAppRating(user.id),
   ]);
 
   const visited = visitedCount(wineries);
@@ -85,6 +93,13 @@ export default async function ProfilePage() {
             <p className="mt-1 text-xs text-[var(--color-charcoal)]/55">{s.label}</p>
           </Card>
         ))}
+      </div>
+
+      <div className="px-6">
+        <AppRatingCard
+          initialRating={appRating?.rating ?? 0}
+          initialFeedback={appRating?.feedback ?? ""}
+        />
       </div>
 
       <div className="px-6">

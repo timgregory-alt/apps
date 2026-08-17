@@ -8,6 +8,7 @@ import {
   SEED_REWARD_TIERS,
 } from "@/lib/seed-data";
 import type {
+  AppRating,
   Checkin,
   CheckinStatus,
   CustomWineTasting,
@@ -300,5 +301,20 @@ export async function getUserRewardRedemptions(userId: string): Promise<RewardRe
     return (data as RewardRedemption[]) ?? [];
   } catch {
     return [];
+  }
+}
+
+export async function getUserAppRating(userId: string): Promise<AppRating | null> {
+  if (!isSupabaseConfigured) return null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("app_ratings")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+    return (data as AppRating) ?? null;
+  } catch {
+    return null;
   }
 }
