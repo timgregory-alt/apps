@@ -64,7 +64,7 @@ export function WineryTastingGlass({
         title={`${tried} of ${total} wines tried here`}
       >
         {glass}
-        <span className="text-[0.68rem] font-medium tabular-nums text-[var(--color-charcoal)]/50">
+        <span className="text-sm font-medium tabular-nums text-[var(--color-charcoal)]/50">
           {tried}/{total} tasted
         </span>
       </div>
