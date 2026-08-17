@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { WineryImage } from "@/components/winery/WineryImage";
 import type { WineryWithStatus } from "@/lib/types";
 
@@ -27,10 +28,11 @@ export function WineryHero({ winery }: { winery: WineryWithStatus }) {
       <span
         className={
           visited
-            ? "absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] rounded-full bg-[var(--color-gold)] px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-charcoal)] shadow-md"
-            : "absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] rounded-full bg-white/90 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--color-charcoal)]/70 shadow-md"
+            ? "absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] inline-flex items-center gap-1.5 rounded-full bg-[var(--color-gold)] px-4 py-1.5 text-sm font-semibold uppercase tracking-wide text-[var(--color-charcoal)] shadow-md"
+            : "absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] inline-flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold uppercase tracking-wide text-[var(--color-charcoal)]/70 shadow-md"
         }
       >
+        {visited && <Check size={15} strokeWidth={3} />}
         {STATUS_LABEL[winery.status]}
       </span>
 
