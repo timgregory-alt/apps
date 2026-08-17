@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveRewardTiers, getProfile, getWineriesWithStatus, getWinesWithTastings } from "@/lib/data";
+import {
+  getActiveRewardTiers,
+  getProfile,
+  getWineriesWithStatus,
+  getWinesWithTastings,
+  getQualifyingReferralCount,
+} from "@/lib/data";
 import {
   computeRewardsPoints,
   currentRewardPeriodKey,
@@ -25,11 +31,12 @@ export async function generateRedemptionAction(
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Sign in to redeem a reward");
 
-  const [tiers, wineries, wines, profile] = await Promise.all([
+  const [tiers, wineries, wines, profile, referralCount] = await Promise.all([
     getActiveRewardTiers(),
     getWineriesWithStatus(user.id),
     getWinesWithTastings(user.id),
     getProfile(user.id),
+    getQualifyingReferralCount(),
   ]);
   const tier = tiers.find((t) => t.id === tierId);
   if (!tier) throw new Error("Reward tier not found");
@@ -50,7 +57,7 @@ export async function generateRedemptionAction(
       throw new Error("This reward only unlocks on your birthday");
     }
   } else {
-    const points = computeRewardsPoints(wineries, wines);
+    const points = computeRewardsPoints(wineries, wines, referralCount);
     if (points.total < tier.points_required) throw new Error("Not enough points yet");
   }
 

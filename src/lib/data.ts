@@ -130,6 +130,21 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   }
 }
 
+/** Count of people the current session's user referred who've actually
+ * visited (their first check-in) — computed server-side via a SECURITY
+ * DEFINER function keyed off auth.uid(), so we never need a broad RLS
+ * policy exposing other guests' full profile rows. */
+export async function getQualifyingReferralCount(): Promise<number> {
+  if (!isSupabaseConfigured) return 0;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.rpc("count_qualifying_referrals");
+    return typeof data === "number" ? data : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export async function getUserCheckins(userId: string): Promise<Checkin[]> {
   if (!isSupabaseConfigured) return [];
   try {

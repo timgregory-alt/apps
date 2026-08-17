@@ -5,6 +5,7 @@ import {
   getPassportCompletions,
   getWineriesWithStatus,
   getUserAppRating,
+  getQualifyingReferralCount,
 } from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
 import { formatCheckinDate } from "@/lib/utils";
@@ -15,16 +16,18 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
 import { AppRatingCard } from "@/components/profile/AppRatingCard";
 import { BugReportCard } from "@/components/profile/BugReportCard";
+import { ReferralCard } from "@/components/profile/ReferralCard";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?redirectTo=/profile");
 
-  const [profile, completions, wineries, appRating] = await Promise.all([
+  const [profile, completions, wineries, appRating, referralCount] = await Promise.all([
     getProfile(user.id),
     getPassportCompletions(user.id),
     getWineriesWithStatus(user.id),
     getUserAppRating(user.id),
+    getQualifyingReferralCount(),
   ]);
 
   const visited = visitedCount(wineries);
@@ -101,6 +104,10 @@ export default async function ProfilePage() {
           initialRating={appRating?.rating ?? 0}
           initialFeedback={appRating?.feedback ?? ""}
         />
+      </div>
+
+      <div className="px-6">
+        <ReferralCard userId={user.id} referralCount={referralCount} />
       </div>
 
       <div className="px-6">

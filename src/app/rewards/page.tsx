@@ -6,6 +6,7 @@ import {
   getWinesWithTastings,
   getActiveRewardTiers,
   getUserRewardRedemptions,
+  getQualifyingReferralCount,
 } from "@/lib/data";
 import {
   computeRewardsPoints,
@@ -14,6 +15,7 @@ import {
   POINTS_PER_CHECKIN,
   POINTS_PER_WINE_RATED,
   COMPLETION_BONUS,
+  POINTS_PER_REFERRAL,
 } from "@/lib/rewards";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
@@ -43,15 +45,16 @@ export default async function RewardsPage() {
     );
   }
 
-  const [wineries, wines, tiers, redemptions, profile] = await Promise.all([
+  const [wineries, wines, tiers, redemptions, profile, referralCount] = await Promise.all([
     getWineriesWithStatus(user.id),
     getWinesWithTastings(user.id),
     getActiveRewardTiers(),
     getUserRewardRedemptions(user.id),
     getProfile(user.id),
+    getQualifyingReferralCount(),
   ]);
 
-  const points = computeRewardsPoints(wineries, wines);
+  const points = computeRewardsPoints(wineries, wines, referralCount);
   const ladderTiers = tiers.filter((t) => !t.birthday_only);
   const redemptionByTier = new Map(
     redemptions.filter((r) => r.period_key === "").map((r) => [r.tier_id, r])
@@ -87,6 +90,7 @@ export default async function RewardsPage() {
             <span>{points.checkins} check-ins</span>
             <span>{points.winesRated} wines rated</span>
             {points.completionBonus > 0 && <span>Trail completion bonus</span>}
+            {points.referrals > 0 && <span>{points.referrals} friends referred</span>}
           </div>
         </Card>
       </div>
@@ -109,10 +113,16 @@ export default async function RewardsPage() {
                 +{POINTS_PER_WINE_RATED} pts
               </span>
             </li>
-            <li className="flex items-center justify-between gap-3 py-2 last:pb-0">
+            <li className="flex items-center justify-between gap-3 py-2">
               <span className="text-sm text-[var(--color-charcoal)]/80">Complete the full trail</span>
               <span className="text-sm font-medium text-[var(--color-burgundy)]">
                 +{COMPLETION_BONUS} pts
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3 py-2 last:pb-0">
+              <span className="text-sm text-[var(--color-charcoal)]/80">Refer a friend who visits</span>
+              <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                +{POINTS_PER_REFERRAL} pts
               </span>
             </li>
           </ul>

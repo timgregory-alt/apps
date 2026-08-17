@@ -151,6 +151,8 @@ export interface Profile {
   /** True once the guest has used their one allowed birth_date change — prevents
    * repeatedly editing it to re-trigger the birthday reward. */
   birth_date_locked: boolean;
+  /** The id of the guest who referred this account, if any — set once at signup. */
+  referred_by: UUID | null;
   passport_start_date: string | null;
   created_at: string;
 }

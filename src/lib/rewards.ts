@@ -4,29 +4,38 @@ import type { WineryWithStatus, WineWithTasting } from "@/lib/types";
 export const POINTS_PER_CHECKIN = 25;
 export const POINTS_PER_WINE_RATED = 5;
 export const COMPLETION_BONUS = 100;
+export const POINTS_PER_REFERRAL = 50;
 
 export interface RewardsPoints {
   total: number;
   checkins: number;
   winesRated: number;
   completionBonus: number;
+  referrals: number;
 }
 
-/** Points are always derived from check-ins, wine ratings, and passport
- * completion — never stored directly — so there's nothing to keep in sync. */
+/** Points are always derived from check-ins, wine ratings, passport
+ * completion, and qualifying referrals — never stored directly — so
+ * there's nothing to keep in sync. */
 export function computeRewardsPoints(
   wineries: WineryWithStatus[],
-  wines: WineWithTasting[]
+  wines: WineWithTasting[],
+  referrals = 0
 ): RewardsPoints {
   const checkins = visitedCount(wineries);
   const winesRated = wines.filter((w) => w.tasting != null).length;
   const completionBonus = isTrailComplete(wineries) ? COMPLETION_BONUS : 0;
 
   return {
-    total: checkins * POINTS_PER_CHECKIN + winesRated * POINTS_PER_WINE_RATED + completionBonus,
+    total:
+      checkins * POINTS_PER_CHECKIN +
+      winesRated * POINTS_PER_WINE_RATED +
+      completionBonus +
+      referrals * POINTS_PER_REFERRAL,
     checkins,
     winesRated,
     completionBonus,
+    referrals,
   };
 }
 

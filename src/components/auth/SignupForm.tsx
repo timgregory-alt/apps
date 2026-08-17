@@ -15,6 +15,7 @@ export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/passport";
+  const referredBy = searchParams.get("ref");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +45,7 @@ export function SignupForm() {
         email,
         password,
         options: {
-          data: { name, birth_date: birthDate },
+          data: { name, birth_date: birthDate, referred_by: referredBy || undefined },
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
       });
