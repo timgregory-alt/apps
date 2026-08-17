@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getCurrentUser, getTrail, getWineriesWithStatus, getWinesWithTastings } from "@/lib/data";
+import {
+  getCurrentUser,
+  getTrail,
+  getWineriesWithStatus,
+  getWinesWithTastings,
+  getUpcomingEvents,
+} from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
 import { getWineryTastingProgress } from "@/lib/recommendations";
 import { Header } from "@/components/layout/Header";
@@ -10,13 +16,15 @@ import { WineryImage } from "@/components/winery/WineryImage";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { TrailMap } from "@/components/map/TrailMap";
 import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
+import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
-  const [trail, wineries, wines] = await Promise.all([
+  const [trail, wineries, wines, events] = await Promise.all([
     getTrail(),
     getWineriesWithStatus(user?.id ?? null),
     getWinesWithTastings(user?.id ?? null),
+    getUpcomingEvents(),
   ]);
   const visited = visitedCount(wineries);
 
@@ -78,6 +86,8 @@ export default async function HomePage() {
           </Link>
         ))}
       </div>
+
+      <UpcomingEventsSection events={events} />
 
       <TrailMap wineries={wineries} />
 

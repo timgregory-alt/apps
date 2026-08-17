@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isCurrentUserAdmin, getWineryByIdAdmin } from "@/lib/admin";
 import { feetToMeters } from "@/lib/geo";
 import { syncWineryWines, type SyncResult } from "@/lib/wine-sync";
+import { syncWineryEvents, type EventSyncResult } from "@/lib/event-sync";
 
 function parseWineryForm(formData: FormData) {
   const benefits = String(formData.get("wine_club_benefits") ?? "")
@@ -37,6 +38,7 @@ function parseWineryForm(formData: FormData) {
     checkin_radius_meters: Math.round(feetToMeters(radiusFeet)),
     active: formData.get("active") === "on",
     wine_menu_url: String(formData.get("wine_menu_url") ?? "").trim() || null,
+    events_page_url: String(formData.get("events_page_url") ?? "").trim() || null,
   };
 }
 
@@ -136,6 +138,40 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
     revalidatePath(`/admin/wineries/${wineryId}`);
     revalidatePath(`/winery/${winery.slug}`);
     revalidatePath("/passport");
+    revalidatePath("/");
+
+    return result;
+  } catch (err) {
+    return {
+      wineryId: winery.id,
+      wineryName: winery.name,
+      added: 0,
+      status: "error",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+export async function syncEventsNowAction(wineryId: string): Promise<EventSyncResult> {
+  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+
+  const winery = await getWineryByIdAdmin(wineryId);
+  if (!winery) throw new Error("Winery not found");
+
+  try {
+    const result = await syncWineryEvents(winery);
+
+    const supabase = await createClient();
+    const { error: logError } = await supabase.from("event_sync_log").insert({
+      winery_id: winery.id,
+      events_added: result.added,
+      status: result.status,
+      detail: result.detail ?? null,
+    });
+    if (logError) console.error("event_sync_log insert failed:", logError.message);
+
+    revalidatePath(`/admin/wineries/${wineryId}`);
+    revalidatePath(`/winery/${winery.slug}`);
     revalidatePath("/");
 
     return result;

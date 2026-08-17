@@ -1,4 +1,4 @@
-import type { Trail, TrailWinery, Winery, Wine, WineryHours, RewardTier } from "./types";
+import type { Trail, TrailWinery, Winery, Wine, WineryHours, RewardTier, WineryEvent } from "./types";
 import { feetToMeters } from "./geo";
 
 /**
@@ -57,6 +57,7 @@ export const SEED_WINERIES: Winery[] = [
     facebook_url: "https://facebook.com",
     checkin_radius_meters: Math.round(feetToMeters(750)),
     wine_menu_url: null,
+    events_page_url: null,
     active: true,
     sort_order: 1,
     created_at: "2026-01-01T00:00:00.000Z",
@@ -90,6 +91,7 @@ export const SEED_WINERIES: Winery[] = [
     facebook_url: "https://facebook.com",
     checkin_radius_meters: Math.round(feetToMeters(750)),
     wine_menu_url: "https://www.woodfeatherfarm.com/shop/",
+    events_page_url: null,
     active: true,
     sort_order: 2,
     created_at: "2026-01-01T00:00:00.000Z",
@@ -123,6 +125,7 @@ export const SEED_WINERIES: Winery[] = [
     facebook_url: "https://facebook.com",
     checkin_radius_meters: Math.round(feetToMeters(750)),
     wine_menu_url: "https://www.pickerscreekwinery.com/wines/",
+    events_page_url: null,
     active: true,
     sort_order: 3,
     created_at: "2026-01-01T00:00:00.000Z",
@@ -157,6 +160,7 @@ export const SEED_WINERIES: Winery[] = [
     facebook_url: "https://facebook.com",
     checkin_radius_meters: Math.round(feetToMeters(750)),
     wine_menu_url: "https://gswinery.com/our-wines/",
+    events_page_url: null,
     active: true,
     sort_order: 4,
     created_at: "2026-01-01T00:00:00.000Z",
@@ -868,6 +872,29 @@ export const SEED_WINERY_HOURS: WineryHours[] = [
     hours_text: "Mon–Thu 11am–7pm · Fri–Sat 11am–8pm · Sun 12pm–7pm",
     sort_order: 4,
     created_at: "2026-01-01T00:00:00.000Z",
+  },
+];
+
+export const SEED_WINERY_EVENTS: WineryEvent[] = [
+  {
+    id: "event-arrington-livemusic",
+    winery_id: "winery-arrington",
+    title: "Live Music on the Lawn",
+    description: "Bring a blanket and settle in among the vines for an evening of local live music.",
+    event_date: "2026-09-05",
+    event_time: "5:00 PM – 8:00 PM",
+    source_url: "https://arringtonvineyards.com",
+    created_at: "2026-08-01T00:00:00.000Z",
+  },
+  {
+    id: "event-woodfeather-harvest",
+    winery_id: "winery-woodfeather",
+    title: "Harvest Weekend",
+    description: "Tour the vineyard during harvest and taste this year's first press straight from the tank.",
+    event_date: "2026-09-12",
+    event_time: "11:00 AM – 5:00 PM",
+    source_url: "https://woodfeatherfarm.com",
+    created_at: "2026-08-01T00:00:00.000Z",
   },
 ];
 

@@ -6,6 +6,7 @@ import {
   SEED_WINES,
   SEED_WINERY_HOURS,
   SEED_REWARD_TIERS,
+  SEED_WINERY_EVENTS,
 } from "@/lib/seed-data";
 import type {
   AppRating,
@@ -20,6 +21,8 @@ import type {
   WineTasting,
   WineWithTasting,
   Winery,
+  WineryEvent,
+  WineryEventWithWinery,
   WineryHours,
   WineryWithStatus,
 } from "@/lib/types";
@@ -332,4 +335,33 @@ export async function getUserAppRating(userId: string): Promise<AppRating | null
   } catch {
     return null;
   }
+}
+
+async function getAllWineryEvents(): Promise<WineryEvent[]> {
+  if (!isSupabaseConfigured) return SEED_WINERY_EVENTS;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("winery_events").select("*");
+    if (error || !data) throw error;
+    return data as WineryEvent[];
+  } catch {
+    return SEED_WINERY_EVENTS;
+  }
+}
+
+/** Upcoming events across every winery on the trail, soonest first —
+ * public, so it's fine to show a logged-out Explore visitor too. */
+export async function getUpcomingEvents(limit = 6): Promise<WineryEventWithWinery[]> {
+  const [events, wineries] = await Promise.all([getAllWineryEvents(), getFoundingTrailWineries()]);
+  const wineryById = new Map(wineries.map((w) => [w.id, w]));
+  const todayISO = new Date().toISOString().slice(0, 10);
+
+  return events
+    .filter((e) => e.event_date >= todayISO && wineryById.has(e.winery_id))
+    .map((e) => {
+      const winery = wineryById.get(e.winery_id)!;
+      return { ...e, winery_name: winery.name, winery_slug: winery.slug };
+    })
+    .sort((a, b) => a.event_date.localeCompare(b.event_date))
+    .slice(0, limit);
 }

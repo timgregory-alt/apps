@@ -183,6 +183,24 @@ export function WineryForm({
         </label>
       </div>
 
+      <div className="rounded-xl border border-[var(--color-line)] bg-white/40 p-4">
+        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+          Automatic Events Sync
+        </p>
+        <p className="mb-3 text-xs text-[var(--color-charcoal)]/55">
+          A scheduled check periodically reads this page and adds any upcoming events it finds.
+          Leave blank to use the Website URL above, or point at a more specific events/calendar page.
+        </p>
+        <label className={labelClass}>
+          <span className={labelTextClass}>Events Page URL (optional)</span>
+          <input
+            name="events_page_url"
+            defaultValue={winery?.events_page_url ?? ""}
+            className={inputClass}
+          />
+        </label>
+      </div>
+
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="active" defaultChecked={winery?.active ?? true} className="h-4 w-4" />
         Active (visible to guests)

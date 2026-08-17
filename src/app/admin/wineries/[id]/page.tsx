@@ -4,6 +4,7 @@ import { getWineryHours } from "@/lib/data";
 import { WineryForm } from "@/components/admin/WineryForm";
 import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
 import { WineSyncPanel } from "@/components/admin/WineSyncPanel";
+import { EventSyncPanel } from "@/components/admin/EventSyncPanel";
 import { WineSoldOutList } from "@/components/admin/WineSoldOutList";
 import { QrCode } from "@/components/ui/QrCode";
 import { updateWineryAction } from "@/app/admin/wineries/actions";
@@ -41,6 +42,14 @@ export default async function EditWineryPage({
           <WineSyncPanel
             wineryId={winery.id}
             wineMenuUrl={winery.wine_menu_url}
+            websiteUrl={winery.website_url}
+          />
+        </div>
+
+        <div className="mt-6">
+          <EventSyncPanel
+            wineryId={winery.id}
+            eventsPageUrl={winery.events_page_url}
             websiteUrl={winery.website_url}
           />
         </div>

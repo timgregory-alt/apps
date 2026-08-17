@@ -43,6 +43,8 @@ export interface Winery {
   created_at: string;
   /** Optional page to check for new wines. Falls back to website_url when unset. */
   wine_menu_url: string | null;
+  /** Optional page to check for upcoming events. Falls back to website_url when unset. */
+  events_page_url: string | null;
 }
 
 export interface WineSyncLogEntry {
@@ -50,6 +52,36 @@ export interface WineSyncLogEntry {
   winery_id: UUID;
   ran_at: string;
   wines_added: number;
+  status: "ok" | "error";
+  detail: string | null;
+}
+
+/** A single upcoming event at a winery, kept current by the weekly sync job. */
+export interface WineryEvent {
+  id: UUID;
+  winery_id: UUID;
+  title: string;
+  description: string | null;
+  /** ISO date (YYYY-MM-DD). */
+  event_date: string;
+  /** Free text — e.g. "6:00 PM - 9:00 PM" — since sources rarely give structured times. */
+  event_time: string | null;
+  source_url: string | null;
+  created_at: string;
+}
+
+/** A winery event merged with the winery's own name/slug — the shape the
+ * Explore page's upcoming-events list actually consumes. */
+export interface WineryEventWithWinery extends WineryEvent {
+  winery_name: string;
+  winery_slug: string;
+}
+
+export interface EventSyncLogEntry {
+  id: UUID;
+  winery_id: UUID;
+  ran_at: string;
+  events_added: number;
   status: "ok" | "error";
   detail: string | null;
 }
