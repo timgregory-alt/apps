@@ -87,6 +87,8 @@ export default async function WineryDetailPage({
 
         <WinerySocialRow winery={winery} />
 
+        <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
+
         <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn={!!user} />
 
         <div>
@@ -123,8 +125,6 @@ export default async function WineryDetailPage({
             />
           </div>
         )}
-
-        <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 
         <WineClubSection winery={winery} />
       </div>
