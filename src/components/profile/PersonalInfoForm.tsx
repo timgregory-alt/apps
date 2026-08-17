@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { DateOfBirthInput } from "@/components/ui/DateOfBirthInput";
 import { updateProfileAction } from "@/app/profile/actions";
 
 const inputClass =
@@ -57,16 +58,13 @@ export function PersonalInfoForm({
         </label>
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-[var(--color-charcoal)]/80">Date of Birth</span>
-          <input
-            type="date"
+          <DateOfBirthInput
             value={birthDate}
-            onChange={(e) => {
-              setBirthDate(e.target.value);
+            onChange={(v) => {
+              setBirthDate(v);
               setSaved(false);
             }}
-            max={new Date().toISOString().slice(0, 10)}
             disabled={birthDateLocked}
-            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
           />
           {birthDateLocked && (
             <span className="text-xs text-[var(--color-charcoal)]/50">

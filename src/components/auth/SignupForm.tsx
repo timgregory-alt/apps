@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { AuthField, AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
+import { DateOfBirthInput } from "@/components/ui/DateOfBirthInput";
 import { calculateAge } from "@/lib/utils";
 
 const MIN_AGE = 21;
@@ -27,6 +28,10 @@ export function SignupForm() {
     e.preventDefault();
     setError(null);
 
+    if (!birthDate) {
+      setError("Please enter your date of birth.");
+      return;
+    }
     if (calculateAge(birthDate) < MIN_AGE) {
       setError(`You must be ${MIN_AGE} or older to create a Tennessee Wine Passport account.`);
       return;
@@ -110,15 +115,10 @@ export function SignupForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <AuthField
-            label="Date of Birth"
-            type="date"
-            required
-            autoComplete="bday"
-            max={new Date().toISOString().slice(0, 10)}
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-          />
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="font-medium text-[var(--color-charcoal)]/80">Date of Birth</span>
+            <DateOfBirthInput value={birthDate} onChange={setBirthDate} required />
+          </label>
           <p className="-mt-2 text-xs text-[var(--color-charcoal)]/50">
             You must be {MIN_AGE}+ to join — Tennessee wineries only serve guests {MIN_AGE} and older.
           </p>

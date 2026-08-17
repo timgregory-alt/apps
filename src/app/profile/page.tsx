@@ -14,6 +14,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
 import { AppRatingCard } from "@/components/profile/AppRatingCard";
+import { BugReportCard } from "@/components/profile/BugReportCard";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -108,6 +109,10 @@ export default async function ProfilePage() {
           initialBirthDate={profile?.birth_date ?? ""}
           birthDateLocked={profile?.birth_date_locked ?? false}
         />
+      </div>
+
+      <div className="px-6">
+        <BugReportCard />
       </div>
 
       <div className="px-6">

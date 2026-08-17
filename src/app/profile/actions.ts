@@ -78,3 +78,22 @@ export async function submitAppRatingAction(rating: number, feedback: string) {
 
   revalidatePath("/profile");
 }
+
+/** Submits a "something's broken" report from the Profile page. */
+export async function submitBugReportAction(description: string, pageUrl: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Sign in to report a bug");
+
+  const trimmed = description.trim();
+  if (!trimmed) throw new Error("Please describe what happened");
+
+  const { error } = await supabase.from("bug_reports").insert({
+    user_id: user.id,
+    description: trimmed,
+    page_url: pageUrl || null,
+  });
+  if (error) throw new Error(error.message);
+}

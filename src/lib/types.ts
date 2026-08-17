@@ -129,6 +129,18 @@ export interface AppRating {
   updated_at: string;
 }
 
+export type BugReportStatus = "open" | "resolved";
+
+/** A guest-submitted "something's broken" report from the Profile page. */
+export interface BugReport {
+  id: UUID;
+  user_id: UUID;
+  description: string;
+  page_url: string | null;
+  status: BugReportStatus;
+  created_at: string;
+}
+
 export interface Profile {
   id: UUID;
   name: string | null;
