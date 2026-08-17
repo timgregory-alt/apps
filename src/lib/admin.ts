@@ -299,3 +299,24 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
     return EMPTY_APP_RATING_STATS;
   }
 }
+
+export interface MemberRow {
+  name: string | null;
+  email: string | null;
+  created_at: string;
+}
+
+/** All signed-up members (name + email), oldest first — used for the admin CSV export. */
+export async function getAllMembersAdmin(): Promise<MemberRow[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("profiles")
+      .select("name, email, created_at")
+      .order("created_at", { ascending: true });
+    return (data as MemberRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
