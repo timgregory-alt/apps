@@ -61,7 +61,7 @@ export function WinerySocialRow({ winery }: { winery: Winery }) {
   if (links.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center justify-center gap-3">
       {links.map(({ href, icon: Icon, label }) => (
         <a
           key={label}
