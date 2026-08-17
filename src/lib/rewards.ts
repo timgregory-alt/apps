@@ -40,3 +40,16 @@ export function generateRedemptionCode(length = 8): string {
   }
   return code;
 }
+
+/** True on the guest's actual birthday (month + day match), parsed from string
+ * parts to avoid UTC/local timezone shifting the date. */
+export function isBirthdayToday(birthDate: string | null, today: Date = new Date()): boolean {
+  if (!birthDate) return false;
+  const [, month, day] = birthDate.split("-").map(Number);
+  return today.getMonth() + 1 === month && today.getDate() === day;
+}
+
+/** The current calendar year, as the period_key for a recurring (e.g. birthday) reward tier. */
+export function currentRewardPeriodKey(): string {
+  return String(new Date().getFullYear());
+}

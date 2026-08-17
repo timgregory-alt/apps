@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { AuthField, AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
+import { calculateAge } from "@/lib/utils";
+
+const MIN_AGE = 21;
 
 export function SignupForm() {
   const router = useRouter();
@@ -15,6 +18,7 @@ export function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
@@ -22,6 +26,12 @@ export function SignupForm() {
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (calculateAge(birthDate) < MIN_AGE) {
+      setError(`You must be ${MIN_AGE} or older to create a Tennessee Wine Passport account.`);
+      return;
+    }
+
     setLoading(true);
     try {
       const supabase = createClient();
@@ -29,7 +39,7 @@ export function SignupForm() {
         email,
         password,
         options: {
-          data: { name },
+          data: { name, birth_date: birthDate },
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
       });
@@ -100,6 +110,18 @@ export function SignupForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <AuthField
+            label="Date of Birth"
+            type="date"
+            required
+            autoComplete="bday"
+            max={new Date().toISOString().slice(0, 10)}
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+          />
+          <p className="-mt-2 text-xs text-[var(--color-charcoal)]/50">
+            You must be {MIN_AGE}+ to join — Tennessee wineries only serve guests {MIN_AGE} and older.
+          </p>
           {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
           <Button type="submit" size="lg" fullWidth disabled={loading}>
             {loading ? "Creating your passport…" : "Create Account"}

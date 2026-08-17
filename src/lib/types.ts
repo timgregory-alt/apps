@@ -124,6 +124,8 @@ export interface Profile {
   name: string | null;
   email: string | null;
   profile_image: string | null;
+  /** ISO date (YYYY-MM-DD) — collected at signup for 21+ age verification and birthday rewards. */
+  birth_date: string | null;
   passport_start_date: string | null;
   created_at: string;
 }
@@ -204,6 +206,9 @@ export interface RewardTier {
   discount_percent: number;
   /** When set, the guest picks one of these instead of getting a flat discount_percent reward. */
   choice_options: string[] | null;
+  /** A surprise reward that isn't part of the regular points ladder — only
+   * appears (and is redeemable) on the guest's actual birthday, every year. */
+  birthday_only: boolean;
   sort_order: number;
   active: boolean;
   created_at: string;
@@ -216,6 +221,9 @@ export interface RewardRedemption {
   user_id: UUID;
   tier_id: UUID;
   code: string;
+  /** Empty for one-time tiers; the calendar year for recurring tiers (birthday_only)
+   * so a new redemption can be issued each year instead of only once ever. */
+  period_key: string;
   /** The option the guest picked, for tiers with choice_options. */
   chosen_option: string | null;
   status: RewardRedemptionStatus;

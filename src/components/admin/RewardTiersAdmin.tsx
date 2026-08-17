@@ -11,6 +11,7 @@ interface DraftTier {
   discount_percent: number;
   /** One choice option per line; blank means a plain discount tier. */
   choiceOptionsText: string;
+  birthday_only: boolean;
   sort_order: number;
   active: boolean;
 }
@@ -22,6 +23,7 @@ function toDraft(t: RewardTier): DraftTier {
     points_required: t.points_required,
     discount_percent: t.discount_percent,
     choiceOptionsText: (t.choice_options ?? []).join("\n"),
+    birthday_only: t.birthday_only,
     sort_order: t.sort_order,
     active: t.active,
   };
@@ -50,6 +52,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
     points_required: 100,
     discount_percent: 10,
     choiceOptionsText: "",
+    birthday_only: false,
     sort_order: rows.length + 1,
     active: true,
   });
@@ -70,6 +73,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           points_required: row.points_required,
           discount_percent: row.discount_percent,
           choice_options: parseChoiceOptions(row.choiceOptionsText),
+          birthday_only: row.birthday_only,
           sort_order: row.sort_order,
           active: row.active,
         });
@@ -93,6 +97,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           points_required: newTier.points_required,
           discount_percent: newTier.discount_percent,
           choice_options: parseChoiceOptions(newTier.choiceOptionsText),
+          birthday_only: newTier.birthday_only,
           sort_order: newTier.sort_order,
           active: newTier.active,
         });
@@ -102,6 +107,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           points_required: 100,
           discount_percent: 10,
           choiceOptionsText: "",
+          birthday_only: false,
           sort_order: rows.length + 2,
           active: true,
         });
@@ -118,7 +124,10 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
       <p className="text-sm font-medium text-[var(--color-charcoal)]">Reward Tiers</p>
       <p className="mt-1 text-xs text-[var(--color-charcoal)]/55">
         Guests unlock a one-time redemption code once their points reach a tier&apos;s threshold.
-        Deactivate a tier instead of deleting it — redemptions already issued reference it.
+        &ldquo;Birthday only&rdquo; tiers skip the points requirement entirely and only unlock
+        (once per year) on the guest&apos;s actual birthday — they&apos;re never shown in the
+        regular rewards list. Deactivate a tier instead of deleting it — redemptions already
+        issued reference it.
       </p>
 
       {error && <p className="mt-3 text-xs text-[var(--color-burgundy)]">{error}</p>}
@@ -188,6 +197,15 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
               />
             </label>
             <div className="col-span-2 flex items-center justify-between gap-2 sm:col-span-6 sm:justify-end">
+              <label className="flex items-center gap-1.5 text-xs text-[var(--color-charcoal)]/70">
+                <input
+                  type="checkbox"
+                  checked={row.birthday_only}
+                  onChange={(e) => updateRow(row.id, { birthday_only: e.target.checked })}
+                  className="h-4 w-4"
+                />
+                Birthday only
+              </label>
               <label className="flex items-center gap-1.5 text-xs text-[var(--color-charcoal)]/70">
                 <input
                   type="checkbox"
@@ -272,6 +290,15 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
             placeholder={"e.g. 35% off your next purchase\nA complimentary tasting for two"}
             className={`${inputClass} resize-y`}
           />
+        </label>
+        <label className="flex items-center gap-1.5 text-xs text-[var(--color-charcoal)]/70">
+          <input
+            type="checkbox"
+            checked={newTier.birthday_only}
+            onChange={(e) => setNewTier((p) => ({ ...p, birthday_only: e.target.checked }))}
+            className="h-4 w-4"
+          />
+          Birthday only
         </label>
         <button
           type="submit"

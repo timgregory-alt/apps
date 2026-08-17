@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Gift, CheckCircle2 } from "lucide-react";
+import { Gift } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { QrCode } from "@/components/ui/QrCode";
 import { generateRedemptionAction } from "@/app/rewards/actions";
+import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
 import type { RewardRedemption, RewardTier } from "@/lib/types";
 
 export function RewardTierCard({
@@ -90,32 +90,10 @@ export function RewardTierCard({
 
       {code && (
         <div className="flex flex-col items-center gap-3 border-t border-[var(--color-line)] pt-4">
-          <div
-            className={
-              code.status === "redeemed"
-                ? "inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs font-medium text-[var(--color-charcoal)]/60"
-                : "inline-flex items-center gap-1.5 rounded-full bg-[var(--color-gold)]/15 px-3 py-1 text-xs font-medium text-[var(--color-gold)]"
-            }
-          >
-            {code.status === "redeemed" ? (
-              <>
-                <CheckCircle2 size={13} /> Redeemed
-              </>
-            ) : (
-              "Ready to redeem"
-            )}
-          </div>
           <p className="text-sm font-medium text-[var(--color-charcoal)]">
             {code.chosen_option ?? `${tier.discount_percent}% off your next purchase`}
           </p>
-          <QrCode
-            value={`${typeof window !== "undefined" ? window.location.origin : ""}/redeem/${code.code}`}
-            size={160}
-          />
-          <p className="font-mono text-lg tracking-[0.3em] text-[var(--color-charcoal)]">{code.code}</p>
-          <p className="text-center text-xs text-[var(--color-charcoal)]/55">
-            Show this QR code to winery staff, or give them the code above if they can&apos;t scan it.
-          </p>
+          <RedemptionCodeDisplay redemption={code} />
         </div>
       )}
     </Card>

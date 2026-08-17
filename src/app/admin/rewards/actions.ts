@@ -10,6 +10,7 @@ export interface RewardTierInput {
   points_required: number;
   discount_percent: number;
   choice_options: string[] | null;
+  birthday_only: boolean;
   sort_order: number;
   active: boolean;
 }

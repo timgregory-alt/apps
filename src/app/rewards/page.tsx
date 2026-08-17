@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   getCurrentUser,
+  getProfile,
   getWineriesWithStatus,
   getWinesWithTastings,
   getActiveRewardTiers,
@@ -8,6 +9,8 @@ import {
 } from "@/lib/data";
 import {
   computeRewardsPoints,
+  currentRewardPeriodKey,
+  isBirthdayToday,
   POINTS_PER_CHECKIN,
   POINTS_PER_WINE_RATED,
   COMPLETION_BONUS,
@@ -16,6 +19,7 @@ import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
+import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
 
 export default async function RewardsPage() {
   const user = await getCurrentUser();
@@ -38,20 +42,38 @@ export default async function RewardsPage() {
     );
   }
 
-  const [wineries, wines, tiers, redemptions] = await Promise.all([
+  const [wineries, wines, tiers, redemptions, profile] = await Promise.all([
     getWineriesWithStatus(user.id),
     getWinesWithTastings(user.id),
     getActiveRewardTiers(),
     getUserRewardRedemptions(user.id),
+    getProfile(user.id),
   ]);
 
   const points = computeRewardsPoints(wineries, wines);
-  const redemptionByTier = new Map(redemptions.map((r) => [r.tier_id, r]));
-  const sortedTiers = [...tiers].sort((a, b) => a.points_required - b.points_required);
+  const ladderTiers = tiers.filter((t) => !t.birthday_only);
+  const redemptionByTier = new Map(
+    redemptions.filter((r) => r.period_key === "").map((r) => [r.tier_id, r])
+  );
+  const sortedTiers = [...ladderTiers].sort((a, b) => a.points_required - b.points_required);
+
+  const birthdayTier = tiers.find((t) => t.birthday_only) ?? null;
+  const showBirthdayReward = birthdayTier != null && isBirthdayToday(profile?.birth_date ?? null);
+  const birthdayRedemption = birthdayTier
+    ? (redemptions.find(
+        (r) => r.tier_id === birthdayTier.id && r.period_key === currentRewardPeriodKey()
+      ) ?? null)
+    : null;
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
       <Header eyebrow="Rewards" title="Your Rewards" />
+
+      {showBirthdayReward && birthdayTier && (
+        <div className="px-6">
+          <BirthdayRewardCard tier={birthdayTier} redemption={birthdayRedemption} />
+        </div>
+      )}
 
       <div className="px-6">
         <Card className="texture-grain bg-[var(--color-burgundy)] p-6 text-[var(--color-ivory)]">
