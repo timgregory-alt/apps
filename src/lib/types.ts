@@ -202,6 +202,8 @@ export interface RewardTier {
   label: string;
   points_required: number;
   discount_percent: number;
+  /** When set, the guest picks one of these instead of getting a flat discount_percent reward. */
+  choice_options: string[] | null;
   sort_order: number;
   active: boolean;
   created_at: string;
@@ -214,6 +216,8 @@ export interface RewardRedemption {
   user_id: UUID;
   tier_id: UUID;
   code: string;
+  /** The option the guest picked, for tiers with choice_options. */
+  chosen_option: string | null;
   status: RewardRedemptionStatus;
   issued_at: string;
   redeemed_at: string | null;

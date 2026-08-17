@@ -9,6 +9,8 @@ interface DraftTier {
   label: string;
   points_required: number;
   discount_percent: number;
+  /** One choice option per line; blank means a plain discount tier. */
+  choiceOptionsText: string;
   sort_order: number;
   active: boolean;
 }
@@ -19,9 +21,18 @@ function toDraft(t: RewardTier): DraftTier {
     label: t.label,
     points_required: t.points_required,
     discount_percent: t.discount_percent,
+    choiceOptionsText: (t.choice_options ?? []).join("\n"),
     sort_order: t.sort_order,
     active: t.active,
   };
+}
+
+function parseChoiceOptions(text: string): string[] | null {
+  const options = text
+    .split("\n")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  return options.length > 0 ? options : null;
 }
 
 const inputClass =
@@ -38,6 +49,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
     label: "",
     points_required: 100,
     discount_percent: 10,
+    choiceOptionsText: "",
     sort_order: rows.length + 1,
     active: true,
   });
@@ -57,6 +69,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           label: row.label.trim(),
           points_required: row.points_required,
           discount_percent: row.discount_percent,
+          choice_options: parseChoiceOptions(row.choiceOptionsText),
           sort_order: row.sort_order,
           active: row.active,
         });
@@ -79,11 +92,19 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           label: newTier.label.trim(),
           points_required: newTier.points_required,
           discount_percent: newTier.discount_percent,
+          choice_options: parseChoiceOptions(newTier.choiceOptionsText),
           sort_order: newTier.sort_order,
           active: newTier.active,
         });
         setRows((prev) => [...prev, toDraft(created)]);
-        setNewTier({ label: "", points_required: 100, discount_percent: 10, sort_order: rows.length + 2, active: true });
+        setNewTier({
+          label: "",
+          points_required: 100,
+          discount_percent: 10,
+          choiceOptionsText: "",
+          sort_order: rows.length + 2,
+          active: true,
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not create tier");
       } finally {
@@ -154,7 +175,19 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
                 className={inputClass}
               />
             </label>
-            <div className="flex items-center justify-between gap-2 sm:justify-end">
+            <label className="col-span-2 flex flex-col gap-1 sm:col-span-6">
+              <span className="text-[0.65rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                Choice Options (one per line — leave blank for a plain {row.discount_percent}% discount tier)
+              </span>
+              <textarea
+                value={row.choiceOptionsText}
+                onChange={(e) => updateRow(row.id, { choiceOptionsText: e.target.value })}
+                rows={2}
+                placeholder={"e.g. 35% off your next purchase\nA complimentary tasting for two"}
+                className={`${inputClass} resize-y`}
+              />
+            </label>
+            <div className="col-span-2 flex items-center justify-between gap-2 sm:col-span-6 sm:justify-end">
               <label className="flex items-center gap-1.5 text-xs text-[var(--color-charcoal)]/70">
                 <input
                   type="checkbox"
@@ -226,6 +259,18 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
             value={newTier.sort_order}
             onChange={(e) => setNewTier((p) => ({ ...p, sort_order: Number(e.target.value) }))}
             className={inputClass}
+          />
+        </label>
+        <label className="col-span-2 flex flex-col gap-1 sm:col-span-6">
+          <span className="text-[0.65rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
+            Choice Options (one per line — leave blank for a plain discount tier)
+          </span>
+          <textarea
+            value={newTier.choiceOptionsText}
+            onChange={(e) => setNewTier((p) => ({ ...p, choiceOptionsText: e.target.value }))}
+            rows={2}
+            placeholder={"e.g. 35% off your next purchase\nA complimentary tasting for two"}
+            className={`${inputClass} resize-y`}
           />
         </label>
         <button

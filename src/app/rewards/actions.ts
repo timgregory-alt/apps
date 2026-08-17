@@ -6,8 +6,12 @@ import { getActiveRewardTiers, getWineriesWithStatus, getWinesWithTastings } fro
 import { computeRewardsPoints, generateRedemptionCode } from "@/lib/rewards";
 import type { RewardRedemption } from "@/lib/types";
 
-/** Issues (or returns the already-issued) redemption code for a tier the user has unlocked. */
-export async function generateRedemptionAction(tierId: string): Promise<RewardRedemption> {
+/** Issues (or returns the already-issued) redemption code for a tier the user has unlocked.
+ * chosenOption is required for tiers with choice_options (e.g. Sommelier's Choice). */
+export async function generateRedemptionAction(
+  tierId: string,
+  chosenOption?: string
+): Promise<RewardRedemption> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -33,11 +37,17 @@ export async function generateRedemptionAction(tierId: string): Promise<RewardRe
   const points = computeRewardsPoints(wineries, wines);
   if (points.total < tier.points_required) throw new Error("Not enough points yet");
 
+  if (tier.choice_options && tier.choice_options.length > 0) {
+    if (!chosenOption || !tier.choice_options.includes(chosenOption)) {
+      throw new Error("Choose a reward first");
+    }
+  }
+
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateRedemptionCode();
     const { data, error } = await supabase
       .from("reward_redemptions")
-      .insert({ user_id: user.id, tier_id: tierId, code })
+      .insert({ user_id: user.id, tier_id: tierId, code, chosen_option: chosenOption ?? null })
       .select()
       .single();
     if (data) {

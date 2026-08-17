@@ -22,12 +22,13 @@ export function RewardTierCard({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const unlocked = pointsTotal >= tier.points_required;
+  const isChoiceTier = !!tier.choice_options && tier.choice_options.length > 0;
 
-  function reveal() {
+  function reveal(option?: string) {
     setError(null);
     startTransition(async () => {
       try {
-        const result = await generateRedemptionAction(tier.id);
+        const result = await generateRedemptionAction(tier.id, option);
         setCode(result);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");
@@ -43,6 +44,9 @@ export function RewardTierCard({
           <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/55">
             {tier.points_required} points required
           </p>
+          <p className="mt-1 text-sm text-[var(--color-charcoal)]/70">
+            {isChoiceTier ? "Choose your reward once unlocked" : `${tier.discount_percent}% off your next purchase`}
+          </p>
         </div>
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)]">
           <Gift size={18} />
@@ -53,9 +57,25 @@ export function RewardTierCard({
         <>
           <ProgressBar value={Math.min(pointsTotal, tier.points_required)} max={tier.points_required} />
           {unlocked ? (
-            <Button onClick={reveal} disabled={isPending} size="sm">
-              {isPending ? "Generating…" : "Reveal My Code"}
-            </Button>
+            isChoiceTier ? (
+              <div className="flex flex-col gap-2">
+                {tier.choice_options!.map((option) => (
+                  <Button
+                    key={option}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => reveal(option)}
+                    disabled={isPending}
+                  >
+                    {isPending ? "Generating…" : option}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <Button onClick={() => reveal()} disabled={isPending} size="sm">
+                {isPending ? "Generating…" : "Reveal My Code"}
+              </Button>
+            )
           ) : (
             <p className="text-xs text-[var(--color-charcoal)]/55">
               {tier.points_required - pointsTotal} points to go
@@ -82,6 +102,9 @@ export function RewardTierCard({
               "Ready to redeem"
             )}
           </div>
+          {code.chosen_option && (
+            <p className="text-sm font-medium text-[var(--color-charcoal)]">{code.chosen_option}</p>
+          )}
           <QrCode
             value={`${typeof window !== "undefined" ? window.location.origin : ""}/redeem/${code.code}`}
             size={160}

@@ -43,7 +43,9 @@ export default async function RedeemCodePage({ params }: { params: Promise<{ cod
         ) : (
           <Card className="flex flex-col items-center gap-3 p-6 text-center">
             <p className="font-serif-display text-2xl text-[var(--color-charcoal)]">{tier.label}</p>
-            <p className="text-sm text-[var(--color-charcoal)]/60">{tier.discount_percent}% off</p>
+            <p className="text-sm text-[var(--color-charcoal)]/60">
+              {data.chosen_option ?? `${tier.discount_percent}% off`}
+            </p>
             <p className="font-mono text-lg tracking-[0.3em] text-[var(--color-charcoal)]">{code}</p>
 
             {data.status === "redeemed" ? (
