@@ -1,4 +1,4 @@
-import type { Trail, TrailWinery, Winery, Wine, WineryHours } from "./types";
+import type { Trail, TrailWinery, Winery, Wine, WineryHours, RewardTier } from "./types";
 import { feetToMeters } from "./geo";
 
 /**
@@ -866,6 +866,18 @@ export const SEED_WINERY_HOURS: WineryHours[] = [
     end_month: 3,
     hours_text: "Mon–Thu 11am–7pm · Fri–Sat 11am–8pm · Sun 12pm–7pm",
     sort_order: 4,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+];
+
+export const SEED_REWARD_TIERS: RewardTier[] = [
+  {
+    id: "reward-tier-15-off",
+    label: "15% Off Your Next Bottle",
+    points_required: 150,
+    discount_percent: 15,
+    sort_order: 1,
+    active: true,
     created_at: "2026-01-01T00:00:00.000Z",
   },
 ];

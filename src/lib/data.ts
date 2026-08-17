@@ -1,11 +1,19 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { FOUNDING_TRAIL, SEED_WINERIES, SEED_WINES, SEED_WINERY_HOURS } from "@/lib/seed-data";
+import {
+  FOUNDING_TRAIL,
+  SEED_WINERIES,
+  SEED_WINES,
+  SEED_WINERY_HOURS,
+  SEED_REWARD_TIERS,
+} from "@/lib/seed-data";
 import type {
   Checkin,
   CheckinStatus,
   CustomWineTasting,
   Profile,
+  RewardRedemption,
+  RewardTier,
   Trail,
   Wine,
   WineTasting,
@@ -258,5 +266,39 @@ export async function getPassportCompletion(userId: string, trailId: string) {
     return data;
   } catch {
     return null;
+  }
+}
+
+/** All active reward tiers, ordered for display. */
+export async function getActiveRewardTiers(): Promise<RewardTier[]> {
+  if (!isSupabaseConfigured) {
+    return SEED_REWARD_TIERS.filter((t) => t.active).sort((a, b) => a.sort_order - b.sort_order);
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("reward_tiers")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
+    if (error || !data) throw error;
+    return data as RewardTier[];
+  } catch {
+    return SEED_REWARD_TIERS.filter((t) => t.active).sort((a, b) => a.sort_order - b.sort_order);
+  }
+}
+
+export async function getUserRewardRedemptions(userId: string): Promise<RewardRedemption[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("reward_redemptions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("issued_at", { ascending: true });
+    return (data as RewardRedemption[]) ?? [];
+  } catch {
+    return [];
   }
 }

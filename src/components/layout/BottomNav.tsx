@@ -2,20 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookMarked, Compass, Map, User } from "lucide-react";
+import { BookMarked, Compass, Gift, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
+  { href: "/", label: "Explore", icon: Compass },
   { href: "/passport", label: "Passport", icon: BookMarked },
-  { href: "/map", label: "Map", icon: Map },
-  { href: "/explore", label: "Explore", icon: Compass },
+  { href: "/rewards", label: "Rewards", icon: Gift },
   { href: "/profile", label: "Profile", icon: User },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/redeem")) return null;
 
   return (
     <nav
@@ -24,7 +24,7 @@ export function BottomNav() {
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2">
         {ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
+          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <li key={href} className="flex-1">
               <Link

@@ -196,3 +196,25 @@ export interface DistanceResult {
   miles: number;
   withinRadius: boolean;
 }
+
+export interface RewardTier {
+  id: UUID;
+  label: string;
+  points_required: number;
+  discount_percent: number;
+  sort_order: number;
+  active: boolean;
+  created_at: string;
+}
+
+export type RewardRedemptionStatus = "issued" | "redeemed";
+
+export interface RewardRedemption {
+  id: UUID;
+  user_id: UUID;
+  tier_id: UUID;
+  code: string;
+  status: RewardRedemptionStatus;
+  issued_at: string;
+  redeemed_at: string | null;
+}
