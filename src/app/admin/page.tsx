@@ -175,7 +175,11 @@ export default async function AdminDashboardPage() {
                     {formatCheckinDate(f.created_at)}
                   </span>
                 </div>
-                <p className="mt-1.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
+                <p className="mt-1.5 text-xs font-medium text-[var(--color-charcoal)]/60">
+                  {f.memberName}
+                  {f.memberEmail && f.memberEmail !== f.memberName ? ` · ${f.memberEmail}` : ""}
+                </p>
+                <p className="mt-0.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
               </div>
             ))}
           </div>

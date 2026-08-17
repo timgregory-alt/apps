@@ -223,11 +223,19 @@ export async function getWineLikeStats(): Promise<WineLikeStats> {
   }
 }
 
+export interface AppFeedbackEntry {
+  rating: number;
+  feedback: string;
+  created_at: string;
+  memberName: string;
+  memberEmail: string | null;
+}
+
 export interface AppRatingStats {
   average: number;
   count: number;
   distribution: Record<1 | 2 | 3 | 4 | 5, number>;
-  recentFeedback: { rating: number; feedback: string; created_at: string }[];
+  recentFeedback: AppFeedbackEntry[];
 }
 
 const EMPTY_APP_RATING_STATS: AppRatingStats = {
@@ -243,7 +251,7 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
     const supabase = await createClient();
     const { data } = await supabase
       .from("app_ratings")
-      .select("rating, feedback, created_at")
+      .select("user_id, rating, feedback, created_at")
       .order("created_at", { ascending: false });
     if (!data || data.length === 0) return EMPTY_APP_RATING_STATS;
 
@@ -254,9 +262,32 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
       total += row.rating;
     }
 
-    const recentFeedback = data
-      .filter((r): r is { rating: number; feedback: string; created_at: string } => !!r.feedback)
+    const feedbackRows = data
+      .filter((r): r is typeof r & { feedback: string } => !!r.feedback)
       .slice(0, 10);
+
+    // app_ratings.user_id references auth.users, not public.profiles, so there's
+    // no FK PostgREST can embed through — look member names up separately.
+    const userIds = [...new Set(feedbackRows.map((r) => r.user_id))];
+    const memberById = new Map<string, { name: string | null; email: string | null }>();
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, name, email")
+        .in("id", userIds);
+      (profiles ?? []).forEach((p) => memberById.set(p.id, { name: p.name, email: p.email }));
+    }
+
+    const recentFeedback = feedbackRows.map((r) => {
+      const member = memberById.get(r.user_id);
+      return {
+        rating: r.rating,
+        feedback: r.feedback,
+        created_at: r.created_at,
+        memberName: member?.name || member?.email || "Member",
+        memberEmail: member?.email ?? null,
+      };
+    });
 
     return {
       average: total / data.length,
