@@ -8,7 +8,11 @@ import { POINTS_PER_REFERRAL } from "@/lib/rewards";
 import { cn } from "@/lib/utils";
 
 export function ReferralCard({ userId, referralCount }: { userId: string; referralCount: number }) {
-  const [open, setOpen] = useState(false);
+  // Arriving via a #referral link (e.g. from the Rewards page) opens the
+  // card automatically instead of landing on a collapsed row.
+  const [open, setOpen] = useState(
+    () => typeof window !== "undefined" && window.location.hash === "#referral"
+  );
   const [copied, setCopied] = useState(false);
   const link =
     typeof window !== "undefined" ? `${window.location.origin}/signup?ref=${userId}` : "";
@@ -28,7 +32,7 @@ export function ReferralCard({ userId, referralCount }: { userId: string; referr
   }
 
   return (
-    <Card className={cn("flex flex-col p-5", open && "gap-3")}>
+    <Card id="referral" className={cn("flex flex-col p-5", open && "gap-3")}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

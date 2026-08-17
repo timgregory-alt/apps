@@ -119,11 +119,18 @@ export default async function RewardsPage() {
                 +{COMPLETION_BONUS} pts
               </span>
             </li>
-            <li className="flex items-center justify-between gap-3 py-2 last:pb-0">
-              <span className="text-sm text-[var(--color-charcoal)]/80">Refer a friend who visits</span>
-              <span className="text-sm font-medium text-[var(--color-burgundy)]">
-                +{POINTS_PER_REFERRAL} pts
-              </span>
+            <li className="py-2 last:pb-0">
+              <Link
+                href="/profile#referral"
+                className="flex items-center justify-between gap-3 -mx-1 rounded-lg px-1 py-0.5 transition-colors hover:bg-black/5"
+              >
+                <span className="text-sm text-[var(--color-charcoal)]/80 underline decoration-[var(--color-charcoal)]/25 underline-offset-2">
+                  Refer a friend who visits
+                </span>
+                <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                  +{POINTS_PER_REFERRAL} pts
+                </span>
+              </Link>
             </li>
           </ul>
         </Card>
