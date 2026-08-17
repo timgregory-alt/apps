@@ -9,6 +9,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { WineryImage } from "@/components/winery/WineryImage";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { TrailMap } from "@/components/map/TrailMap";
+import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -25,14 +26,15 @@ export default async function HomePage() {
 
       <div className="px-6">
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
-          <p className="text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
+          <PassportCoverFrame />
+          <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
             {wineries.length} Stops · Middle Tennessee
           </p>
-          <p className="font-serif-display mt-2 text-2xl leading-tight">{trail.name}</p>
+          <p className="font-serif-display relative mt-2 text-2xl leading-tight">{trail.name}</p>
           {trail.description && (
-            <p className="mt-2 text-sm text-[var(--color-ivory)]/70">{trail.description}</p>
+            <p className="relative mt-2 text-sm text-[var(--color-ivory)]/70">{trail.description}</p>
           )}
-          <p className="mt-4 text-sm font-medium text-[var(--color-gold-pale)]">
+          <p className="relative mt-4 text-sm font-medium text-[var(--color-gold-pale)]">
             {visited} of {wineries.length} visited
           </p>
         </Card>
