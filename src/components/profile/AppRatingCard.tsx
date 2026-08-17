@@ -40,6 +40,8 @@ export function AppRatingCard({
       try {
         await submitAppRatingAction(rating, feedback);
         setSaved(true);
+        setRating(0);
+        setFeedback("");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Could not submit your rating");
       }
@@ -55,6 +57,12 @@ export function AppRatingCard({
         {rating > 0 ? "Your rating" : "Let us know how we're doing"}
       </p>
       <StarRating value={rating} onRate={rate} disabled={isPending} />
+
+      {saved && !error && (
+        <p className="text-sm text-[var(--color-gold)]">
+          Thanks for the feedback! Rate us again anytime.
+        </p>
+      )}
 
       {rating > 0 && (
         <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2">
@@ -77,7 +85,6 @@ export function AppRatingCard({
             className="w-full resize-y rounded-xl border border-[var(--color-line)] bg-white/70 px-3 py-2 text-sm text-[var(--color-charcoal)] outline-none placeholder:text-[var(--color-charcoal)]/40 focus:border-[var(--color-gold)]"
           />
           {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
-          {saved && !error && <p className="text-sm text-[var(--color-gold)]">Thanks for the feedback!</p>}
           <Button type="submit" size="sm" disabled={isPending}>
             {isPending ? "Submitting…" : "Submit Rating"}
           </Button>
