@@ -68,6 +68,8 @@ export default async function WineryDetailPage({
       <div className="flex flex-col gap-7 px-6 pt-6">
         <WineryDescription winery={winery} />
 
+        <WinerySocialRow winery={winery} />
+
         <div className="grid grid-cols-2 gap-2.5">
           <DirectionsButton
             lat={winery.latitude}
@@ -84,8 +86,6 @@ export default async function WineryDetailPage({
             <span />
           )}
         </div>
-
-        <WinerySocialRow winery={winery} />
 
         <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 
