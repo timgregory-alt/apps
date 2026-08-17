@@ -44,9 +44,6 @@ export function RewardTierCard({
           <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/55">
             {tier.points_required} points required
           </p>
-          <p className="mt-1 text-sm text-[var(--color-charcoal)]/70">
-            {isChoiceTier ? "Choose your reward once unlocked" : `${tier.discount_percent}% off your next purchase`}
-          </p>
         </div>
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)]">
           <Gift size={18} />
@@ -59,6 +56,7 @@ export function RewardTierCard({
           {unlocked ? (
             isChoiceTier ? (
               <div className="flex flex-col gap-2">
+                <p className="text-sm text-[var(--color-charcoal)]/70">Choose your reward:</p>
                 {tier.choice_options!.map((option) => (
                   <Button
                     key={option}
@@ -72,9 +70,14 @@ export function RewardTierCard({
                 ))}
               </div>
             ) : (
-              <Button onClick={() => reveal()} disabled={isPending} size="sm">
-                {isPending ? "Generating…" : "Reveal My Code"}
-              </Button>
+              <>
+                <p className="text-sm text-[var(--color-charcoal)]/70">
+                  {tier.discount_percent}% off your next purchase
+                </p>
+                <Button onClick={() => reveal()} disabled={isPending} size="sm">
+                  {isPending ? "Generating…" : "Reveal My Code"}
+                </Button>
+              </>
             )
           ) : (
             <p className="text-xs text-[var(--color-charcoal)]/55">
@@ -102,9 +105,9 @@ export function RewardTierCard({
               "Ready to redeem"
             )}
           </div>
-          {code.chosen_option && (
-            <p className="text-sm font-medium text-[var(--color-charcoal)]">{code.chosen_option}</p>
-          )}
+          <p className="text-sm font-medium text-[var(--color-charcoal)]">
+            {code.chosen_option ?? `${tier.discount_percent}% off your next purchase`}
+          </p>
           <QrCode
             value={`${typeof window !== "undefined" ? window.location.origin : ""}/redeem/${code.code}`}
             size={160}
