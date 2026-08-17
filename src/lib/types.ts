@@ -126,6 +126,9 @@ export interface Profile {
   profile_image: string | null;
   /** ISO date (YYYY-MM-DD) — collected at signup for 21+ age verification and birthday rewards. */
   birth_date: string | null;
+  /** True once the guest has used their one allowed birth_date change — prevents
+   * repeatedly editing it to re-trigger the birthday reward. */
+  birth_date_locked: boolean;
   passport_start_date: string | null;
   created_at: string;
 }

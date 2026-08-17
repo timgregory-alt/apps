@@ -91,6 +91,7 @@ export default async function ProfilePage() {
         <PersonalInfoForm
           initialName={profile?.name ?? ""}
           initialBirthDate={profile?.birth_date ?? ""}
+          birthDateLocked={profile?.birth_date_locked ?? false}
         />
       </div>
 

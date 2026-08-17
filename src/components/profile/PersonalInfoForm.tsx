@@ -11,9 +11,11 @@ const inputClass =
 export function PersonalInfoForm({
   initialName,
   initialBirthDate,
+  birthDateLocked,
 }: {
   initialName: string;
   initialBirthDate: string;
+  birthDateLocked: boolean;
 }) {
   const [name, setName] = useState(initialName);
   const [birthDate, setBirthDate] = useState(initialBirthDate);
@@ -63,8 +65,14 @@ export function PersonalInfoForm({
               setSaved(false);
             }}
             max={new Date().toISOString().slice(0, 10)}
-            className={inputClass}
+            disabled={birthDateLocked}
+            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
           />
+          {birthDateLocked && (
+            <span className="text-xs text-[var(--color-charcoal)]/50">
+              Your birthday can only be set once and is now locked. Contact us if it needs correcting.
+            </span>
+          )}
         </label>
         {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
         {saved && !error && <p className="text-sm text-[var(--color-gold)]">Saved.</p>}

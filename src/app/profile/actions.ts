@@ -16,13 +16,31 @@ export async function updateProfileAction(input: { name: string; birth_date: str
   const name = input.name.trim();
   if (!name) throw new Error("Name is required");
 
-  if (input.birth_date && calculateAge(input.birth_date) < MIN_AGE) {
+  const newBirthDate = input.birth_date || null;
+  if (newBirthDate && calculateAge(newBirthDate) < MIN_AGE) {
     throw new Error(`You must be ${MIN_AGE} or older.`);
+  }
+
+  const { data: current } = await supabase
+    .from("profiles")
+    .select("birth_date, birth_date_locked")
+    .eq("id", user.id)
+    .single();
+
+  const birthDateChanged = (current?.birth_date ?? null) !== newBirthDate;
+  if (birthDateChanged && current?.birth_date_locked) {
+    throw new Error(
+      "Your birthday can only be changed once and has already been set. Contact us if this needs to be corrected."
+    );
   }
 
   const { error } = await supabase
     .from("profiles")
-    .update({ name, birth_date: input.birth_date || null })
+    .update({
+      name,
+      birth_date: newBirthDate,
+      ...(birthDateChanged ? { birth_date_locked: true } : {}),
+    })
     .eq("id", user.id);
   if (error) throw new Error(error.message);
 
