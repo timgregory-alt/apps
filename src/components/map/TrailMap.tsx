@@ -10,7 +10,7 @@ import type { WineryWithStatus } from "@/lib/types";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const MAPBOX_STYLE =
-  process.env.NEXT_PUBLIC_MAPBOX_STYLE || "mapbox://styles/mapbox/streets-v12";
+  process.env.NEXT_PUBLIC_MAPBOX_STYLE || "mapbox://styles/mapbox/light-v11";
 
 /** A pin with a tiny wine glass inside — empty outline when not visited,
  * poured full once it is, echoing the same fill motif used everywhere else
@@ -81,6 +81,20 @@ export function TrailMap({ wineries }: { wineries: WineryWithStatus[] }) {
         return;
       }
       map.addSource("trail-route", { type: "geojson", data: geojson });
+      // A pale casing under the dashed gold line keeps the route legible
+      // over any basemap, and reads as a deliberate trail rather than a
+      // stray GPS trace.
+      map.addLayer({
+        id: "trail-route-casing",
+        type: "line",
+        source: "trail-route",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#faf6ee",
+          "line-width": 6,
+          "line-opacity": 0.75,
+        },
+      });
       map.addLayer({
         id: "trail-route-line",
         type: "line",
@@ -88,9 +102,8 @@ export function TrailMap({ wineries }: { wineries: WineryWithStatus[] }) {
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
           "line-color": "#b0904f",
-          "line-width": 2.5,
-          "line-opacity": 0.8,
-          "line-dasharray": [0.2, 1.6],
+          "line-width": 3.5,
+          "line-dasharray": [0.05, 1.2],
         },
       });
     },
