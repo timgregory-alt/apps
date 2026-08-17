@@ -1,4 +1,4 @@
-import { Clock, Globe, MapPin } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/BrandIcons";
 import { WineryHoursRow } from "@/components/winery/WineryHoursRow";
 import type { Winery, WineryHours } from "@/lib/types";
@@ -53,10 +53,9 @@ function Row({
 
 export function WinerySocialRow({ winery }: { winery: Winery }) {
   const links = [
-    winery.website_url && { href: winery.website_url, icon: Globe, label: "Website" },
     winery.instagram_url && { href: winery.instagram_url, icon: InstagramIcon, label: "Instagram" },
     winery.facebook_url && { href: winery.facebook_url, icon: FacebookIcon, label: "Facebook" },
-  ].filter((l): l is { href: string; icon: typeof Globe; label: string } => !!l);
+  ].filter((l): l is { href: string; icon: typeof InstagramIcon; label: string } => !!l);
 
   if (links.length === 0) return null;
 
