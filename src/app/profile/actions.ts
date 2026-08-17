@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calculateAge } from "@/lib/utils";
+import { LOW_RATING_THRESHOLD } from "@/lib/appRating";
 
 const MIN_AGE = 21;
 
@@ -59,11 +60,16 @@ export async function submitAppRatingAction(rating: number, feedback: string) {
     throw new Error("Rating must be 1-5 stars");
   }
 
+  const trimmedFeedback = feedback.trim();
+  if (rating < LOW_RATING_THRESHOLD && !trimmedFeedback) {
+    throw new Error("Please let us know what went wrong so we can improve.");
+  }
+
   const { error } = await supabase.from("app_ratings").upsert(
     {
       user_id: user.id,
       rating,
-      feedback: feedback.trim() || null,
+      feedback: trimmedFeedback || null,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" }
