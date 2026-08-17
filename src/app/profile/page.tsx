@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -84,6 +85,13 @@ export default async function ProfilePage() {
             <p className="mt-1 text-xs text-[var(--color-charcoal)]/55">{s.label}</p>
           </Card>
         ))}
+      </div>
+
+      <div className="px-6">
+        <PersonalInfoForm
+          initialName={profile?.name ?? ""}
+          initialBirthDate={profile?.birth_date ?? ""}
+        />
       </div>
 
       <div className="px-6">
