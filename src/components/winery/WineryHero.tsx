@@ -1,13 +1,7 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
 import { WineryImage } from "@/components/winery/WineryImage";
+import { WineryVisitedStamp } from "@/components/winery/WineryVisitedStamp";
 import type { WineryWithStatus } from "@/lib/types";
-
-const STATUS_LABEL: Record<WineryWithStatus["status"], string> = {
-  not_visited: "Not Visited",
-  visited: "Visited",
-  completed: "Visited",
-};
 
 export function WineryHero({ winery }: { winery: WineryWithStatus }) {
   const visited = winery.status !== "not_visited";
@@ -25,21 +19,9 @@ export function WineryHero({ winery }: { winery: WineryWithStatus }) {
         ←
       </Link>
 
-      {visited ? (
-        <div
-          className="absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] flex h-[70px] w-[70px] rotate-[-11deg] flex-col items-center justify-center gap-0.5 rounded-full border-[3px] border-[var(--color-gold)] bg-[var(--color-ivory)]/95 text-[var(--color-burgundy)] shadow-md"
-          aria-label="Visited"
-        >
-          <div className="flex h-[56px] w-[56px] flex-col items-center justify-center gap-0.5 rounded-full border border-[var(--color-gold)]/70">
-            <Check size={18} strokeWidth={3} />
-            <span className="text-[0.5rem] font-bold uppercase tracking-[0.14em]">Visited</span>
-          </div>
-        </div>
-      ) : (
-        <span className="absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] rounded-full bg-white/90 px-4 py-1.5 text-sm font-semibold uppercase tracking-wide text-[var(--color-charcoal)]/70 shadow-md">
-          {STATUS_LABEL[winery.status]}
-        </span>
-      )}
+      <div className="absolute right-5 top-[calc(env(safe-area-inset-top)+1rem)] drop-shadow-md">
+        <WineryVisitedStamp visited={visited} />
+      </div>
 
       <div className="absolute inset-x-0 bottom-0 px-6 pb-7">
         <p className="text-[0.7rem] font-medium uppercase tracking-[0.28em] text-[var(--color-gold-pale)]">
