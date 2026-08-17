@@ -15,7 +15,7 @@ import {
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
-import { RewardTierCard } from "@/components/rewards/RewardTierCard";
+import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 
 export default async function RewardsPage() {
   const user = await getCurrentUser();
@@ -95,23 +95,24 @@ export default async function RewardsPage() {
         </Card>
       </div>
 
-      <div className="flex flex-col gap-3 px-6">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
+      <div className="flex flex-col gap-3">
+        <p className="px-6 text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
           Rewards
         </p>
         {sortedTiers.length === 0 ? (
-          <Card className="p-6 text-center text-sm text-[var(--color-charcoal)]/55">
-            No rewards available yet — check back soon.
-          </Card>
+          <div className="px-6">
+            <Card className="p-6 text-center text-sm text-[var(--color-charcoal)]/55">
+              No rewards available yet — check back soon.
+            </Card>
+          </div>
         ) : (
-          sortedTiers.map((tier) => (
-            <RewardTierCard
-              key={tier.id}
-              tier={tier}
+          <div className="px-6">
+            <RewardTierCarousel
+              tiers={sortedTiers}
               pointsTotal={points.total}
-              redemption={redemptionByTier.get(tier.id) ?? null}
+              redemptionByTier={redemptionByTier}
             />
-          ))
+          </div>
         )}
       </div>
 
