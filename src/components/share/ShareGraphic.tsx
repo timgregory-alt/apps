@@ -148,7 +148,7 @@ export const ShareGraphic = forwardRef<HTMLDivElement, ShareGraphicProps>(functi
           color: "rgba(250,246,238,0.6)",
         }}
       >
-        tennesseewinepassport.com
+        tennesseewinetrails.com
       </p>
     </div>
   );

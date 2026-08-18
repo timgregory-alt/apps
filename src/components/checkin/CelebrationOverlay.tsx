@@ -103,7 +103,7 @@ export function CelebrationOverlay({
             className="relative mt-10 flex w-full max-w-xs flex-col items-center gap-5"
           >
             <p className="text-[1.05rem] text-[var(--color-ivory)]/90">
-              Another Tennessee Wine Passport stamp collected.
+              Another Tennessee Wine Trails stamp collected.
             </p>
 
             <div className="w-full">

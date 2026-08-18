@@ -20,7 +20,7 @@ export function ReferralCard({ userId, referralCount }: { userId: string; referr
   async function handleShare() {
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Tennessee Wine Passport", url: link });
+        await navigator.share({ title: "Tennessee Wine Trails", url: link });
         return;
       } catch {
         // user cancelled — fall through to copy

@@ -18,12 +18,12 @@ export function CompletionShareButton({ wineryNames }: { wineryNames: string[] }
         open={open}
         onClose={() => setOpen(false)}
         wineryId={null}
-        headline="I COMPLETED THE TENNESSEE WINE PASSPORT"
+        headline="I COMPLETED THE TENNESSEE WINE TRAILS"
         subheadline="4 / 4 COMPLETE"
         checklist={wineryNames}
         visited={wineryNames.length}
         total={wineryNames.length}
-        shareUrl="https://tennesseewinepassport.com"
+        shareUrl="https://tennesseewinetrails.com"
       />
     </>
   );

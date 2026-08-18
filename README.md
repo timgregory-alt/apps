@@ -1,4 +1,4 @@
-# Tennessee Wine Passport
+# Tennessee Wine Trails
 
 A premium, mobile-first digital passport for touring Tennessee's boutique wineries — check in with GPS, collect an animated stamp, share a story graphic, and unlock a completion badge after visiting every stop on the trail.
 

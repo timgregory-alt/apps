@@ -34,7 +34,7 @@ export function SignupForm() {
       return;
     }
     if (calculateAge(birthDate) < MIN_AGE) {
-      setError(`You must be ${MIN_AGE} or older to create a Tennessee Wine Passport account.`);
+      setError(`You must be ${MIN_AGE} or older to create a Tennessee Wine Trails account.`);
       return;
     }
 

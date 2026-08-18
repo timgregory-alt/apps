@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Tennessee Wine Passport",
-    short_name: "TN Wine Passport",
+    name: "Tennessee Wine Trails",
+    short_name: "TN Wine Trails",
     description: "Four wineries. One Tennessee wine adventure.",
     start_url: "/",
     id: "/",

@@ -63,18 +63,18 @@ export function ShareSheet({
     try {
       if (imageUrl && navigator.canShare) {
         const blob = await (await fetch(imageUrl)).blob();
-        const file = new File([blob], "tennessee-wine-passport.png", { type: "image/png" });
+        const file = new File([blob], "tennessee-wine-trails.png", { type: "image/png" });
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: "Tennessee Wine Passport",
+            title: "Tennessee Wine Trails",
             text: `${subheadline} — ${shareUrl}`,
           });
           return;
         }
       }
       if (navigator.share) {
-        await navigator.share({ title: "Tennessee Wine Passport", text: subheadline, url: shareUrl });
+        await navigator.share({ title: "Tennessee Wine Trails", text: subheadline, url: shareUrl });
       }
     } catch {
       // user cancelled — no-op
@@ -86,7 +86,7 @@ export function ShareSheet({
     if (!imageUrl) return;
     const a = document.createElement("a");
     a.href = imageUrl;
-    a.download = "tennessee-wine-passport.png";
+    a.download = "tennessee-wine-trails.png";
     a.click();
   }
 
@@ -117,7 +117,7 @@ export function ShareSheet({
       <div className="relative mx-auto mt-4 aspect-[9/16] w-40 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-charcoal)] shadow-lg">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="Your Tennessee Wine Passport share graphic" className="h-full w-full object-cover" />
+          <img src={imageUrl} alt="Your Tennessee Wine Trails share graphic" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-white/50">
             {generating ? "Preparing your graphic…" : ""}

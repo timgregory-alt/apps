@@ -26,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <header className="border-b border-[var(--color-line)] bg-[var(--color-charcoal)] px-6 py-4 text-[var(--color-ivory)]">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <Link href="/admin" className="font-serif-display text-lg">
-            TN Wine Passport · Admin
+            TN Wine Trails · Admin
           </Link>
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/admin" className="hover:text-[var(--color-gold)]">

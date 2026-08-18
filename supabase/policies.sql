@@ -1,4 +1,4 @@
--- Tennessee Wine Passport — Row Level Security
+-- Tennessee Wine Trails — Row Level Security
 -- Run after schema.sql.
 
 -- ---------------------------------------------------------------------------

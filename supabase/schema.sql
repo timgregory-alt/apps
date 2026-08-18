@@ -1,4 +1,4 @@
--- Tennessee Wine Passport — core schema
+-- Tennessee Wine Trails — core schema
 -- Run this in the Supabase SQL editor (or via `supabase db push`) before policies.sql and seed.sql.
 
 create extension if not exists "pgcrypto";

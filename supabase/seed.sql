@@ -1,11 +1,11 @@
--- Tennessee Wine Passport — Founding Trail seed data
+-- Tennessee Wine Trails — Founding Trail seed data
 -- Run after schema.sql and policies.sql. Safe to re-run (upserts on slug).
 
 insert into public.trails (name, slug, description, active)
 values (
-  'Tennessee Wine Passport — Founding Trail',
+  'Tennessee Wine Trails — Founding Trail',
   'founding-trail',
-  'The original four stops of the Tennessee Wine Passport: a countryside tour through Middle Tennessee''s boutique wineries.',
+  'The original four stops of the Tennessee Wine Trails: a countryside tour through Middle Tennessee''s boutique wineries.',
   true
 )
 on conflict (slug) do update set

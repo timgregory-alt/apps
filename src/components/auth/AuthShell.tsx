@@ -20,7 +20,7 @@ export function AuthShell({
           href="/"
           className="text-[0.7rem] font-medium uppercase tracking-[0.28em] text-[var(--color-gold)]"
         >
-          Tennessee Wine Passport
+          Tennessee Wine Trails
         </Link>
         <p className="mt-3 font-serif-display text-xs uppercase tracking-[0.2em] text-[var(--color-charcoal)]/40">
           {eyebrow}

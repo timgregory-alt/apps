@@ -19,13 +19,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Tennessee Wine Passport",
+  title: "Tennessee Wine Trails",
   description: "Four wineries. One Tennessee wine adventure.",
-  applicationName: "Tennessee Wine Passport",
+  applicationName: "Tennessee Wine Trails",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "TN Wine Passport",
+    title: "TN Wine Trails",
   },
 };
 

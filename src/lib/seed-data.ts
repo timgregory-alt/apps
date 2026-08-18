@@ -16,10 +16,10 @@ import { feetToMeters } from "./geo";
 
 export const FOUNDING_TRAIL: Trail = {
   id: "trail-founding",
-  name: "Tennessee Wine Passport — Founding Trail",
+  name: "Tennessee Wine Trails — Founding Trail",
   slug: "founding-trail",
   description:
-    "The original four stops of the Tennessee Wine Passport: a countryside tour through Middle Tennessee's boutique wineries.",
+    "The original four stops of the Tennessee Wine Trails: a countryside tour through Middle Tennessee's boutique wineries.",
   image: null,
   active: true,
   created_at: "2026-01-01T00:00:00.000Z",

@@ -27,9 +27,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const winery = await getWineryBySlug(slug);
-  if (!winery) return { title: "Winery Not Found — Tennessee Wine Passport" };
+  if (!winery) return { title: "Winery Not Found — Tennessee Wine Trails" };
   return {
-    title: `${winery.name} — Tennessee Wine Passport`,
+    title: `${winery.name} — Tennessee Wine Trails`,
     description: winery.description,
   };
 }

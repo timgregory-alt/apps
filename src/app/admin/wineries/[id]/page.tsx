@@ -23,7 +23,7 @@ export default async function EditWineryPage({
     getWineryWinesAdmin(winery.id),
   ]);
   const boundAction = updateWineryAction.bind(null, winery.id);
-  const qrUrl = `https://tennesseewinepassport.com/winery/${winery.slug}`;
+  const qrUrl = `https://tennesseewinetrails.com/winery/${winery.slug}`;
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">

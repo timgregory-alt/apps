@@ -24,7 +24,7 @@ export default async function PassportPage() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="Tennessee Wine Passport" title="Your Tennessee Wine Passport" />
+      <Header eyebrow="Tennessee Wine Trails" title="Your Wine Passport" />
 
       <div className="mx-auto w-full max-w-md px-6">
         <div className="flex items-baseline justify-between">
