@@ -17,6 +17,7 @@ import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
 import { AppRatingCard } from "@/components/profile/AppRatingCard";
 import { BugReportCard } from "@/components/profile/BugReportCard";
 import { ReferralCard } from "@/components/profile/ReferralCard";
+import { SubscriptionUpsellCard } from "@/components/profile/SubscriptionUpsellCard";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -47,6 +48,10 @@ export default async function ProfilePage() {
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
       <Header eyebrow="My Passport" title={`${possessive} Wine Passport`} />
+
+      <div className="px-6">
+        <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} />
+      </div>
 
       <div className="px-6">
         <div className="flex items-baseline justify-between">

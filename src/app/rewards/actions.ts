@@ -57,7 +57,7 @@ export async function generateRedemptionAction(
       throw new Error("This reward only unlocks on your birthday");
     }
   } else {
-    const points = computeRewardsPoints(wineries, wines, referralCount);
+    const points = computeRewardsPoints(wineries, wines, referralCount, profile?.is_subscriber ?? false);
     if (points.total < tier.points_required) throw new Error("Not enough points yet");
   }
 

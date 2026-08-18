@@ -5,6 +5,10 @@ export const POINTS_PER_CHECKIN = 25;
 export const POINTS_PER_WINE_RATED = 5;
 export const COMPLETION_BONUS = 100;
 export const POINTS_PER_REFERRAL = 50;
+/** Subscribers earn this much more on every check-in, wine rating, and
+ * referral. Doesn't apply to the one-time completion bonus — that's a flat
+ * achievement reward, not an activity that scales with a multiplier. */
+export const SUBSCRIBER_MULTIPLIER = 1.5;
 
 export interface RewardsPoints {
   total: number;
@@ -20,18 +24,20 @@ export interface RewardsPoints {
 export function computeRewardsPoints(
   wineries: WineryWithStatus[],
   wines: WineWithTasting[],
-  referrals = 0
+  referrals = 0,
+  isSubscriber = false
 ): RewardsPoints {
   const checkins = visitedCount(wineries);
   const winesRated = wines.filter((w) => w.tasting != null).length;
   const completionBonus = isTrailComplete(wineries) ? COMPLETION_BONUS : 0;
+  const multiplier = isSubscriber ? SUBSCRIBER_MULTIPLIER : 1;
 
   return {
     total:
-      checkins * POINTS_PER_CHECKIN +
-      winesRated * POINTS_PER_WINE_RATED +
-      completionBonus +
-      referrals * POINTS_PER_REFERRAL,
+      Math.round(
+        (checkins * POINTS_PER_CHECKIN + winesRated * POINTS_PER_WINE_RATED + referrals * POINTS_PER_REFERRAL) *
+          multiplier
+      ) + completionBonus,
     checkins,
     winesRated,
     completionBonus,

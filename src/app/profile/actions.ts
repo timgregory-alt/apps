@@ -79,6 +79,28 @@ export async function submitAppRatingAction(rating: number, feedback: string) {
   revalidatePath("/profile");
 }
 
+/** Self-serve toggle for the subscriber preview — no billing exists yet, so
+ * this just flips the same is_subscriber flag an admin can also set from
+ * the Members page. RLS already allows a user to update their own profile
+ * row, so no separate policy is needed for this one. */
+export async function toggleSubscriptionAction(isSubscriber: boolean) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Sign in to manage your subscription");
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ is_subscriber: isSubscriber })
+    .eq("id", user.id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/profile");
+  revalidatePath("/rewards");
+  revalidatePath("/");
+}
+
 /** Submits a "something's broken" report from the Profile page. */
 export async function submitBugReportAction(description: string, pageUrl: string) {
   const supabase = await createClient();

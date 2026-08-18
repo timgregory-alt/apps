@@ -54,7 +54,7 @@ export default async function RewardsPage() {
     getQualifyingReferralCount(),
   ]);
 
-  const points = computeRewardsPoints(wineries, wines, referralCount);
+  const points = computeRewardsPoints(wineries, wines, referralCount, profile?.is_subscriber ?? false);
   const ladderTiers = tiers.filter((t) => !t.birthday_only);
   const redemptionByTier = new Map(
     redemptions.filter((r) => r.period_key === "").map((r) => [r.tier_id, r])
