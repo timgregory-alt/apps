@@ -33,7 +33,10 @@ export function SubscriptionUpsellCard({ isSubscriber }: { isSubscriber: boolean
   }
 
   return (
-    <Card className="texture-grain relative flex flex-col gap-3 overflow-hidden bg-[var(--color-burgundy)] p-5 text-[var(--color-ivory)]">
+    <Card
+      id="premium"
+      className="texture-grain relative flex flex-col gap-3 overflow-hidden bg-[var(--color-burgundy)] p-5 text-[var(--color-ivory)]"
+    >
       <PassportCoverFrame />
 
       <div className="relative flex items-center gap-2">

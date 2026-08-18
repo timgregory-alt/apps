@@ -16,6 +16,7 @@ import {
   POINTS_PER_WINE_RATED,
   COMPLETION_BONUS,
   POINTS_PER_REFERRAL,
+  SUBSCRIBER_MULTIPLIER,
 } from "@/lib/rewards";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
@@ -119,7 +120,7 @@ export default async function RewardsPage() {
                 +{COMPLETION_BONUS} pts
               </span>
             </li>
-            <li className="py-2 last:pb-0">
+            <li className="py-2">
               <Link
                 href="/profile#referral"
                 className="flex items-center justify-between gap-3 -mx-1 rounded-lg px-1 py-0.5 transition-colors hover:bg-black/5"
@@ -129,6 +130,19 @@ export default async function RewardsPage() {
                 </span>
                 <span className="text-sm font-medium text-[var(--color-burgundy)]">
                   +{POINTS_PER_REFERRAL} pts
+                </span>
+              </Link>
+            </li>
+            <li className="py-2 last:pb-0">
+              <Link
+                href="/profile#premium"
+                className="flex items-center justify-between gap-3 -mx-1 rounded-lg px-1 py-0.5 transition-colors hover:bg-black/5"
+              >
+                <span className="text-sm text-[var(--color-charcoal)]/80 underline decoration-[var(--color-charcoal)]/25 underline-offset-2">
+                  {profile?.is_subscriber ? "You're a subscriber" : "Go Premium"}
+                </span>
+                <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                  {SUBSCRIBER_MULTIPLIER}x pts
                 </span>
               </Link>
             </li>
