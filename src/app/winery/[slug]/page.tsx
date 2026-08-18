@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import {
   getCurrentUser,
+  getProfile,
   getWineriesWithStatus,
   getWineryBySlug,
   getWinesWithTastings,
@@ -18,9 +19,9 @@ import { DirectionsButton } from "@/components/winery/DirectionsButton";
 import { WineClubSection } from "@/components/wineclub/WineClubSection";
 import { CheckInFlow } from "@/components/checkin/CheckInFlow";
 import { WineTastingList } from "@/components/tasting/WineTastingList";
-import { LinkButton } from "@/components/ui/Button";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { SectionEyebrow } from "@/components/ui/Card";
-import { Star } from "lucide-react";
+import { Lock, Star } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -47,6 +48,9 @@ export default async function WineryDetailPage({
 
   const user = await getCurrentUser();
   if (!user) redirect(`/login?redirectTo=${encodeURIComponent(`/winery/${slug}`)}`);
+
+  const profile = await getProfile(user.id);
+  const isSubscriber = profile?.is_subscriber ?? false;
 
   const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
     getWineriesWithStatus(user.id),
@@ -91,10 +95,20 @@ export default async function WineryDetailPage({
         </div>
 
         {winery.yelp_url && (
-          <LinkButton href={winery.yelp_url} target="_blank" rel="noopener noreferrer" variant="outline" fullWidth>
-            <Star size={16} strokeWidth={2} />
-            Review on Yelp
-          </LinkButton>
+          isSubscriber ? (
+            <LinkButton href={winery.yelp_url} target="_blank" rel="noopener noreferrer" variant="outline" fullWidth>
+              <Star size={16} strokeWidth={2} />
+              Review on Yelp
+            </LinkButton>
+          ) : (
+            <div className="flex flex-col items-center gap-1.5">
+              <Button variant="outline" fullWidth disabled>
+                <Lock size={16} strokeWidth={2} />
+                Review on Yelp
+              </Button>
+              <p className="text-xs text-[var(--color-charcoal)]/45">Subscribers only</p>
+            </div>
+          )
         )}
 
         <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
