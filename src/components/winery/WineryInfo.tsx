@@ -1,7 +1,5 @@
-import { Clock, MapPin } from "lucide-react";
 import { InstagramIcon, FacebookIcon } from "@/components/ui/BrandIcons";
-import { WineryHoursRow } from "@/components/winery/WineryHoursRow";
-import type { Winery, WineryHours } from "@/lib/types";
+import type { Winery } from "@/lib/types";
 
 export function WineryDescription({ winery }: { winery: Winery }) {
   return (
@@ -9,44 +7,6 @@ export function WineryDescription({ winery }: { winery: Winery }) {
       <p className="text-[1.05rem] leading-relaxed text-[var(--color-charcoal)]/80">
         {winery.description}
       </p>
-    </div>
-  );
-}
-
-export function WineryDetailsList({
-  winery,
-  hoursSeasons = [],
-}: {
-  winery: Winery;
-  hoursSeasons?: WineryHours[];
-}) {
-  return (
-    <dl className="flex flex-col divide-y divide-[var(--color-line)] rounded-2xl border border-[var(--color-line)] bg-white/60">
-      <Row icon={MapPin} label="Address" value={winery.address} />
-      <WineryHoursRow fallbackHours={winery.hours} seasons={hoursSeasons} />
-      {winery.phone && <Row icon={Clock} label="Phone" value={winery.phone} />}
-    </dl>
-  );
-}
-
-function Row({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 px-4 py-3.5">
-      <Icon size={17} strokeWidth={1.75} className="mt-0.5 shrink-0 text-[var(--color-gold)]" />
-      <div className="min-w-0">
-        <dt className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
-          {label}
-        </dt>
-        <dd className="mt-0.5 text-sm text-[var(--color-charcoal)]/85">{value}</dd>
-      </div>
     </div>
   );
 }

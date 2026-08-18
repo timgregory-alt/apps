@@ -10,11 +10,8 @@ import {
   getWineryHours,
 } from "@/lib/data";
 import { WineryHero } from "@/components/winery/WineryHero";
-import {
-  WineryDescription,
-  WineryDetailsList,
-  WinerySocialRow,
-} from "@/components/winery/WineryInfo";
+import { WineryDescription, WinerySocialRow } from "@/components/winery/WineryInfo";
+import { WineryDetailsList } from "@/components/winery/WineryDetailsList";
 import { DirectionsButton } from "@/components/winery/DirectionsButton";
 import { WineClubSection } from "@/components/wineclub/WineClubSection";
 import { CheckInFlow } from "@/components/checkin/CheckInFlow";
