@@ -45,6 +45,8 @@ export interface Winery {
   wine_menu_url: string | null;
   /** Optional page to check for upcoming events. Falls back to website_url when unset. */
   events_page_url: string | null;
+  /** Optional link to this winery's Yelp page, for the "Review on Yelp" button. */
+  yelp_url: string | null;
 }
 
 export interface WineSyncLogEntry {

@@ -20,6 +20,7 @@ import { CheckInFlow } from "@/components/checkin/CheckInFlow";
 import { WineTastingList } from "@/components/tasting/WineTastingList";
 import { LinkButton } from "@/components/ui/Button";
 import { SectionEyebrow } from "@/components/ui/Card";
+import { Star } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -89,6 +90,13 @@ export default async function WineryDetailPage({
           )}
         </div>
 
+        {winery.yelp_url && (
+          <LinkButton href={winery.yelp_url} target="_blank" rel="noopener noreferrer" variant="outline" fullWidth>
+            <Star size={16} strokeWidth={2} />
+            Review on Yelp
+          </LinkButton>
+        )}
+
         <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 
         <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn />
@@ -120,7 +128,7 @@ export default async function WineryDetailPage({
             <WineTastingList
               initialWines={meadWines}
               wineryId={winery.id}
-              isLoggedIn={!!user}
+              isLoggedIn
               redirectTo={`/winery/${winery.slug}`}
               showProgress={false}
               allowCustom={false}

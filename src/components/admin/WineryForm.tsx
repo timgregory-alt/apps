@@ -129,6 +129,10 @@ export function WineryForm({
           <span className={labelTextClass}>Facebook URL</span>
           <input name="facebook_url" defaultValue={winery?.facebook_url ?? ""} className={inputClass} />
         </label>
+        <label className={labelClass}>
+          <span className={labelTextClass}>Yelp URL</span>
+          <input name="yelp_url" defaultValue={winery?.yelp_url ?? ""} className={inputClass} />
+        </label>
       </div>
 
       <div className="rounded-xl border border-[var(--color-gold)]/30 bg-[var(--color-gold-pale)]/20 p-4">
