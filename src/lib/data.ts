@@ -22,6 +22,7 @@ import type {
   WineWithTasting,
   Winery,
   WineryEvent,
+  LockableWineryEvent,
   WineryEventGroup,
   WineryHours,
   WineryWithStatus,
@@ -358,20 +359,21 @@ const EARLY_ACCESS_HOURS = 72;
  * Explore visitor too. Grouped rather than a single soonest-first list so a
  * winery with lots of upcoming events can't crowd the others out.
  *
- * Non-subscribers don't see an event until it's past its early-access
- * window, giving subscribers a head start without needing the winery to
- * designate anything as exclusive. */
+ * Non-subscribers still see that an event exists during its early-access
+ * window (date shown, details locked) rather than it being invisible —
+ * a hidden event just looks like a bug, a locked one reads as a real
+ * feature and doubles as an upsell. */
 export async function getUpcomingEventsByWinery(isSubscriber = false): Promise<WineryEventGroup[]> {
   const [events, wineries] = await Promise.all([getAllWineryEvents(), getFoundingTrailWineries()]);
   const todayISO = new Date().toISOString().slice(0, 10);
   const earlyAccessCutoff = Date.now() - EARLY_ACCESS_HOURS * 60 * 60 * 1000;
 
-  const eventsByWinery = new Map<string, WineryEvent[]>();
+  const eventsByWinery = new Map<string, LockableWineryEvent[]>();
   for (const e of events) {
     if (e.event_date < todayISO) continue;
-    if (!isSubscriber && new Date(e.created_at).getTime() > earlyAccessCutoff) continue;
+    const locked = !isSubscriber && new Date(e.created_at).getTime() > earlyAccessCutoff;
     const list = eventsByWinery.get(e.winery_id) ?? [];
-    list.push(e);
+    list.push({ ...e, locked });
     eventsByWinery.set(e.winery_id, list);
   }
 

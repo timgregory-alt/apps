@@ -920,6 +920,16 @@ export const SEED_WINERY_EVENTS: WineryEvent[] = [
     source_url: "https://woodfeatherfarm.com",
     created_at: "2026-08-01T00:00:00.000Z",
   },
+  {
+    id: "event-grinders-newrelease",
+    winery_id: "winery-grinders-switch",
+    title: "New Release Tasting Night",
+    description: "First pour of the newest vintage, straight off the bottling line.",
+    event_date: "2026-09-06",
+    event_time: "6:00 PM – 9:00 PM",
+    source_url: "https://gswinery.com",
+    created_at: "2026-08-16T12:00:00.000Z",
+  },
 ];
 
 export const SEED_REWARD_TIERS: RewardTier[] = [

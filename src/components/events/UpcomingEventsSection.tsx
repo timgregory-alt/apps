@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import type { WineryEventGroup } from "@/lib/types";
@@ -70,12 +70,40 @@ export function UpcomingEventsSection({ groups }: { groups: WineryEventGroup[] }
                 <ul className="mt-2 flex min-h-0 flex-1 flex-col divide-y divide-[var(--color-line)] overflow-y-auto">
                   {group.events.map((event) => {
                     const { month, day } = formatEventDateParts(event.event_date);
+                    const dateBadge = (
+                      <div
+                        className={cn(
+                          "flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl",
+                          event.locked
+                            ? "bg-black/5 text-[var(--color-charcoal)]/40"
+                            : "bg-[var(--color-gold-pale)]/40 text-[var(--color-burgundy)]"
+                        )}
+                      >
+                        <span className="text-[0.6rem] font-semibold tracking-wide">{month}</span>
+                        <span className="font-serif-display text-lg leading-none">{day}</span>
+                      </div>
+                    );
+
+                    if (event.locked) {
+                      return (
+                        <li key={event.id}>
+                          <Link
+                            href="/profile#premium"
+                            className="flex items-center gap-3 py-2.5"
+                          >
+                            {dateBadge}
+                            <div className="flex min-w-0 items-center gap-1.5 text-[var(--color-charcoal)]/45">
+                              <Lock size={13} strokeWidth={2} />
+                              <span className="truncate text-sm">Subscribers only</span>
+                            </div>
+                          </Link>
+                        </li>
+                      );
+                    }
+
                     return (
                       <li key={event.id} className="flex items-center gap-3 py-2.5">
-                        <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--color-gold-pale)]/40 text-[var(--color-burgundy)]">
-                          <span className="text-[0.6rem] font-semibold tracking-wide">{month}</span>
-                          <span className="font-serif-display text-lg leading-none">{day}</span>
-                        </div>
+                        {dateBadge}
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">
                             {event.title}

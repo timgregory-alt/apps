@@ -72,13 +72,19 @@ export interface WineryEvent {
   created_at: string;
 }
 
+/** An event still within its early-access window for a non-subscriber
+ * viewer — the date shows, but the details stay locked behind Premium. */
+export interface LockableWineryEvent extends WineryEvent {
+  locked: boolean;
+}
+
 /** One winery's upcoming events (may be empty) — the shape the Explore
  * page's by-winery events carousel consumes, one slide per winery. */
 export interface WineryEventGroup {
   winery_id: UUID;
   winery_name: string;
   winery_slug: string;
-  events: WineryEvent[];
+  events: LockableWineryEvent[];
 }
 
 export interface EventSyncLogEntry {
