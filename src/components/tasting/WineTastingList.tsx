@@ -51,7 +51,15 @@ export function WineTastingList({
     const q = query.trim().toLowerCase();
     return wines.filter((w) => {
       if (activeStyle !== "all" && w.style !== activeStyle) return false;
-      if (q && !w.name.toLowerCase().includes(q) && !w.varietal.toLowerCase().includes(q)) return false;
+      if (
+        q &&
+        !w.name.toLowerCase().includes(q) &&
+        !w.varietal.toLowerCase().includes(q) &&
+        !w.tasting_notes.toLowerCase().includes(q) &&
+        !(w.food_pairing?.toLowerCase().includes(q) ?? false)
+      ) {
+        return false;
+      }
       return true;
     });
   }, [wines, query, activeStyle]);
@@ -151,7 +159,7 @@ export function WineTastingList({
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search wines…"
+              placeholder="Search by taste, pairing, name…"
               className="w-full rounded-full border border-[var(--color-line)] bg-white/70 py-2 pl-9 pr-3 text-sm text-[var(--color-charcoal)] outline-none focus:border-[var(--color-gold)]"
             />
           </div>
