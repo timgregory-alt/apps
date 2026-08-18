@@ -349,17 +349,27 @@ async function getAllWineryEvents(): Promise<WineryEvent[]> {
   }
 }
 
+/** New events stay subscriber-only for this long after being added, before
+ * becoming visible to everyone. */
+const EARLY_ACCESS_HOURS = 72;
+
 /** Upcoming events grouped one entry per winery (trail order, including
  * wineries with none scheduled) — public, so it's fine to show a logged-out
  * Explore visitor too. Grouped rather than a single soonest-first list so a
- * winery with lots of upcoming events can't crowd the others out. */
-export async function getUpcomingEventsByWinery(): Promise<WineryEventGroup[]> {
+ * winery with lots of upcoming events can't crowd the others out.
+ *
+ * Non-subscribers don't see an event until it's past its early-access
+ * window, giving subscribers a head start without needing the winery to
+ * designate anything as exclusive. */
+export async function getUpcomingEventsByWinery(isSubscriber = false): Promise<WineryEventGroup[]> {
   const [events, wineries] = await Promise.all([getAllWineryEvents(), getFoundingTrailWineries()]);
   const todayISO = new Date().toISOString().slice(0, 10);
+  const earlyAccessCutoff = Date.now() - EARLY_ACCESS_HOURS * 60 * 60 * 1000;
 
   const eventsByWinery = new Map<string, WineryEvent[]>();
   for (const e of events) {
     if (e.event_date < todayISO) continue;
+    if (!isSubscriber && new Date(e.created_at).getTime() > earlyAccessCutoff) continue;
     const list = eventsByWinery.get(e.winery_id) ?? [];
     list.push(e);
     eventsByWinery.set(e.winery_id, list);

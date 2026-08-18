@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
-import type { Winery, Wine, RewardTier } from "@/lib/types";
+import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
 
 export async function isCurrentUserAdmin(): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
@@ -301,19 +301,22 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
 }
 
 export interface MemberRow {
+  id: UUID;
   name: string | null;
   email: string | null;
+  is_subscriber: boolean;
   created_at: string;
 }
 
-/** All signed-up members (name + email), oldest first — used for the admin CSV export. */
+/** All signed-up members, oldest first — used for the admin CSV export and
+ * the Members page. */
 export async function getAllMembersAdmin(): Promise<MemberRow[]> {
   if (!isSupabaseConfigured) return [];
   try {
     const supabase = await createClient();
     const { data } = await supabase
       .from("profiles")
-      .select("name, email, created_at")
+      .select("id, name, email, is_subscriber, created_at")
       .order("created_at", { ascending: true });
     return (data as MemberRow[]) ?? [];
   } catch {

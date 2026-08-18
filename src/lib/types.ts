@@ -189,6 +189,9 @@ export interface Profile {
   birth_date_locked: boolean;
   /** The id of the guest who referred this account, if any — set once at signup. */
   referred_by: UUID | null;
+  /** Manually toggled by an admin for now — stands in for a real subscription
+   * until billing exists. Gates things like early access to new events. */
+  is_subscriber: boolean;
   passport_start_date: string | null;
   created_at: string;
 }

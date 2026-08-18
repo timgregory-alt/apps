@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import {
   getCurrentUser,
+  getProfile,
   getTrail,
   getWineriesWithStatus,
   getWinesWithTastings,
@@ -20,11 +21,12 @@ import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection
 
 export default async function HomePage() {
   const user = await getCurrentUser();
+  const profile = user ? await getProfile(user.id) : null;
   const [trail, wineries, wines, eventGroups] = await Promise.all([
     getTrail(),
     getWineriesWithStatus(user?.id ?? null),
     getWinesWithTastings(user?.id ?? null),
-    getUpcomingEventsByWinery(),
+    getUpcomingEventsByWinery(profile?.is_subscriber ?? false),
   ]);
   const visited = visitedCount(wineries);
 

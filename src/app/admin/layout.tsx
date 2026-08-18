@@ -38,6 +38,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin/rewards" className="hover:text-[var(--color-gold)]">
               Rewards
             </Link>
+            <Link href="/admin/members" className="hover:text-[var(--color-gold)]">
+              Members
+            </Link>
             <Link href="/" className="text-[var(--color-ivory)]/60 hover:text-[var(--color-gold)]">
               Exit Admin
             </Link>
