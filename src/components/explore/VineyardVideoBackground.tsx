@@ -5,11 +5,9 @@ import { useEffect, useRef } from "react";
 /** Fixed, full-viewport looping video behind the Explore page's content.
  * Muted/autoplay/playsInline so mobile browsers allow it without a user
  * gesture. Paused (falls back to the poster frame) for guests who prefer
- * reduced motion. Heavily blurred and scaled up so the source footage
- * (a close-up hand/glass shot, not a landscape) reads as a soft, shifting
- * wash of vineyard greens and wine reds instead of a literal scene. No
- * scrim overlay — the video shows through at full strength; cards rely on
- * their own translucent white background for text contrast. */
+ * reduced motion. No scrim overlay and no blur — the video shows through
+ * at full strength; cards rely on their own translucent white background
+ * for text contrast. */
 export function VineyardVideoBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -22,7 +20,7 @@ export function VineyardVideoBackground() {
     <div className="fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
       <video
         ref={videoRef}
-        className="h-full w-full scale-110 object-cover blur-2xl"
+        className="h-full w-full object-cover"
         autoPlay
         muted
         loop
