@@ -7,8 +7,9 @@ import { useEffect, useRef } from "react";
  * gesture. Paused (falls back to the poster frame) for guests who prefer
  * reduced motion. Heavily blurred and scaled up so the source footage
  * (a close-up hand/glass shot, not a landscape) reads as a soft, shifting
- * wash of vineyard greens and wine reds instead of a literal scene — and a
- * scrim overlay on top keeps card/text contrast readable. */
+ * wash of vineyard greens and wine reds instead of a literal scene. No
+ * scrim overlay — the video shows through at full strength; cards rely on
+ * their own translucent white background for text contrast. */
 export function VineyardVideoBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -31,8 +32,6 @@ export function VineyardVideoBackground() {
       >
         <source src="/video/explore-vineyard.mp4" type="video/mp4" />
       </video>
-      <div className="absolute inset-0 bg-[var(--color-ivory)]/62" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-ivory)] via-transparent to-[var(--color-ivory)]" />
     </div>
   );
 }
