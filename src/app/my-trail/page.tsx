@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   getCurrentUser,
   getWineriesWithStatus,
@@ -11,6 +12,7 @@ import { MyTrailEntry } from "@/components/my-trail/MyTrailEntry";
 import { CompletionBanner } from "@/components/completion/CompletionBanner";
 import { WineTastingSection } from "@/components/tasting/WineTastingSection";
 import { getWineryTastingProgress } from "@/lib/recommendations";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function MyTrailPage() {
   const user = await getCurrentUser();
@@ -23,34 +25,41 @@ export default async function MyTrailPage() {
   const complete = isTrailComplete(wineries);
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="Tennessee Wine Trails" title="Your Trail" />
+    <>
+      <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
+        <Header eyebrow="Tennessee Wine Trails" title="Your Trail" />
 
-      <div className="mx-auto w-full max-w-md px-6">
-        <div className="flex items-baseline justify-between">
-          <p className="font-serif-display text-lg text-[var(--color-charcoal)]">
-            {visited} of {wineries.length} Stops Complete
-          </p>
-        </div>
-        <ProgressBar value={visited} max={wineries.length} className="mt-3" />
-      </div>
-
-      {complete && (
         <div className="mx-auto w-full max-w-md px-6">
-          <CompletionBanner />
+          <div className="flex items-baseline justify-between">
+            <p className="font-serif-display text-lg text-[var(--color-charcoal)]">
+              {visited} of {wineries.length} Stops Complete
+            </p>
+          </div>
+          <ProgressBar value={visited} max={wineries.length} className="mt-3" />
         </div>
+
+        {complete && (
+          <div className="mx-auto w-full max-w-md px-6">
+            <CompletionBanner />
+          </div>
+        )}
+
+        <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-6">
+          {wineries.map((w) => (
+            <MyTrailEntry key={w.id} winery={w} tastingProgress={getWineryTastingProgress(wines, w.id)} />
+          ))}
+        </div>
+
+        <div className="mx-auto w-full max-w-md px-6">
+          <div className="gold-divider mb-8" />
+          <WineTastingSection wines={wines} wineries={wineries} customTastings={customTastings} />
+        </div>
+      </main>
+      {!user && (
+        <Suspense>
+          <AuthModal />
+        </Suspense>
       )}
-
-      <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-6">
-        {wineries.map((w) => (
-          <MyTrailEntry key={w.id} winery={w} tastingProgress={getWineryTastingProgress(wines, w.id)} />
-        ))}
-      </div>
-
-      <div className="mx-auto w-full max-w-md px-6">
-        <div className="gold-divider mb-8" />
-        <WineTastingSection wines={wines} wineries={wineries} customTastings={customTastings} />
-      </div>
-    </main>
+    </>
   );
 }

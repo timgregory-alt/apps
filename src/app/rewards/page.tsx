@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   getCurrentUser,
@@ -20,29 +21,31 @@ import {
 } from "@/lib/rewards";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
-import { LinkButton } from "@/components/ui/Button";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function RewardsPage() {
   const user = await getCurrentUser();
 
   if (!user) {
     return (
-      <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-        <Header eyebrow="Rewards" title="Your Rewards" />
-        <div className="px-6">
-          <Card className="flex flex-col items-center gap-3 p-6 text-center">
-            <p className="text-sm text-[var(--color-charcoal)]/70">
-              Sign in to start earning points for check-ins, wine ratings, and completing the trail.
-            </p>
-            <LinkButton href="/login" size="sm">
-              Sign In
-            </LinkButton>
-          </Card>
-        </div>
-      </main>
+      <>
+        <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
+          <Header eyebrow="Rewards" title="Your Rewards" />
+          <div className="px-6">
+            <Card className="flex flex-col items-center gap-3 p-6 text-center">
+              <p className="text-sm text-[var(--color-charcoal)]/70">
+                Sign up to start earning points for check-ins, wine ratings, and completing the trail.
+              </p>
+            </Card>
+          </div>
+        </main>
+        <Suspense>
+          <AuthModal />
+        </Suspense>
+      </>
     );
   }
 

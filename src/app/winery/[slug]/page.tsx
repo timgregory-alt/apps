@@ -1,4 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import {
   getCurrentUser,
@@ -19,6 +20,7 @@ import { WineTastingList } from "@/components/tasting/WineTastingList";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { SectionEyebrow } from "@/components/ui/Card";
 import { Lock, Star } from "lucide-react";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export async function generateMetadata({
   params,
@@ -44,15 +46,13 @@ export default async function WineryDetailPage({
   if (!winery) notFound();
 
   const user = await getCurrentUser();
-  if (!user) redirect(`/login?redirectTo=${encodeURIComponent(`/winery/${slug}`)}`);
-
-  const profile = await getProfile(user.id);
+  const profile = user ? await getProfile(user.id) : null;
   const isSubscriber = profile?.is_subscriber ?? false;
 
   const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
-    getWineriesWithStatus(user.id),
-    getWinesWithTastings(user.id),
-    getCustomWineTastings(user.id),
+    getWineriesWithStatus(user?.id ?? null),
+    getWinesWithTastings(user?.id ?? null),
+    user ? getCustomWineTastings(user.id) : Promise.resolve([]),
     getWineryHours(winery.id),
   ]);
   const wineryWithStatus = wineries.find((w) => w.id === winery.id) ?? {
@@ -66,6 +66,7 @@ export default async function WineryDetailPage({
   const wineryCustomTastings = customTastings.filter((t) => t.winery_id === winery.id);
 
   return (
+    <>
     <main className="mx-auto flex max-w-md flex-col pb-10">
       <WineryHero winery={wineryWithStatus} />
 
@@ -110,7 +111,7 @@ export default async function WineryDetailPage({
 
         <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
 
-        <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn />
+        <CheckInFlow winery={wineryWithStatus} allWineries={wineries} isLoggedIn={!!user} />
 
         <div>
           <SectionEyebrow>Wine Tasting</SectionEyebrow>
@@ -121,7 +122,7 @@ export default async function WineryDetailPage({
             initialWines={wineryWines}
             initialCustomTastings={wineryCustomTastings}
             wineryId={winery.id}
-            isLoggedIn
+            isLoggedIn={!!user}
             redirectTo={`/winery/${winery.slug}`}
             showProgress={false}
           />
@@ -139,7 +140,7 @@ export default async function WineryDetailPage({
             <WineTastingList
               initialWines={meadWines}
               wineryId={winery.id}
-              isLoggedIn
+              isLoggedIn={!!user}
               redirectTo={`/winery/${winery.slug}`}
               showProgress={false}
               allowCustom={false}
@@ -150,5 +151,11 @@ export default async function WineryDetailPage({
         <WineClubSection winery={winery} />
       </div>
     </main>
+    {!user && (
+      <Suspense>
+        <AuthModal />
+      </Suspense>
+    )}
+    </>
   );
 }

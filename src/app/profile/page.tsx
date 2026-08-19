@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import {
   getCurrentUser,
   getProfile,
@@ -18,10 +18,49 @@ import { AppRatingCard } from "@/components/profile/AppRatingCard";
 import { BugReportCard } from "@/components/profile/BugReportCard";
 import { ReferralCard } from "@/components/profile/ReferralCard";
 import { SubscriptionUpsellCard } from "@/components/profile/SubscriptionUpsellCard";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login?redirectTo=/profile");
+
+  if (!user) {
+    const wineries = await getWineriesWithStatus(null);
+    const stats = [
+      { label: "Wineries Visited", value: "—" },
+      { label: "Total Check-ins", value: "—" },
+      { label: "Trails Completed", value: "—" },
+      { label: "Trail Started", value: "—" },
+    ];
+
+    return (
+      <>
+        <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
+          <Header eyebrow="My Trail" title="Your Trail" />
+
+          <div className="px-6">
+            <div className="flex items-baseline justify-between">
+              <p className="font-serif-display text-lg text-[var(--color-charcoal)]">
+                0 / {wineries.length} Complete
+              </p>
+            </div>
+            <ProgressBar value={0} max={wineries.length} className="mt-3" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 px-6">
+            {stats.map((s) => (
+              <Card key={s.label} className="px-4 py-4">
+                <p className="font-serif-display text-2xl text-[var(--color-burgundy)]">{s.value}</p>
+                <p className="mt-1 text-xs text-[var(--color-charcoal)]/55">{s.label}</p>
+              </Card>
+            ))}
+          </div>
+        </main>
+        <Suspense>
+          <AuthModal />
+        </Suspense>
+      </>
+    );
+  }
 
   const [profile, completions, wineries, appRating, referralCount] = await Promise.all([
     getProfile(user.id),

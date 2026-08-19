@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import {
@@ -18,6 +19,7 @@ import { TrailMap } from "@/components/map/TrailMap";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -110,6 +112,11 @@ export default async function HomePage() {
         </LinkButton>
       </div>
       </main>
+      {!user && (
+        <Suspense>
+          <AuthModal />
+        </Suspense>
+      )}
     </>
   );
 }

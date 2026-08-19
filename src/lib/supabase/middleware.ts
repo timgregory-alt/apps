@@ -31,8 +31,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protectedPrefixes = ["/my-trail", "/profile", "/checkin", "/admin"];
-  const isProtected = protectedPrefixes.some((p) => request.nextUrl.pathname.startsWith(p));
+  // Admin is a separate staff tool and keeps a hard redirect. Every other
+  // page now renders its real (preview) content for signed-out guests and
+  // shows a mandatory AuthModal on top instead of redirecting away.
+  const isProtected = request.nextUrl.pathname.startsWith("/admin");
 
   if (isProtected && !user) {
     const redirectUrl = new URL("/login", request.url);

@@ -1,15 +1,18 @@
+import { Suspense } from "react";
 import { LinkButton } from "@/components/ui/Button";
 import { SectionEyebrow } from "@/components/ui/Card";
 import { CompletionBadge } from "@/components/completion/CompletionBadge";
 import { CompletionShareButton } from "@/components/completion/CompletionShareButton";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { getCurrentUser, getWineriesWithStatus } from "@/lib/data";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function CompletionPage() {
   const user = await getCurrentUser();
   const wineries = await getWineriesWithStatus(user?.id ?? null);
 
   return (
+    <>
     <main className="texture-grain relative mx-auto flex min-h-[calc(100dvh-6rem)] max-w-md flex-col items-center justify-center gap-8 overflow-hidden px-6 py-16 text-center">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(176,144,79,0.12),transparent_55%)]" />
       <TrailCoverFrame />
@@ -53,5 +56,11 @@ export default async function CompletionPage() {
         </LinkButton>
       </div>
     </main>
+    {!user && (
+      <Suspense>
+        <AuthModal />
+      </Suspense>
+    )}
+    </>
   );
 }
