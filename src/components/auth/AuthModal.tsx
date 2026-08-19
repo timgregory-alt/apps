@@ -25,12 +25,12 @@ export function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-[var(--color-charcoal)]/55 backdrop-blur-md sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[var(--color-charcoal)]/45 p-5 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-modal-title"
     >
-      <div className="texture-grain relative w-full max-w-md rounded-t-3xl bg-[var(--color-ivory)] px-6 pt-8 pb-[calc(env(safe-area-inset-bottom)+2rem)] shadow-[0_-8px_40px_rgba(36,33,29,0.25)] sm:my-8 sm:rounded-3xl sm:pb-8 sm:shadow-2xl">
+      <div className="texture-grain relative max-h-[80vh] w-full max-w-sm overflow-y-auto rounded-3xl bg-[var(--color-ivory)] px-6 py-7 shadow-2xl">
         <div className="relative mb-6 text-center">
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.28em] text-[var(--color-gold)]">
             Tennessee Wine Trails
@@ -208,6 +208,7 @@ function SignupFields({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
@@ -233,7 +234,12 @@ function SignupFields({
         email,
         password,
         options: {
-          data: { name, birth_date: birthDate, referred_by: referredBy || undefined },
+          data: {
+            name,
+            birth_date: birthDate,
+            zip_code: zipCode || undefined,
+            referred_by: referredBy || undefined,
+          },
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
       });
@@ -293,6 +299,15 @@ function SignupFields({
       <p className="-mt-2 text-xs text-[var(--color-charcoal)]/50">
         You must be {MIN_AGE}+ to join — Tennessee wineries only serve guests {MIN_AGE} and older.
       </p>
+      <AuthField
+        label="Zip Code"
+        type="text"
+        inputMode="numeric"
+        autoComplete="postal-code"
+        maxLength={10}
+        value={zipCode}
+        onChange={(e) => setZipCode(e.target.value)}
+      />
       {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
       <Button type="submit" size="lg" fullWidth disabled={loading}>
         {loading ? "Creating your account…" : "Create Account"}
