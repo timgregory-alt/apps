@@ -11,7 +11,7 @@ export default async function AdminWineriesPage() {
         <div>
           <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">Wineries</h1>
           <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
-            Manage the Founding Trail roster. New wineries can be added without a code change.
+            Manage the winery roster. New wineries can be added without a code change.
           </p>
         </div>
         <Link

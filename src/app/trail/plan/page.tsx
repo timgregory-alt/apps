@@ -8,7 +8,7 @@ export default async function TrailPlanPage() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-6 pb-10">
-      <Header back="/map" eyebrow="Founding Trail" title="Plan My Wine Trail" />
+      <Header back="/map" eyebrow="Wine Trails" title="Plan My Wine Trail" />
       <p className="px-6 -mt-3 text-sm text-[var(--color-charcoal)]/60">
         Select a stop to see driving directions, or follow the suggested order below.
       </p>

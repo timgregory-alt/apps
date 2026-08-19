@@ -33,7 +33,7 @@ export default async function AdminDashboardPage() {
         <div>
           <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">Overview</h1>
           <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
-            Traffic, engagement, and conversion across the Founding Trail.
+            Traffic, engagement, and conversion across the trail.
           </p>
         </div>
         <a

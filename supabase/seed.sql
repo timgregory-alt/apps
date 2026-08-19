@@ -3,7 +3,7 @@
 
 insert into public.trails (name, slug, description, active)
 values (
-  'Tennessee Wine Trails — Founding Trail',
+  'Tennessee Wine Trails',
   'founding-trail',
   'The original four stops of the Tennessee Wine Trails: a countryside tour through Middle Tennessee''s boutique wineries.',
   true

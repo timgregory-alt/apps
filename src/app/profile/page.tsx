@@ -90,7 +90,7 @@ export default async function ProfilePage() {
       {completionDate && (
         <div className="px-6">
           <Card className="px-4 py-3 text-center text-sm text-[var(--color-charcoal)]/70">
-            Founding Trail completed {formatCheckinDate(completionDate)}
+            Trail completed {formatCheckinDate(completionDate)}
           </Card>
         </div>
       )}
