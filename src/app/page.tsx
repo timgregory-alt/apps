@@ -18,7 +18,6 @@ import { TrailMap } from "@/components/map/TrailMap";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
-import { SpelledOutTitle } from "@/components/explore/SpelledOutTitle";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -39,7 +38,11 @@ export default async function HomePage() {
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.32em] text-[var(--color-gold)]">
             Wine Trails
           </p>
-          <SpelledOutTitle line1="Explore Tennessee" line2="Wine Country" />
+          <h1 className="font-serif-elegant mt-2 text-[2.75rem] italic leading-[1.05] text-[var(--color-charcoal)] [text-shadow:0_2px_18px_rgba(250,246,238,0.9)]">
+            Explore Tennessee
+            <br />
+            Wine Country
+          </h1>
         </header>
 
       <div className="px-6">
