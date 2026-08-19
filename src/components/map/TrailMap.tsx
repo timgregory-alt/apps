@@ -156,7 +156,7 @@ export function TrailMap({ wineries }: { wineries: WineryWithStatus[] }) {
 
   if (!MAPBOX_TOKEN) {
     return (
-      <div className="flex h-[70vh] w-full flex-col items-center justify-center gap-2 bg-[var(--color-parchment)] px-8 text-center">
+      <div className="mx-6 flex h-[45vh] flex-col items-center justify-center gap-2 rounded-3xl border border-[var(--color-line)] bg-[var(--color-parchment)] px-8 text-center">
         <p className="font-serif-display text-lg text-[var(--color-charcoal)]">
           Map unavailable
         </p>
@@ -173,7 +173,7 @@ export function TrailMap({ wineries }: { wineries: WineryWithStatus[] }) {
     : null;
 
   return (
-    <div className="relative h-[70vh] w-full overflow-hidden">
+    <div className="relative mx-6 h-[45vh] overflow-hidden rounded-3xl border border-[var(--color-line)]">
       <div ref={containerRef} className="h-full w-full" />
 
       {selected && (
