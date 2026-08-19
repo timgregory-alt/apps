@@ -14,7 +14,7 @@ const MIN_AGE = 21;
 export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/trail-card";
+  const redirectTo = searchParams.get("redirectTo") || "/my-trail";
   const referredBy = searchParams.get("ref");
 
   const [name, setName] = useState("");

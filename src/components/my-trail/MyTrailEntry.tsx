@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { WineryImage } from "@/components/winery/WineryImage";
-import { TrailStamp } from "@/components/trail-card/TrailStamp";
+import { TrailStamp } from "@/components/my-trail/TrailStamp";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { Card } from "@/components/ui/Card";
 import { formatCheckinDate } from "@/lib/utils";
@@ -13,7 +13,7 @@ const STATUS_LABEL: Record<WineryWithStatus["status"], string> = {
   completed: "Completed",
 };
 
-export function TrailCardEntry({
+export function MyTrailEntry({
   winery,
   tastingProgress,
 }: {

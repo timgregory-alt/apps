@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       verified: true,
       demo: true,
-      message: "Supabase isn't configured yet, so this stamp won't be saved to a real trail card.",
+      message: "Supabase isn't configured yet, so this stamp won't be saved to My Trail.",
       checkin: {
         id: `demo-${wineryId}`,
         winery_id: wineryId,

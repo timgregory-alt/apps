@@ -22,7 +22,7 @@ export default function UpdatePasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       setDone(true);
-      setTimeout(() => router.push("/trail-card"), 1200);
+      setTimeout(() => router.push("/my-trail"), 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update your password.");
     } finally {
@@ -34,7 +34,7 @@ export default function UpdatePasswordPage() {
     <AuthShell eyebrow="Account Recovery" title="Choose a New Password">
       {done ? (
         <p className="rounded-xl bg-[var(--color-gold-pale)]/50 px-4 py-4 text-center text-sm text-[var(--color-charcoal)]/75">
-          Password updated. Redirecting to your trail card…
+          Password updated. Redirecting to My Trail…
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

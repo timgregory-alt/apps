@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Share2, ArrowRight } from "lucide-react";
 import { createPortal } from "react-dom";
-import { TrailStamp } from "@/components/trail-card/TrailStamp";
+import { TrailStamp } from "@/components/my-trail/TrailStamp";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/Button";
 import { formatCheckinDate } from "@/lib/utils";

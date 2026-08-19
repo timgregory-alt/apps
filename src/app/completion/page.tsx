@@ -48,8 +48,8 @@ export default async function CompletionPage() {
         style={{ animationDelay: "0.45s", opacity: 0 }}
       >
         <CompletionShareButton wineryNames={wineries.map((w) => w.name)} />
-        <LinkButton href="/trail-card" variant="outline" fullWidth>
-          Back to Your Trail Card
+        <LinkButton href="/my-trail" variant="outline" fullWidth>
+          Back to My Trail
         </LinkButton>
       </div>
     </main>

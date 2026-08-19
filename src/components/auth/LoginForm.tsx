@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/trail-card";
+  const redirectTo = searchParams.get("redirectTo") || "/my-trail";
 
   const [mode, setMode] = useState<"password" | "magic">("password");
   const [email, setEmail] = useState("");

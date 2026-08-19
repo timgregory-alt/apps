@@ -138,7 +138,7 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
 
     revalidatePath(`/admin/wineries/${wineryId}`);
     revalidatePath(`/winery/${winery.slug}`);
-    revalidatePath("/trail-card");
+    revalidatePath("/my-trail");
     revalidatePath("/");
 
     return result;

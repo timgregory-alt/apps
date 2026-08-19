@@ -5,7 +5,7 @@ import { RecommendationsPanel } from "@/components/tasting/RecommendationsPanel"
 import { computeRecommendations } from "@/lib/recommendations";
 import type { CustomWineTasting, WineWithTasting, WineryWithStatus } from "@/lib/types";
 
-/** Trail-card-page summary: overall tasting progress plus recommendations —
+/** My-Trail-page summary: overall tasting progress plus recommendations —
  * the actual "rate this wine" cards live on each winery's own page. */
 export function WineTastingSection({
   wines,

@@ -47,7 +47,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="My Trail Card" title={`${possessive} Trail Card`} />
+      <Header eyebrow="My Trail" title={`${possessive} Trail`} />
 
       <div className="px-6">
         <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} />
