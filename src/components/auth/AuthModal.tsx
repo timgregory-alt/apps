@@ -25,12 +25,12 @@ export function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[var(--color-charcoal)]/45 p-5 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[var(--color-charcoal)]/40 p-5"
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-modal-title"
     >
-      <div className="texture-grain relative max-h-[80vh] w-full max-w-sm overflow-y-auto rounded-3xl bg-[var(--color-ivory)] px-6 py-7 shadow-2xl">
+      <div className="texture-grain relative max-h-[70vh] w-full max-w-[300px] overflow-y-auto rounded-3xl bg-[var(--color-ivory)] px-5 py-6 shadow-2xl">
         <div className="relative mb-6 text-center">
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.28em] text-[var(--color-gold)]">
             Tennessee Wine Trails
