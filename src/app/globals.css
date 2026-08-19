@@ -285,6 +285,89 @@ body {
   animation: wine-pour-droplet 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Explore hero title: a Disney-style "magic wand" reveal — the words wipe
+   in left-to-right in sync with a traveling spark, ending in a sparkle
+   burst right where the sweep finishes. */
+@keyframes title-reveal-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0% 0 0);
+  }
+}
+
+@keyframes wand-spark-travel {
+  0% {
+    left: -2%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: 101%;
+    opacity: 0;
+  }
+}
+
+@keyframes burst-particle {
+  0%,
+  60% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--burst-angle)) translateX(0) scale(0.3);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--burst-angle)) translateX(30px) scale(1);
+  }
+}
+
+.hero-title-reveal {
+  animation: title-reveal-wipe 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.hero-wand-spark {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(207, 181, 121, 0.7) 45%, transparent 70%);
+  box-shadow: 0 0 14px 5px rgba(207, 181, 121, 0.55);
+  transform: translate(-50%, -50%);
+  animation: wand-spark-travel 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  pointer-events: none;
+}
+
+.hero-burst {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.hero-burst span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  background: var(--color-gold);
+  clip-path: polygon(50% 0%, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0% 50%, 39% 35%);
+  animation: burst-particle 0.9s ease-out forwards;
+  animation-delay: 1.55s;
+}
+
 ::selection {
   background: var(--color-gold-pale);
   color: var(--color-burgundy-deep);

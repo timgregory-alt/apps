@@ -28,7 +28,7 @@ export function Header({
         </p>
       )}
       {title && (
-        <h1 className="font-serif-display mt-1 text-3xl leading-tight text-[var(--color-charcoal)]">
+        <h1 className="font-serif-elegant mt-1 text-3xl italic leading-tight text-[var(--color-charcoal)]">
           {title}
         </h1>
       )}

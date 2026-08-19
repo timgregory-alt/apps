@@ -38,11 +38,22 @@ export default async function HomePage() {
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.32em] text-[var(--color-gold)]">
             Wine Trails
           </p>
-          <h1 className="font-serif-elegant mt-2 text-[2.75rem] italic leading-[1.05] text-[var(--color-charcoal)] [text-shadow:0_2px_18px_rgba(250,246,238,0.9)]">
-            Explore Tennessee
-            <br />
-            Wine Country
-          </h1>
+          <div className="relative mt-2 inline-block">
+            <h1 className="hero-title-reveal font-serif-elegant text-[2.75rem] italic leading-[1.05] text-[var(--color-charcoal)] [text-shadow:0_2px_18px_rgba(250,246,238,0.9)]">
+              Explore Tennessee
+              <br />
+              Wine Country
+            </h1>
+            <span className="hero-wand-spark" aria-hidden="true" />
+            <span className="hero-burst" aria-hidden="true">
+              <span style={{ "--burst-angle": "-75deg" } as React.CSSProperties} />
+              <span style={{ "--burst-angle": "-45deg" } as React.CSSProperties} />
+              <span style={{ "--burst-angle": "-15deg" } as React.CSSProperties} />
+              <span style={{ "--burst-angle": "15deg" } as React.CSSProperties} />
+              <span style={{ "--burst-angle": "45deg" } as React.CSSProperties} />
+              <span style={{ "--burst-angle": "75deg" } as React.CSSProperties} />
+            </span>
+          </div>
         </header>
 
       <div className="px-6">
