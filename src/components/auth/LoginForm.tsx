@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/passport";
+  const redirectTo = searchParams.get("redirectTo") || "/trail-card";
 
   const [mode, setMode] = useState<"password" | "magic">("password");
   const [email, setEmail] = useState("");
@@ -67,7 +67,7 @@ export function LoginForm() {
         <>
           New here?{" "}
           <Link href="/signup" className="font-medium text-[var(--color-burgundy)] hover:underline">
-            Create your passport
+            Create an account
           </Link>
         </>
       }

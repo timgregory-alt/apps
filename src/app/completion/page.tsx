@@ -2,7 +2,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { SectionEyebrow } from "@/components/ui/Card";
 import { CompletionBadge } from "@/components/completion/CompletionBadge";
 import { CompletionShareButton } from "@/components/completion/CompletionShareButton";
-import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
+import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { getCurrentUser, getWineriesWithStatus } from "@/lib/data";
 
 export default async function CompletionPage() {
@@ -12,10 +12,10 @@ export default async function CompletionPage() {
   return (
     <main className="texture-grain relative mx-auto flex min-h-[calc(100dvh-6rem)] max-w-md flex-col items-center justify-center gap-8 overflow-hidden px-6 py-16 text-center">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(176,144,79,0.12),transparent_55%)]" />
-      <PassportCoverFrame />
+      <TrailCoverFrame />
 
       <div className="animate-fade-up relative flex flex-col items-center gap-4">
-        <SectionEyebrow>Passport Complete</SectionEyebrow>
+        <SectionEyebrow>Trail Complete</SectionEyebrow>
         <h1 className="font-serif-display text-4xl italic leading-tight text-[var(--color-burgundy)]">
           You did it.
         </h1>
@@ -48,8 +48,8 @@ export default async function CompletionPage() {
         style={{ animationDelay: "0.45s", opacity: 0 }}
       >
         <CompletionShareButton wineryNames={wineries.map((w) => w.name)} />
-        <LinkButton href="/passport" variant="outline" fullWidth>
-          Back to Your Passport
+        <LinkButton href="/trail-card" variant="outline" fullWidth>
+          Back to Your Trail Card
         </LinkButton>
       </div>
     </main>

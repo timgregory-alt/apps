@@ -23,7 +23,7 @@ import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
-import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
+import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 
 export default async function RewardsPage() {
   const user = await getCurrentUser();
@@ -82,7 +82,7 @@ export default async function RewardsPage() {
 
       <div className="px-6">
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] p-6 text-[var(--color-ivory)]">
-          <PassportCoverFrame />
+          <TrailCoverFrame />
           <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
             Total Points
           </p>
@@ -174,8 +174,8 @@ export default async function RewardsPage() {
       <div className="px-6">
         <p className="text-center text-xs text-[var(--color-charcoal)]/45">
           Check in and rate wines on your{" "}
-          <Link href="/passport" className="underline">
-            passport
+          <Link href="/trail-card" className="underline">
+            trail card
           </Link>{" "}
           to start earning.
         </p>

@@ -67,7 +67,7 @@ export function NextStopSheet({
             You&rsquo;ve visited every stop!
           </p>
           <p className="text-sm text-[var(--color-charcoal)]/65">
-            Head to your passport to see your completion badge.
+            Head to your trail card to see your completion badge.
           </p>
           <LinkButton href="/completion" variant="primary" fullWidth>
             View Completion

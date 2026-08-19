@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import {
   getCurrentUser,
   getProfile,
-  getPassportCompletions,
+  getTrailCompletions,
   getWineriesWithStatus,
   getUserAppRating,
   getQualifyingReferralCount,
@@ -25,7 +25,7 @@ export default async function ProfilePage() {
 
   const [profile, completions, wineries, appRating, referralCount] = await Promise.all([
     getProfile(user.id),
-    getPassportCompletions(user.id),
+    getTrailCompletions(user.id),
     getWineriesWithStatus(user.id),
     getUserAppRating(user.id),
     getQualifyingReferralCount(),
@@ -35,19 +35,19 @@ export default async function ProfilePage() {
   const displayName = profile?.name || user.email?.split("@")[0] || "Your";
   const possessive = displayName.toLowerCase().endsWith("s") ? `${displayName}'` : `${displayName}'s`;
 
-  const startDate = profile?.passport_start_date ?? user.created_at;
+  const startDate = profile?.trail_start_date ?? user.created_at;
   const completionDate = completions[0]?.completed_at as string | undefined;
 
   const stats = [
     { label: "Wineries Visited", value: `${visited}` },
     { label: "Total Check-ins", value: `${visited}` },
     { label: "Trails Completed", value: `${completions.length}` },
-    { label: "Passport Started", value: startDate ? formatCheckinDate(startDate) : "—" },
+    { label: "Trail Started", value: startDate ? formatCheckinDate(startDate) : "—" },
   ];
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="My Passport" title={`${possessive} Wine Passport`} />
+      <Header eyebrow="My Trail Card" title={`${possessive} Trail Card`} />
 
       <div className="px-6">
         <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} />

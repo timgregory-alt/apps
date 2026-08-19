@@ -66,7 +66,7 @@ export function CheckInFlow({
       if (!res.ok || !data.verified) {
         setBlockedMessage(
           data.message ??
-            "It looks like you're not quite at the winery yet. Visit the tasting room to collect your passport stamp."
+            "It looks like you're not quite at the winery yet. Visit the tasting room to collect your trail stamp."
         );
         return;
       }
@@ -108,7 +108,7 @@ export function CheckInFlow({
           Visited{checkinDate ? ` — ${formatCheckinDate(checkinDate).toUpperCase()}` : ""}
         </p>
         <p className="text-xs text-[var(--color-charcoal)]/60">
-          Your passport stamp for {winery.name} has been collected.
+          Your trail stamp for {winery.name} has been collected.
         </p>
       </div>
     );

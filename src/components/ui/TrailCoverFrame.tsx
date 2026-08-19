@@ -1,8 +1,8 @@
 /** A decorative gold border frame + watermark emblem, evoking an official
- * passport cover. Pure SVG/CSS — no external image, so it renders reliably
+ * document cover. Pure SVG/CSS — no external image, so it renders reliably
  * and matches the app's ink/gold palette. Purely decorative: absolutely
  * positioned, non-interactive, sits behind the card's real content. */
-export function PassportCoverFrame() {
+export function TrailCoverFrame() {
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="true">
       {/* Inset double-line border, like an official document */}

@@ -7,12 +7,12 @@ import {
 import { visitedCount, isTrailComplete } from "@/lib/trail";
 import { Header } from "@/components/layout/Header";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { PassportEntry } from "@/components/passport/PassportEntry";
+import { TrailCardEntry } from "@/components/trail-card/TrailCardEntry";
 import { CompletionBanner } from "@/components/completion/CompletionBanner";
 import { WineTastingSection } from "@/components/tasting/WineTastingSection";
 import { getWineryTastingProgress } from "@/lib/recommendations";
 
-export default async function PassportPage() {
+export default async function TrailCardPage() {
   const user = await getCurrentUser();
   const [wineries, wines, customTastings] = await Promise.all([
     getWineriesWithStatus(user?.id ?? null),
@@ -24,7 +24,7 @@ export default async function PassportPage() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="Tennessee Wine Trails" title="Your Wine Passport" />
+      <Header eyebrow="Tennessee Wine Trails" title="Your Trail Card" />
 
       <div className="mx-auto w-full max-w-md px-6">
         <div className="flex items-baseline justify-between">
@@ -43,7 +43,7 @@ export default async function PassportPage() {
 
       <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-6">
         {wineries.map((w) => (
-          <PassportEntry key={w.id} winery={w} tastingProgress={getWineryTastingProgress(wines, w.id)} />
+          <TrailCardEntry key={w.id} winery={w} tastingProgress={getWineryTastingProgress(wines, w.id)} />
         ))}
       </div>
 

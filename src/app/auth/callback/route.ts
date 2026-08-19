@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const redirectTo = searchParams.get("redirectTo") || "/passport";
+  const redirectTo = searchParams.get("redirectTo") || "/trail-card";
 
   if (code) {
     const supabase = await createClient();

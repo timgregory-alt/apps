@@ -8,7 +8,7 @@ const SIZES = {
   lg: 176,
 } as const;
 
-export function PassportStamp({
+export function TrailStamp({
   name,
   city,
   status,

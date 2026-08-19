@@ -14,7 +14,7 @@ const MIN_AGE = 21;
 export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/passport";
+  const redirectTo = searchParams.get("redirectTo") || "/trail-card";
   const referredBy = searchParams.get("ref");
 
   const [name, setName] = useState("");
@@ -58,7 +58,7 @@ export function SignupForm() {
         setConfirmSent(true);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create your passport.");
+      setError(err instanceof Error ? err.message : "Could not create your account.");
     } finally {
       setLoading(false);
     }
@@ -67,11 +67,11 @@ export function SignupForm() {
   return (
     <AuthShell
       eyebrow="Begin Your Journey"
-      title="Create Your Passport"
+      title="Create Your Account"
       subtitle="One account, four wineries, a lifetime of Tennessee wine memories."
       footer={
         <>
-          Already have a passport?{" "}
+          Already have an account?{" "}
           <Link href="/login" className="font-medium text-[var(--color-burgundy)] hover:underline">
             Sign in
           </Link>
@@ -87,7 +87,7 @@ export function SignupForm() {
 
       {confirmSent ? (
         <p className="rounded-xl bg-[var(--color-gold-pale)]/50 px-4 py-4 text-center text-sm text-[var(--color-charcoal)]/75">
-          Check {email} to confirm your account and start your passport.
+          Check {email} to confirm your account and start your trail.
         </p>
       ) : (
         <form onSubmit={handleSignUp} className="flex flex-col gap-4">
@@ -125,7 +125,7 @@ export function SignupForm() {
           </p>
           {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
           <Button type="submit" size="lg" fullWidth disabled={loading}>
-            {loading ? "Creating your passport…" : "Create Account"}
+            {loading ? "Creating your account…" : "Create Account"}
           </Button>
         </form>
       )}

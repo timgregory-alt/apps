@@ -175,12 +175,12 @@ create policy "Admins manage rewards" on public.rewards
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- ---------------------------------------------------------------------------
--- passport_completions
+-- trail_completions
 -- ---------------------------------------------------------------------------
-alter table public.passport_completions enable row level security;
+alter table public.trail_completions enable row level security;
 
-create policy "Users view their own completions" on public.passport_completions
+create policy "Users view their own completions" on public.trail_completions
   for select using (auth.uid() = user_id or public.is_admin());
 
-create policy "Users record their own completions" on public.passport_completions
+create policy "Users record their own completions" on public.trail_completions
   for insert with check (auth.uid() = user_id);

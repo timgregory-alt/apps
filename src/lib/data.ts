@@ -204,12 +204,12 @@ export async function getCustomWineTastings(userId: string): Promise<CustomWineT
   }
 }
 
-export async function getPassportCompletions(userId: string) {
+export async function getTrailCompletions(userId: string) {
   if (!isSupabaseConfigured) return [];
   try {
     const supabase = await createClient();
     const { data } = await supabase
-      .from("passport_completions")
+      .from("trail_completions")
       .select("*")
       .eq("user_id", userId)
       .order("completed_at", { ascending: true });
@@ -273,12 +273,12 @@ export async function getWinesWithTastings(userId: string | null): Promise<WineW
     .filter((w): w is WineWithTasting => !!w);
 }
 
-export async function getPassportCompletion(userId: string, trailId: string) {
+export async function getTrailCompletion(userId: string, trailId: string) {
   if (!isSupabaseConfigured) return null;
   try {
     const supabase = await createClient();
     const { data } = await supabase
-      .from("passport_completions")
+      .from("trail_completions")
       .select("*")
       .eq("user_id", userId)
       .eq("trail_id", trailId)

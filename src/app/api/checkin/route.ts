@@ -11,7 +11,7 @@ interface CheckinBody {
 }
 
 const NOT_CLOSE_MESSAGE =
-  "It looks like you're not quite at the winery yet. Visit the tasting room to collect your passport stamp.";
+  "It looks like you're not quite at the winery yet. Visit the tasting room to collect your trail stamp.";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as CheckinBody;
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       verified: true,
       demo: true,
-      message: "Supabase isn't configured yet, so this stamp won't be saved to a real passport.",
+      message: "Supabase isn't configured yet, so this stamp won't be saved to a real trail card.",
       checkin: {
         id: `demo-${wineryId}`,
         winery_id: wineryId,
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not save your check-in. Please try again." }, { status: 500 });
   }
 
-  // If this completes the Founding Trail, record the passport completion.
+  // If this completes the Founding Trail, record the trail completion.
   const { data: trail } = await supabase
     .from("trails")
     .select("id")
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
   let completion = null;
   if (trailComplete) {
     const { data } = await supabase
-      .from("passport_completions")
+      .from("trail_completions")
       .upsert(
         { user_id: user.id, trail_id: trailId },
         { onConflict: "user_id,trail_id", ignoreDuplicates: true }

@@ -18,7 +18,7 @@ interface ShareGraphicProps {
  * The literal pixel-dimension Instagram Stories graphic (1080×1920), rendered
  * off-screen and rasterized with html-to-image. Kept as a plain component so
  * the same template can be reused for both a single check-in and the full
- * passport completion share.
+ * trail completion share.
  */
 export const ShareGraphic = forwardRef<HTMLDivElement, ShareGraphicProps>(function ShareGraphic(
   { headline, subheadline, tagline, visited, total, checklist },

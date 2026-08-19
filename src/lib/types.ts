@@ -132,7 +132,7 @@ export interface Checkin {
 
 export type ShareType =
   | "winery_checkin"
-  | "passport_completion"
+  | "trail_completion"
   | "native_share"
   | "copy_link"
   | "facebook"
@@ -154,7 +154,7 @@ export interface WineClubClick {
   created_at: string;
 }
 
-export interface PassportCompletion {
+export interface TrailCompletion {
   id: UUID;
   user_id: UUID;
   trail_id: UUID;
@@ -198,7 +198,7 @@ export interface Profile {
   /** Manually toggled by an admin for now — stands in for a real subscription
    * until billing exists. Gates things like early access to new events. */
   is_subscriber: boolean;
-  passport_start_date: string | null;
+  trail_start_date: string | null;
   created_at: string;
 }
 

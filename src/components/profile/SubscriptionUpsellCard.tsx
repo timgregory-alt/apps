@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Check, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
+import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { toggleSubscriptionAction } from "@/app/profile/actions";
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
 
@@ -37,7 +37,7 @@ export function SubscriptionUpsellCard({ isSubscriber }: { isSubscriber: boolean
       id="premium"
       className="texture-grain relative flex flex-col gap-3 overflow-hidden bg-[var(--color-burgundy)] p-5 text-[var(--color-ivory)]"
     >
-      <PassportCoverFrame />
+      <TrailCoverFrame />
 
       <div className="relative flex items-center gap-2">
         <Sparkles size={16} className="text-[var(--color-gold-pale)]" />

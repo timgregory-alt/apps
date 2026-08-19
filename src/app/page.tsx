@@ -16,7 +16,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { WineryImage } from "@/components/winery/WineryImage";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { TrailMap } from "@/components/map/TrailMap";
-import { PassportCoverFrame } from "@/components/ui/PassportCoverFrame";
+import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 
 export default async function HomePage() {
@@ -36,7 +36,7 @@ export default async function HomePage() {
 
       <div className="px-6">
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
-          <PassportCoverFrame />
+          <TrailCoverFrame />
           <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
             {wineries.length} Stops · Middle Tennessee
           </p>

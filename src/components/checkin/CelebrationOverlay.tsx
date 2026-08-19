@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Share2, ArrowRight } from "lucide-react";
 import { createPortal } from "react-dom";
-import { PassportStamp } from "@/components/passport/PassportStamp";
+import { TrailStamp } from "@/components/trail-card/TrailStamp";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/Button";
 import { formatCheckinDate } from "@/lib/utils";
@@ -77,7 +77,7 @@ export function CelebrationOverlay({
             animate={{ opacity: 1 }}
             className="animate-impact-shake relative flex flex-col items-center"
           >
-            <PassportStamp
+            <TrailStamp
               name={wineryName}
               city={city}
               status="visited"

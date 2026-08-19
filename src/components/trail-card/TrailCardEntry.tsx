@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { WineryImage } from "@/components/winery/WineryImage";
-import { PassportStamp } from "@/components/passport/PassportStamp";
+import { TrailStamp } from "@/components/trail-card/TrailStamp";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { Card } from "@/components/ui/Card";
 import { formatCheckinDate } from "@/lib/utils";
@@ -13,7 +13,7 @@ const STATUS_LABEL: Record<WineryWithStatus["status"], string> = {
   completed: "Completed",
 };
 
-export function PassportEntry({
+export function TrailCardEntry({
   winery,
   tastingProgress,
 }: {
@@ -66,7 +66,7 @@ export function PassportEntry({
           )}
         </div>
 
-        <PassportStamp name={winery.name} city={winery.city} status={winery.status} size="sm" />
+        <TrailStamp name={winery.name} city={winery.city} status={winery.status} size="sm" />
       </Link>
     </Card>
   );

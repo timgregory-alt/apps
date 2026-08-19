@@ -18,7 +18,7 @@ export interface RewardsPoints {
   referrals: number;
 }
 
-/** Points are always derived from check-ins, wine ratings, passport
+/** Points are always derived from check-ins, wine ratings, trail
  * completion, and qualifying referrals — never stored directly — so
  * there's nothing to keep in sync. */
 export function computeRewardsPoints(

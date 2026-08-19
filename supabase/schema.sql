@@ -12,7 +12,7 @@ create table if not exists public.profiles (
   email text,
   profile_image text,
   is_admin boolean not null default false,
-  passport_start_date timestamptz not null default now(),
+  trail_start_date timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
 
@@ -23,7 +23,7 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, name, passport_start_date)
+  insert into public.profiles (id, email, name, trail_start_date)
   values (
     new.id,
     new.email,
@@ -208,7 +208,7 @@ create table if not exists public.share_events (
   winery_id uuid references public.wineries (id) on delete set null,
   share_type text not null check (
     share_type in (
-      'winery_checkin', 'passport_completion', 'native_share',
+      'winery_checkin', 'trail_completion', 'native_share',
       'copy_link', 'facebook', 'instagram', 'save_image'
     )
   ),
@@ -258,9 +258,9 @@ create table if not exists public.rewards (
 );
 
 -- ---------------------------------------------------------------------------
--- passport_completions
+-- trail_completions
 -- ---------------------------------------------------------------------------
-create table if not exists public.passport_completions (
+create table if not exists public.trail_completions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
   trail_id uuid not null references public.trails (id) on delete cascade,
@@ -270,4 +270,4 @@ create table if not exists public.passport_completions (
   unique (user_id, trail_id)
 );
 
-create index if not exists passport_completions_user_idx on public.passport_completions (user_id);
+create index if not exists trail_completions_user_idx on public.trail_completions (user_id);

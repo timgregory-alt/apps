@@ -47,7 +47,7 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="New Accounts" value={stats.totalAccounts} />
         <StatCard label="Total Check-ins" value={stats.totalCheckins} />
-        <StatCard label="Passport Completions" value={stats.totalCompletions} />
+        <StatCard label="Trail Completions" value={stats.totalCompletions} />
         <StatCard label="Wine Club Clicks" value={stats.totalWineClubClicks} />
         <StatCard label="Share Events" value={stats.totalShareEvents} />
         <StatCard label="Multi-Winery Visitors" value={stats.multiWineryVisitors} />

@@ -51,7 +51,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("checkins").select("winery_id, user_id"),
-        supabase.from("passport_completions").select("*", { count: "exact", head: true }),
+        supabase.from("trail_completions").select("*", { count: "exact", head: true }),
         supabase.from("wine_club_clicks").select("winery_id"),
         supabase.from("share_events").select("share_type"),
       ]);
