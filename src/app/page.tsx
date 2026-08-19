@@ -18,6 +18,7 @@ import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { TrailMap } from "@/components/map/TrailMap";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
+import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -31,8 +32,10 @@ export default async function HomePage() {
   const visited = visitedCount(wineries);
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="Wine Trails" title="Explore Tennessee Wine Country" />
+    <>
+      <VineyardVideoBackground />
+      <main className="relative z-10 mx-auto flex max-w-md flex-col gap-8 pb-10">
+        <Header eyebrow="Wine Trails" title="Explore Tennessee Wine Country" />
 
       <div className="px-6">
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
@@ -98,6 +101,7 @@ export default async function HomePage() {
           Plan My Wine Trail
         </LinkButton>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
