@@ -6,5 +6,5 @@
 update public.trails
 set
   name = 'Tennessee Wine Trails',
-  description = 'The original Middle Tennessee wine trail: a countryside tour through four boutique wineries.'
+  description = 'The original Middle Tennessee wine trail — a countryside tour through the region''s boutique wineries.'
 where slug = 'founding-trail';

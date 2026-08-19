@@ -19,7 +19,7 @@ export const FOUNDING_TRAIL: Trail = {
   name: "Tennessee Wine Trails",
   slug: "founding-trail",
   description:
-    "The original Middle Tennessee wine trail: a countryside tour through four boutique wineries.",
+    "The original Middle Tennessee wine trail — a countryside tour through the region's boutique wineries.",
   image: null,
   active: true,
   created_at: "2026-01-01T00:00:00.000Z",

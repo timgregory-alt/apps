@@ -5,7 +5,7 @@ insert into public.trails (name, slug, description, active)
 values (
   'Tennessee Wine Trails',
   'founding-trail',
-  'The original Middle Tennessee wine trail: a countryside tour through four boutique wineries.',
+  'The original Middle Tennessee wine trail — a countryside tour through the region''s boutique wineries.',
   true
 )
 on conflict (slug) do update set
