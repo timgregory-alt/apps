@@ -225,6 +225,10 @@ function SignupFields({
       setError(`You must be ${MIN_AGE} or older to create a Tennessee Wine Trails account.`);
       return;
     }
+    if (!/^\d{5}(-\d{4})?$/.test(zipCode.trim())) {
+      setError("Please enter a valid zip code.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -237,7 +241,7 @@ function SignupFields({
           data: {
             name,
             birth_date: birthDate,
-            zip_code: zipCode || undefined,
+            zip_code: zipCode.trim(),
             referred_by: referredBy || undefined,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
@@ -302,6 +306,7 @@ function SignupFields({
       <AuthField
         label="Zip Code"
         type="text"
+        required
         inputMode="numeric"
         autoComplete="postal-code"
         maxLength={10}

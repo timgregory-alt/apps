@@ -1,9 +1,8 @@
 -- Tennessee Wine Trails — migration 0028: collect zip code at signup.
 --
--- Stored on the profile so we can eventually understand where guests are
--- traveling from (e.g. targeting nearby markets, or a "closest winery"
--- suggestion later). Optional, not validated beyond what the signup form
--- itself enforces client-side.
+-- Stored on the profile so we can tell local guests from travelers (e.g.
+-- targeting nearby markets, or a "closest winery" suggestion later).
+-- Required at signup; validated client-side only (5-digit or ZIP+4 format).
 
 alter table public.profiles
   add column if not exists zip_code text;
