@@ -4,16 +4,21 @@ import { useEffect, useRef } from "react";
 
 /** Fixed, full-viewport looping video behind the Explore page's content.
  * Muted/autoplay/playsInline so mobile browsers allow it without a user
- * gesture. Paused (falls back to the poster frame) for guests who prefer
- * reduced motion. No scrim overlay and no blur — the video shows through
- * at full strength; cards rely on their own translucent white background
- * for text contrast. */
+ * gesture. Played at half speed for a calmer, more ambient feel; paused
+ * entirely (falls back to the poster frame) for guests who prefer reduced
+ * motion. No scrim overlay and no blur — the video shows through at full
+ * strength; cards rely on their own translucent white background for text
+ * contrast. */
 export function VineyardVideoBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) videoRef.current?.pause();
+    if (prefersReducedMotion) {
+      videoRef.current?.pause();
+    } else if (videoRef.current) {
+      videoRef.current.playbackRate = 0.5;
+    }
   }, []);
 
   return (
