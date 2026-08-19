@@ -10,7 +10,6 @@ import {
 } from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
 import { getWineryTastingProgress } from "@/lib/recommendations";
-import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { WineryImage } from "@/components/winery/WineryImage";
@@ -35,7 +34,16 @@ export default async function HomePage() {
     <>
       <VineyardVideoBackground />
       <main className="relative z-10 mx-auto flex max-w-md flex-col gap-8 pb-10">
-        <Header eyebrow="Wine Trails" title="Explore Tennessee Wine Country" />
+        <header className="mx-auto w-full max-w-md px-6 pt-[calc(env(safe-area-inset-top)+1.75rem)] text-center">
+          <p className="text-[0.7rem] font-medium uppercase tracking-[0.32em] text-[var(--color-gold)]">
+            Wine Trails
+          </p>
+          <h1 className="font-serif-elegant mt-2 text-[2.75rem] italic leading-[1.05] text-[var(--color-charcoal)] [text-shadow:0_2px_18px_rgba(250,246,238,0.9)]">
+            Explore Tennessee
+            <br />
+            Wine Country
+          </h1>
+        </header>
 
       <div className="px-6">
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
