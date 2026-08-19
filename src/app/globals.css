@@ -285,32 +285,42 @@ body {
   animation: wine-pour-droplet 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Explore hero title: a Disney-style "magic wand" reveal — the words wipe
-   in left-to-right in sync with a traveling spark, ending in a sparkle
-   burst right where the sweep finishes. */
-@keyframes title-reveal-wipe {
-  from {
-    clip-path: inset(0 100% 0 0);
+/* Explore hero title: a Tinkerbell-style "spelled out" reveal — each
+   letter pops in in sequence with its own small sparkle flash, like a
+   wand tracing the words, ending in a bigger sparkle burst right after
+   the last letter. Per-letter timing comes from the `--delay` custom
+   property set inline (SpelledOutTitle.tsx), which pseudo-elements
+   inherit automatically since custom properties (unlike animation-delay
+   itself) are inherited. */
+@keyframes letter-spell-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) translateY(8px);
+    filter: blur(3px);
   }
-  to {
-    clip-path: inset(0 0% 0 0);
+  55% {
+    opacity: 1;
+    transform: scale(1.18) translateY(-3px);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-@keyframes wand-spark-travel {
-  0% {
-    left: -2%;
+@keyframes letter-sparkle-flash {
+  0%,
+  40% {
     opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
   }
-  8% {
-    opacity: 1;
-  }
-  90% {
+  55% {
     opacity: 1;
   }
   100% {
-    left: 101%;
     opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
   }
 }
 
@@ -329,28 +339,31 @@ body {
   }
 }
 
-.hero-title-reveal {
-  animation: title-reveal-wipe 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+.letter-spell-in {
+  display: inline-block;
+  position: relative;
+  opacity: 0;
+  animation: letter-spell-in 0.5s var(--delay, 0s) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-.hero-wand-spark {
+.letter-spell-in::after {
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 10px;
-  height: 10px;
+  top: 15%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(207, 181, 121, 0.7) 45%, transparent 70%);
-  box-shadow: 0 0 14px 5px rgba(207, 181, 121, 0.55);
-  transform: translate(-50%, -50%);
-  animation: wand-spark-travel 1.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(207, 181, 121, 0.75) 45%, transparent 72%);
+  box-shadow: 0 0 8px 3px rgba(207, 181, 121, 0.5);
+  opacity: 0;
+  animation: letter-sparkle-flash 0.5s var(--delay, 0s) ease-out forwards;
   pointer-events: none;
 }
 
 .hero-burst {
-  position: absolute;
-  top: 50%;
-  right: 0;
+  position: relative;
+  display: inline-block;
   width: 0;
   height: 0;
   pointer-events: none;
@@ -364,8 +377,7 @@ body {
   height: 7px;
   background: var(--color-gold);
   clip-path: polygon(50% 0%, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0% 50%, 39% 35%);
-  animation: burst-particle 0.9s ease-out forwards;
-  animation-delay: 1.55s;
+  animation: burst-particle 0.9s var(--delay, 0s) ease-out forwards;
 }
 
 ::selection {

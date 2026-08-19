@@ -18,6 +18,7 @@ import { TrailMap } from "@/components/map/TrailMap";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
+import { SpelledOutTitle } from "@/components/explore/SpelledOutTitle";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -38,22 +39,7 @@ export default async function HomePage() {
           <p className="text-[0.7rem] font-medium uppercase tracking-[0.32em] text-[var(--color-gold)]">
             Wine Trails
           </p>
-          <div className="relative mt-2 inline-block">
-            <h1 className="hero-title-reveal font-serif-elegant text-[2.75rem] italic leading-[1.05] text-[var(--color-charcoal)] [text-shadow:0_2px_18px_rgba(250,246,238,0.9)]">
-              Explore Tennessee
-              <br />
-              Wine Country
-            </h1>
-            <span className="hero-wand-spark" aria-hidden="true" />
-            <span className="hero-burst" aria-hidden="true">
-              <span style={{ "--burst-angle": "-75deg" } as React.CSSProperties} />
-              <span style={{ "--burst-angle": "-45deg" } as React.CSSProperties} />
-              <span style={{ "--burst-angle": "-15deg" } as React.CSSProperties} />
-              <span style={{ "--burst-angle": "15deg" } as React.CSSProperties} />
-              <span style={{ "--burst-angle": "45deg" } as React.CSSProperties} />
-              <span style={{ "--burst-angle": "75deg" } as React.CSSProperties} />
-            </span>
-          </div>
+          <SpelledOutTitle line1="Explore Tennessee" line2="Wine Country" />
         </header>
 
       <div className="px-6">
@@ -73,7 +59,7 @@ export default async function HomePage() {
       </div>
 
       <div className="px-6">
-        <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
+        <p className="font-serif-elegant mb-3 text-xl italic text-[var(--color-charcoal)]/80 [text-shadow:0_1px_12px_rgba(250,246,238,0.9)]">
           More trails coming soon
         </p>
         <div className="flex gap-3 overflow-x-auto pb-1">
@@ -91,7 +77,7 @@ export default async function HomePage() {
       </div>
 
       <div className="flex flex-col gap-3 px-6">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
+        <p className="font-serif-elegant text-xl italic text-[var(--color-charcoal)] [text-shadow:0_1px_12px_rgba(250,246,238,0.9)]">
           All Wineries
         </p>
         {wineries.map((w) => (

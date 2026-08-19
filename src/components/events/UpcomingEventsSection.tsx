@@ -46,8 +46,8 @@ export function UpcomingEventsSection({ groups }: { groups: WineryEventGroup[] }
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="flex items-center gap-2 px-6 text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-charcoal)]/45">
-        <CalendarDays size={14} className="text-[var(--color-gold)]" />
+      <p className="font-serif-elegant flex items-center gap-2 px-6 text-xl italic text-[var(--color-charcoal)] [text-shadow:0_1px_12px_rgba(250,246,238,0.9)]">
+        <CalendarDays size={18} className="text-[var(--color-gold)]" />
         Upcoming Events
       </p>
 
