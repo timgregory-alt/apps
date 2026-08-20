@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isCurrentUserAdmin, getAllMembersAdmin } from "@/lib/admin";
+import { isCurrentUserAdmin, getAllMembersAdmin, cityFromZip } from "@/lib/admin";
 
 function csvField(value: string): string {
   if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
@@ -14,10 +14,12 @@ export async function GET() {
   const members = await getAllMembersAdmin();
 
   const rows = [
-    ["Name", "Email", "Signed Up"],
+    ["Name", "Email", "Zip Code", "City", "Signed Up"],
     ...members.map((m) => [
       m.name ?? "",
       m.email ?? "",
+      m.zip_code ?? "",
+      cityFromZip(m.zip_code) ?? "",
       new Date(m.created_at).toISOString().slice(0, 10),
     ]),
   ];

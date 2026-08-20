@@ -7,7 +7,12 @@ import { LOW_RATING_THRESHOLD } from "@/lib/appRating";
 
 const MIN_AGE = 21;
 
-export async function updateProfileAction(input: { name: string; birth_date: string }) {
+export async function updateProfileAction(input: {
+  name: string;
+  birth_date: string;
+  email: string;
+  zip_code: string;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,6 +21,16 @@ export async function updateProfileAction(input: { name: string; birth_date: str
 
   const name = input.name.trim();
   if (!name) throw new Error("Name is required");
+
+  const email = input.email.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Please enter a valid email address.");
+  }
+
+  const zipCode = input.zip_code.trim();
+  if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
+    throw new Error("Please enter a valid zip code.");
+  }
 
   const newBirthDate = input.birth_date || null;
   if (newBirthDate && calculateAge(newBirthDate) < MIN_AGE) {
@@ -40,12 +55,24 @@ export async function updateProfileAction(input: { name: string; birth_date: str
     .update({
       name,
       birth_date: newBirthDate,
+      zip_code: zipCode,
       ...(birthDateChanged ? { birth_date_locked: true } : {}),
     })
     .eq("id", user.id);
   if (error) throw new Error(error.message);
 
+  // Email changes go through Supabase Auth's own confirmation flow rather
+  // than the profiles table directly — profiles.email is synced once the
+  // guest confirms via the on_auth_user_email_updated trigger.
+  let emailChangePending = false;
+  if (email !== user.email) {
+    const { error: emailError } = await supabase.auth.updateUser({ email });
+    if (emailError) throw new Error(emailError.message);
+    emailChangePending = true;
+  }
+
   revalidatePath("/profile");
+  return { emailChangePending };
 }
 
 /** Submits or updates the guest's 1-5 star rating of the app itself. */

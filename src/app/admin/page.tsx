@@ -187,7 +187,9 @@ export default async function AdminDashboardPage() {
                   {f.memberName}
                   {f.memberEmail && f.memberEmail !== f.memberName ? ` · ${f.memberEmail}` : ""}
                 </p>
-                <p className="mt-0.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
+                {f.feedback && (
+                  <p className="mt-0.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
+                )}
               </div>
             ))}
           </div>

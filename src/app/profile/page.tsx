@@ -13,7 +13,8 @@ import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { PersonalInfoForm } from "@/components/profile/PersonalInfoForm";
+import { AccountInfoForm } from "@/components/profile/AccountInfoForm";
+import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
 import { AppRatingCard } from "@/components/profile/AppRatingCard";
 import { BugReportCard } from "@/components/profile/BugReportCard";
 import { ReferralCard } from "@/components/profile/ReferralCard";
@@ -155,11 +156,17 @@ export default async function ProfilePage() {
       </div>
 
       <div className="px-6">
-        <PersonalInfoForm
+        <AccountInfoForm
           initialName={profile?.name ?? ""}
+          initialEmail={profile?.email ?? user.email ?? ""}
+          initialZipCode={profile?.zip_code ?? ""}
           initialBirthDate={profile?.birth_date ?? ""}
           birthDateLocked={profile?.birth_date_locked ?? false}
         />
+      </div>
+
+      <div className="px-6">
+        <ChangePasswordForm />
       </div>
 
       <div className="px-6">

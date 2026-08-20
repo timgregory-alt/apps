@@ -1,7 +1,17 @@
 import "server-only";
+import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
+
+/** Looks up the city/state for a guest's signup zip code, for the admin
+ * Members list — best-effort, so an unrecognized or malformed zip just
+ * shows nothing rather than an error. */
+export function cityFromZip(zip: string | null): string | null {
+  if (!zip) return null;
+  const match = zipcodes.lookup(zip.trim().slice(0, 5));
+  return match ? `${match.city}, ${match.state}` : null;
+}
 
 export async function isCurrentUserAdmin(): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
@@ -225,7 +235,7 @@ export async function getWineLikeStats(): Promise<WineLikeStats> {
 
 export interface AppFeedbackEntry {
   rating: number;
-  feedback: string;
+  feedback: string | null;
   created_at: string;
   memberName: string;
   memberEmail: string | null;
@@ -262,9 +272,9 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
       total += row.rating;
     }
 
-    const feedbackRows = data
-      .filter((r): r is typeof r & { feedback: string } => !!r.feedback)
-      .slice(0, 10);
+    // Show every rating, not just ones with written feedback — a star-only
+    // submission is still a submission.
+    const feedbackRows = data.slice(0, 10);
 
     // app_ratings.user_id references auth.users, not public.profiles, so there's
     // no FK PostgREST can embed through — look member names up separately.
@@ -304,6 +314,7 @@ export interface MemberRow {
   id: UUID;
   name: string | null;
   email: string | null;
+  zip_code: string | null;
   is_subscriber: boolean;
   created_at: string;
 }
@@ -316,7 +327,7 @@ export async function getAllMembersAdmin(): Promise<MemberRow[]> {
     const supabase = await createClient();
     const { data } = await supabase
       .from("profiles")
-      .select("id, name, email, is_subscriber, created_at")
+      .select("id, name, email, zip_code, is_subscriber, created_at")
       .order("created_at", { ascending: true });
     return (data as MemberRow[]) ?? [];
   } catch {
