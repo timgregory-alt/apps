@@ -8,6 +8,7 @@ import {
   getActiveRewardTiers,
   getUserRewardRedemptions,
   getQualifyingReferralCount,
+  getUserCheckins,
 } from "@/lib/data";
 import {
   computeRewardsPoints,
@@ -49,16 +50,23 @@ export default async function RewardsPage() {
     );
   }
 
-  const [wineries, wines, tiers, redemptions, profile, referralCount] = await Promise.all([
+  const [wineries, wines, tiers, redemptions, profile, referralCount, checkins] = await Promise.all([
     getWineriesWithStatus(user.id),
     getWinesWithTastings(user.id),
     getActiveRewardTiers(),
     getUserRewardRedemptions(user.id),
     getProfile(user.id),
     getQualifyingReferralCount(),
+    getUserCheckins(user.id),
   ]);
 
-  const points = computeRewardsPoints(wineries, wines, referralCount, profile?.is_subscriber ?? false);
+  const points = computeRewardsPoints(
+    wineries,
+    wines,
+    checkins.length,
+    referralCount,
+    profile?.is_subscriber ?? false
+  );
   const ladderTiers = tiers.filter((t) => !t.birthday_only);
   const redemptionByTier = new Map(
     redemptions.filter((r) => r.period_key === "").map((r) => [r.tier_id, r])

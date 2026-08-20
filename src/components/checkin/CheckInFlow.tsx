@@ -102,14 +102,38 @@ export function CheckInFlow({
 
   if (alreadyVisited && stage === "idle") {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-gold-pale)]/40 px-5 py-4 text-center">
-        <Wine size={18} className="text-[var(--color-burgundy)]" strokeWidth={1.75} />
-        <p className="font-serif-display text-lg text-[var(--color-burgundy)]">
-          Visited{checkinDate ? ` — ${formatCheckinDate(checkinDate).toUpperCase()}` : ""}
-        </p>
-        <p className="text-xs text-[var(--color-charcoal)]/60">
-          Your trail stamp for {winery.name} has been collected.
-        </p>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-gold-pale)]/40 px-5 py-4 text-center">
+          <Wine size={18} className="text-[var(--color-burgundy)]" strokeWidth={1.75} />
+          <p className="font-serif-display text-lg text-[var(--color-burgundy)]">
+            Visited{checkinDate ? ` — ${formatCheckinDate(checkinDate).toUpperCase()}` : ""}
+          </p>
+          <p className="text-xs text-[var(--color-charcoal)]/60">
+            Your trail stamp for {winery.name} has been collected.
+          </p>
+        </div>
+
+        <Button
+          variant="outline"
+          size="lg"
+          fullWidth
+          onClick={handleCheckIn}
+          disabled={submitting}
+          aria-busy={submitting}
+        >
+          <MapPin size={18} strokeWidth={2} />
+          {submitting
+            ? status === "locating"
+              ? "Finding you…"
+              : "Checking in…"
+            : "Check In Again"}
+        </Button>
+
+        {blockedMessage && (
+          <p role="alert" className="text-center text-sm text-[var(--color-burgundy)]">
+            {blockedMessage}
+          </p>
+        )}
       </div>
     );
   }

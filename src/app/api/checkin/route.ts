@@ -13,6 +13,10 @@ interface CheckinBody {
 const NOT_CLOSE_MESSAGE =
   "It looks like you're not quite at the winery yet. Visit the tasting room to collect your trail stamp.";
 
+/** A guest can check in at the same winery again after this cooldown —
+ * rewards repeat visits instead of a single one-time stamp. */
+const CHECKIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as CheckinBody;
   const { wineryId, latitude, longitude } = body;
@@ -85,15 +89,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "You must be signed in to check in." }, { status: 401 });
   }
 
-  const { data: existing } = await supabase
+  const { data: lastCheckin } = await supabase
     .from("checkins")
     .select("*")
     .eq("user_id", user.id)
     .eq("winery_id", wineryId)
+    .order("checkin_date", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
-  if (existing) {
-    return NextResponse.json({ verified: true, alreadyCheckedIn: true, checkin: existing });
+  if (lastCheckin) {
+    const elapsedMs = Date.now() - new Date(lastCheckin.checkin_date).getTime();
+    if (elapsedMs < CHECKIN_COOLDOWN_MS) {
+      const hoursLeft = Math.max(1, Math.ceil((CHECKIN_COOLDOWN_MS - elapsedMs) / (60 * 60 * 1000)));
+      return NextResponse.json(
+        {
+          verified: false,
+          cooldown: true,
+          message: `You already checked in here today — come back in about ${hoursLeft} hour${hoursLeft === 1 ? "" : "s"} to check in again.`,
+          checkin: lastCheckin,
+        },
+        { status: 429 }
+      );
+    }
   }
 
   const { data: checkin, error: insertError } = await supabase

@@ -149,6 +149,9 @@ export async function getQualifyingReferralCount(): Promise<number> {
   }
 }
 
+/** Every check-in the guest has ever made, most recent first — a guest can
+ * now check in at the same winery more than once (one per 24 hours), so
+ * this is no longer capped to one row per winery. */
 export async function getUserCheckins(userId: string): Promise<Checkin[]> {
   if (!isSupabaseConfigured) return [];
   try {
@@ -157,7 +160,7 @@ export async function getUserCheckins(userId: string): Promise<Checkin[]> {
       .from("checkins")
       .select("*")
       .eq("user_id", userId)
-      .order("created_at", { ascending: true });
+      .order("checkin_date", { ascending: false });
     return (data as Checkin[]) ?? [];
   } catch {
     return [];

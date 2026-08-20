@@ -67,12 +67,16 @@ export async function getAdminStats(): Promise<AdminStats> {
       ]);
 
     const checkinsByWinery: Record<string, number> = {};
-    const perUserCounts: Record<string, number> = {};
+    // A guest can now check in at the same winery more than once (one per
+    // 24 hours), so this has to count distinct wineries per guest, not raw
+    // check-in rows — otherwise a repeat visitor to a single winery would
+    // wrongly count as a multi-winery visitor.
+    const perUserWineries: Record<string, Set<string>> = {};
     (checkins ?? []).forEach((c) => {
       checkinsByWinery[c.winery_id] = (checkinsByWinery[c.winery_id] ?? 0) + 1;
-      perUserCounts[c.user_id] = (perUserCounts[c.user_id] ?? 0) + 1;
+      (perUserWineries[c.user_id] ??= new Set()).add(c.winery_id);
     });
-    const multiWineryVisitors = Object.values(perUserCounts).filter((n) => n > 1).length;
+    const multiWineryVisitors = Object.values(perUserWineries).filter((s) => s.size > 1).length;
 
     const wineClubClicksByWinery: Record<string, number> = {};
     (clicks ?? []).forEach((c) => {

@@ -1,4 +1,4 @@
-import { visitedCount, isTrailComplete } from "@/lib/trail";
+import { isTrailComplete } from "@/lib/trail";
 import type { WineryWithStatus, WineWithTasting } from "@/lib/types";
 
 export const POINTS_PER_CHECKIN = 25;
@@ -20,14 +20,18 @@ export interface RewardsPoints {
 
 /** Points are always derived from check-ins, wine ratings, trail
  * completion, and qualifying referrals — never stored directly — so
- * there's nothing to keep in sync. */
+ * there's nothing to keep in sync. `totalCheckins` is every check-in the
+ * guest has ever made (not deduped by winery) — a guest can check in at
+ * the same winery again after a 24-hour cooldown and earn points again,
+ * rewarding repeat visits rather than a one-time stamp. */
 export function computeRewardsPoints(
   wineries: WineryWithStatus[],
   wines: WineWithTasting[],
+  totalCheckins: number,
   referrals = 0,
   isSubscriber = false
 ): RewardsPoints {
-  const checkins = visitedCount(wineries);
+  const checkins = totalCheckins;
   const winesRated = wines.filter((w) => w.tasting != null).length;
   const completionBonus = isTrailComplete(wineries) ? COMPLETION_BONUS : 0;
   const multiplier = isSubscriber ? SUBSCRIBER_MULTIPLIER : 1;
