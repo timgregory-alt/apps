@@ -135,3 +135,14 @@ cross join (
     ('March', 3, 3, 'Mon–Thu 11am–7pm · Fri–Sat 11am–8pm · Sun 12pm–7pm', 4)
 ) as v(label, start_month, end_month, hours_text, sort_order)
 where w.slug = 'arrington-vineyards';
+
+-- Four placeholder dog profiles — leaves the real details to be filled in via
+-- /admin/dogs, and never overwrites them once set (unlike the winery/wine
+-- rows above, this content is owner-edited, not synced from a fixed brief).
+insert into public.dogs (slug, name, sort_order)
+values
+  ('dog-1', 'Dog 1', 1),
+  ('dog-2', 'Dog 2', 2),
+  ('dog-3', 'Dog 3', 3),
+  ('dog-4', 'Dog 4', 4)
+on conflict (slug) do nothing;

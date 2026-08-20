@@ -271,3 +271,29 @@ create table if not exists public.trail_completions (
 );
 
 create index if not exists trail_completions_user_idx on public.trail_completions (user_id);
+
+-- ---------------------------------------------------------------------------
+-- dogs  (four fixed profile cards for the household's dogs — the info page
+-- shared with the dog sitter: photo, food, medication, vet/emergency info)
+-- ---------------------------------------------------------------------------
+create table if not exists public.dogs (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  photo text,
+  breed text,
+  age text,
+  weight text,
+  food text,
+  medication text,
+  allergies text,
+  vet_name text,
+  vet_phone text,
+  emergency_contact_name text,
+  emergency_contact_phone text,
+  notes text,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists dogs_sort_idx on public.dogs (sort_order);

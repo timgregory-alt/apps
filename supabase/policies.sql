@@ -184,3 +184,15 @@ create policy "Users view their own completions" on public.trail_completions
 
 create policy "Users record their own completions" on public.trail_completions
   for insert with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- dogs — publicly readable (this is the no-login page shared with the dog
+-- sitter); only admins can edit
+-- ---------------------------------------------------------------------------
+alter table public.dogs enable row level security;
+
+create policy "Dogs are public" on public.dogs
+  for select using (true);
+
+create policy "Admins manage dogs" on public.dogs
+  for all using (public.is_admin()) with check (public.is_admin());

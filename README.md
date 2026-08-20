@@ -135,6 +135,14 @@ The app ships a web manifest (`src/app/manifest.ts`) and generated app icons (`s
 - **iPhone (Safari):** Share → Add to Home Screen
 - **Android (Chrome):** ⋮ menu → Add to Home Screen / Install App (Chrome may also prompt automatically)
 
+## Dog sitter page
+
+A second, unrelated mini-app lives at `/dog-sitter` — a no-login page with a photo, food, medication, allergies, vet, and emergency-contact card for each of four dogs, meant to be sent as a link to whoever is watching them. It's intentionally outside the wine-trail experience: it isn't in the bottom nav, isn't gated by the site-wide auth modal, and is marked `noindex`.
+
+- **View it:** `/dog-sitter` — public, read-only, safe to text or email to a sitter.
+- **Edit it:** `/admin/dogs` — same admin-only gate as the rest of `/admin` (an account with `is_admin = true`). Each dog has its own edit page with a photo upload (resized and stored inline as the row's `photo` field — no storage bucket needed for four photos) plus text fields for food, medication, allergies, vet info, emergency contact, and notes. Saves apply immediately, no deploy required.
+- **Data:** the `dogs` table (`supabase/schema.sql`, `supabase/policies.sql`, seeded with four blank placeholders in `supabase/seed.sql`; `supabase/migrations/0033_dog_sitter.sql` adds it to an already-running project). Row-level security makes it publicly readable and admin-only to write. Without Supabase configured, `/dog-sitter` still renders using local blank placeholders, but edits made at `/admin/dogs` won't persist until Supabase is connected.
+
 ## Design system
 
 Warm ivory backgrounds, deep burgundy and charcoal, muted gold accents, a serif display face (Fraunces) for headlines over a clean sans (Inter) for body text — defined as CSS custom properties in `src/app/globals.css` and consumed via Tailwind v4's `@theme inline`. Motion is deliberately restrained: soft fades, a spring-based stamp animation, and a brief gold sparkle on check-in — no cartoon bounce.

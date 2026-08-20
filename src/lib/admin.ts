@@ -1,8 +1,8 @@
 import "server-only";
 import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
-import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
+import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS, SEED_DOGS } from "@/lib/seed-data";
+import type { Winery, Wine, RewardTier, UUID, Dog } from "@/lib/types";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
  * Members list — best-effort, so an unrecognized or malformed zip just
@@ -312,6 +312,22 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
   } catch {
     return EMPTY_APP_RATING_STATS;
   }
+}
+
+export async function getAllDogsAdmin(): Promise<Dog[]> {
+  if (!isSupabaseConfigured) return [...SEED_DOGS].sort((a, b) => a.sort_order - b.sort_order);
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("dogs").select("*").order("sort_order");
+    return data && data.length > 0 ? (data as Dog[]) : SEED_DOGS;
+  } catch {
+    return SEED_DOGS;
+  }
+}
+
+export async function getDogByIdAdmin(id: string): Promise<Dog | null> {
+  const dogs = await getAllDogsAdmin();
+  return dogs.find((d) => d.id === id) ?? null;
 }
 
 export interface MemberRow {
