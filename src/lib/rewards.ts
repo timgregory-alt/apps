@@ -8,7 +8,7 @@ export const POINTS_PER_REFERRAL = 50;
 /** Subscribers earn this much more on every check-in, wine rating, and
  * referral. Doesn't apply to the one-time completion bonus — that's a flat
  * achievement reward, not an activity that scales with a multiplier. */
-export const SUBSCRIBER_MULTIPLIER = 1.5;
+export const SUBSCRIBER_MULTIPLIER = 2;
 
 export interface RewardsPoints {
   total: number;
