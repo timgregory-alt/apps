@@ -936,7 +936,7 @@ export const SEED_REWARD_TIERS: RewardTier[] = [
   {
     id: "reward-tier-first-pour",
     label: "First Pour",
-    points_required: 1000,
+    points_required: 150,
     discount_percent: 10,
     choice_options: null,
     birthday_only: false,
@@ -947,7 +947,7 @@ export const SEED_REWARD_TIERS: RewardTier[] = [
   {
     id: "reward-tier-trail-blazer",
     label: "Trail Blazer",
-    points_required: 2000,
+    points_required: 400,
     discount_percent: 15,
     choice_options: null,
     birthday_only: false,
@@ -958,7 +958,7 @@ export const SEED_REWARD_TIERS: RewardTier[] = [
   {
     id: "reward-tier-estate-insider",
     label: "Estate Insider",
-    points_required: 3000,
+    points_required: 750,
     discount_percent: 20,
     choice_options: null,
     birthday_only: false,
@@ -969,7 +969,7 @@ export const SEED_REWARD_TIERS: RewardTier[] = [
   {
     id: "reward-tier-sommeliers-choice",
     label: "Sommelier's Choice",
-    points_required: 4000,
+    points_required: 1250,
     discount_percent: 35,
     choice_options: ["35% off your next purchase", "A complimentary tasting for two"],
     birthday_only: false,
