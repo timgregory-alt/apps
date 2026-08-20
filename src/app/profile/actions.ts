@@ -7,34 +7,40 @@ import { LOW_RATING_THRESHOLD } from "@/lib/appRating";
 
 const MIN_AGE = 21;
 
+export type UpdateProfileResult = { error: string } | { error?: undefined; emailChangePending: boolean };
+
+// This Next.js version's Server Functions redact thrown errors into a
+// generic "Server Components render" error on the client — expected errors
+// need to come back as return values instead (see
+// node_modules/next/dist/docs/01-app/01-getting-started/10-error-handling.md).
 export async function updateProfileAction(input: {
   name: string;
   birth_date: string;
   email: string;
   zip_code: string;
-}) {
+}): Promise<UpdateProfileResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Sign in to update your profile");
+  if (!user) return { error: "Sign in to update your profile" };
 
   const name = input.name.trim();
-  if (!name) throw new Error("Name is required");
+  if (!name) return { error: "Name is required" };
 
   const email = input.email.trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error("Please enter a valid email address.");
+    return { error: "Please enter a valid email address." };
   }
 
   const zipCode = input.zip_code.trim();
   if (!/^\d{5}(-\d{4})?$/.test(zipCode)) {
-    throw new Error("Please enter a valid zip code.");
+    return { error: "Please enter a valid zip code." };
   }
 
   const newBirthDate = input.birth_date || null;
   if (newBirthDate && calculateAge(newBirthDate) < MIN_AGE) {
-    throw new Error(`You must be ${MIN_AGE} or older.`);
+    return { error: `You must be ${MIN_AGE} or older.` };
   }
 
   const { data: current } = await supabase
@@ -45,9 +51,10 @@ export async function updateProfileAction(input: {
 
   const birthDateChanged = (current?.birth_date ?? null) !== newBirthDate;
   if (birthDateChanged && current?.birth_date_locked) {
-    throw new Error(
-      "Your birthday can only be changed once and has already been set. Contact us if this needs to be corrected."
-    );
+    return {
+      error:
+        "Your birthday can only be changed once and has already been set. Contact us if this needs to be corrected.",
+    };
   }
 
   const { error } = await supabase
@@ -59,7 +66,7 @@ export async function updateProfileAction(input: {
       ...(birthDateChanged ? { birth_date_locked: true } : {}),
     })
     .eq("id", user.id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   // Email changes go through Supabase Auth's own confirmation flow rather
   // than the profiles table directly — profiles.email is synced once the
@@ -67,7 +74,7 @@ export async function updateProfileAction(input: {
   let emailChangePending = false;
   if (email !== user.email) {
     const { error: emailError } = await supabase.auth.updateUser({ email });
-    if (emailError) throw new Error(emailError.message);
+    if (emailError) return { error: emailError.message };
     emailChangePending = true;
   }
 

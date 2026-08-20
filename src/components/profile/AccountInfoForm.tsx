@@ -40,13 +40,13 @@ export function AccountInfoForm({
     setSaved(false);
     setEmailChangePending(false);
     startTransition(async () => {
-      try {
-        const result = await updateProfileAction({ name, birth_date: birthDate, email, zip_code: zipCode });
-        setSaved(true);
-        setEmailChangePending(!!result?.emailChangePending);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save your info");
+      const result = await updateProfileAction({ name, birth_date: birthDate, email, zip_code: zipCode });
+      if (result.error !== undefined) {
+        setError(result.error);
+        return;
       }
+      setSaved(true);
+      setEmailChangePending(result.emailChangePending);
     });
   }
 
