@@ -82,7 +82,9 @@ export async function updateProfileAction(input: {
   return { emailChangePending };
 }
 
-/** Submits or updates the guest's 1-5 star rating of the app itself. */
+/** Submits a new 1-5 star rating of the app itself. A guest can submit more
+ * than once over time (e.g. coming back later with new feedback) — each
+ * submission is its own row rather than overwriting a prior one. */
 export async function submitAppRatingAction(
   rating: number,
   feedback: string
@@ -102,15 +104,11 @@ export async function submitAppRatingAction(
     return { error: "Please let us know what went wrong so we can improve." };
   }
 
-  const { error } = await supabase.from("app_ratings").upsert(
-    {
-      user_id: user.id,
-      rating,
-      feedback: trimmedFeedback || null,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id" }
-  );
+  const { error } = await supabase.from("app_ratings").insert({
+    user_id: user.id,
+    rating,
+    feedback: trimmedFeedback || null,
+  });
   if (error) return { error: error.message };
 
   revalidatePath("/profile");

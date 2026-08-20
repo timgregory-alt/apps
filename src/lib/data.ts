@@ -323,6 +323,9 @@ export async function getUserRewardRedemptions(userId: string): Promise<RewardRe
   }
 }
 
+/** A guest can submit more than one rating over time, so this returns just
+ * their most recent one — used to give the Profile page's rating widget a
+ * starting point, not as "the" rating. */
 export async function getUserAppRating(userId: string): Promise<AppRating | null> {
   if (!isSupabaseConfigured) return null;
   try {
@@ -331,6 +334,8 @@ export async function getUserAppRating(userId: string): Promise<AppRating | null
       .from("app_ratings")
       .select("*")
       .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
     return (data as AppRating) ?? null;
   } catch {
