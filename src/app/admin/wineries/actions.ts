@@ -43,25 +43,27 @@ function parseWineryForm(formData: FormData) {
   };
 }
 
-export async function createWineryAction(formData: FormData) {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+export type WineryActionResult = { error: string } | void;
+
+export async function createWineryAction(formData: FormData): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const winery = parseWineryForm(formData);
   const { data, error } = await supabase.from("wineries").insert(winery).select().single();
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/admin/wineries");
   redirect(`/admin/wineries/${data.id}`);
 }
 
-export async function updateWineryAction(wineryId: string, formData: FormData) {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+export async function updateWineryAction(wineryId: string, formData: FormData): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const winery = parseWineryForm(formData);
   const { error } = await supabase.from("wineries").update(winery).eq("id", wineryId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/admin/wineries");
   revalidatePath(`/admin/wineries/${wineryId}`);
@@ -75,15 +77,18 @@ export interface SeasonalHoursInput {
   hours_text: string;
 }
 
-export async function saveWineryHoursAction(wineryId: string, rows: SeasonalHoursInput[]) {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+export async function saveWineryHoursAction(
+  wineryId: string,
+  rows: SeasonalHoursInput[]
+): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const { error: deleteError } = await supabase
     .from("winery_hours")
     .delete()
     .eq("winery_id", wineryId);
-  if (deleteError) throw new Error(deleteError.message);
+  if (deleteError) return { error: deleteError.message };
 
   const cleaned = rows
     .map((r) => ({ ...r, label: r.label.trim(), hours_text: r.hours_text.trim() }))
@@ -100,18 +105,22 @@ export async function saveWineryHoursAction(wineryId: string, rows: SeasonalHour
         sort_order: i + 1,
       }))
     );
-    if (insertError) throw new Error(insertError.message);
+    if (insertError) return { error: insertError.message };
   }
 
   revalidatePath(`/admin/wineries/${wineryId}`);
 }
 
-export async function setWineSoldOutAction(wineId: string, wineryId: string, soldOut: boolean) {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+export async function setWineSoldOutAction(
+  wineId: string,
+  wineryId: string,
+  soldOut: boolean
+): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("wines").update({ sold_out: soldOut }).eq("id", wineId);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   const winery = await getWineryByIdAdmin(wineryId);
   revalidatePath(`/admin/wineries/${wineryId}`);
@@ -119,10 +128,14 @@ export async function setWineSoldOutAction(wineId: string, wineryId: string, sol
 }
 
 export async function syncWineryNowAction(wineryId: string): Promise<SyncResult> {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+  if (!(await isCurrentUserAdmin())) {
+    return { wineryId, wineryName: "", added: 0, status: "error", detail: "Not authorized" };
+  }
 
   const winery = await getWineryByIdAdmin(wineryId);
-  if (!winery) throw new Error("Winery not found");
+  if (!winery) {
+    return { wineryId, wineryName: "", added: 0, status: "error", detail: "Winery not found" };
+  }
 
   try {
     const result = await syncWineryWines(winery);
@@ -154,10 +167,14 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
 }
 
 export async function syncEventsNowAction(wineryId: string): Promise<EventSyncResult> {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+  if (!(await isCurrentUserAdmin())) {
+    return { wineryId, wineryName: "", added: 0, status: "error", detail: "Not authorized" };
+  }
 
   const winery = await getWineryByIdAdmin(wineryId);
-  if (!winery) throw new Error("Winery not found");
+  if (!winery) {
+    return { wineryId, wineryName: "", added: 0, status: "error", detail: "Winery not found" };
+  }
 
   try {
     const result = await syncWineryEvents(winery);

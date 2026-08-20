@@ -15,20 +15,14 @@ export function EventSyncPanel({
 }) {
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<EventSyncResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const sourceUrl = eventsPageUrl ?? websiteUrl;
 
   function handleSync() {
-    setError(null);
     setResult(null);
     startTransition(async () => {
-      try {
-        const res = await syncEventsNowAction(wineryId);
-        setResult(res);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Sync failed.");
-      }
+      const res = await syncEventsNowAction(wineryId);
+      setResult(res);
     });
   }
 
@@ -55,9 +49,7 @@ export function EventSyncPanel({
         {pending ? "Checking…" : "Check for New Events Now"}
       </button>
 
-      {error && <p className="mt-3 text-sm text-[var(--color-burgundy)]">{error}</p>}
-
-      {result && !error && (
+      {result && (
         <div className="mt-3 rounded-xl bg-[var(--color-gold-pale)]/25 p-3 text-sm text-[var(--color-charcoal)]">
           {result.status === "error" ? (
             <p className="text-[var(--color-burgundy)]">Couldn&rsquo;t check: {result.detail}</p>

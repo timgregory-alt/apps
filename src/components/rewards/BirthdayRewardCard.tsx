@@ -24,12 +24,12 @@ export function BirthdayRewardCard({
   function reveal() {
     setError(null);
     startTransition(async () => {
-      try {
-        const result = await generateRedemptionAction(tier.id);
-        setCode(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await generateRedemptionAction(tier.id);
+      if ("error" in result) {
+        setError(result.error);
+        return;
       }
+      setCode(result);
     });
   }
 

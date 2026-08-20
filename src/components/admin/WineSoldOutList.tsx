@@ -14,9 +14,8 @@ export function WineSoldOutList({ wineryId, wines }: { wineryId: string; wines: 
   function handleToggle(wineId: string, checked: boolean) {
     setSoldOutById((prev) => ({ ...prev, [wineId]: checked }));
     startTransition(async () => {
-      try {
-        await setWineSoldOutAction(wineId, wineryId, checked);
-      } catch {
+      const result = await setWineSoldOutAction(wineId, wineryId, checked);
+      if (result?.error) {
         setSoldOutById((prev) => ({ ...prev, [wineId]: !checked }));
       }
     });

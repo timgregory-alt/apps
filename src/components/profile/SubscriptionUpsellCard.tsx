@@ -23,12 +23,12 @@ export function SubscriptionUpsellCard({ isSubscriber }: { isSubscriber: boolean
     const next = !subscriber;
     setError(null);
     startTransition(async () => {
-      try {
-        await toggleSubscriptionAction(next);
-        setSubscriber(next);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not update your subscription");
+      const result = await toggleSubscriptionAction(next);
+      if (result?.error) {
+        setError(result.error);
+        return;
       }
+      setSubscriber(next);
     });
   }
 

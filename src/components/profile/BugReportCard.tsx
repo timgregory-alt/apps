@@ -20,13 +20,13 @@ export function BugReportCard() {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      try {
-        await submitBugReportAction(description, pathname);
-        setSubmitted(true);
-        setDescription("");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not submit your report");
+      const result = await submitBugReportAction(description, pathname);
+      if (result?.error) {
+        setError(result.error);
+        return;
       }
+      setSubmitted(true);
+      setDescription("");
     });
   }
 

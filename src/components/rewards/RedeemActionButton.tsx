@@ -13,12 +13,12 @@ export function RedeemActionButton({ code }: { code: string }) {
   function redeem() {
     setError(null);
     startTransition(async () => {
-      try {
-        await markRedeemedAction(code);
-        setDone(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await markRedeemedAction(code);
+      if ("error" in result) {
+        setError(result.error);
+        return;
       }
+      setDone(true);
     });
   }
 

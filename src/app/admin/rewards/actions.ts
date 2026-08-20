@@ -15,12 +15,14 @@ export interface RewardTierInput {
   active: boolean;
 }
 
-export async function createRewardTierAction(input: RewardTierInput): Promise<RewardTier> {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+export async function createRewardTierAction(
+  input: RewardTierInput
+): Promise<RewardTier | { error: string }> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const { data, error } = await supabase.from("reward_tiers").insert(input).select().single();
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/admin/rewards");
   revalidatePath("/rewards");
@@ -29,12 +31,15 @@ export async function createRewardTierAction(input: RewardTierInput): Promise<Re
 
 /** Updates a tier in place — never delete-and-reinsert, since reward_redemptions
  * has a foreign key to reward_tiers and must not be orphaned. */
-export async function updateRewardTierAction(id: string, input: RewardTierInput) {
-  if (!(await isCurrentUserAdmin())) throw new Error("Not authorized");
+export async function updateRewardTierAction(
+  id: string,
+  input: RewardTierInput
+): Promise<{ error: string } | void> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("reward_tiers").update(input).eq("id", id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/admin/rewards");
   revalidatePath("/rewards");

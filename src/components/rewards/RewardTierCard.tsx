@@ -27,12 +27,12 @@ export function RewardTierCard({
   function reveal(option?: string) {
     setError(null);
     startTransition(async () => {
-      try {
-        const result = await generateRedemptionAction(tier.id, option);
-        setCode(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
+      const result = await generateRedemptionAction(tier.id, option);
+      if ("error" in result) {
+        setError(result.error);
+        return;
       }
+      setCode(result);
     });
   }
 

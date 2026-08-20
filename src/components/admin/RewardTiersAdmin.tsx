@@ -67,21 +67,17 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
     setError(null);
     setSavingId(id);
     startTransition(async () => {
-      try {
-        await updateRewardTierAction(id, {
-          label: row.label.trim(),
-          points_required: row.points_required,
-          discount_percent: row.discount_percent,
-          choice_options: parseChoiceOptions(row.choiceOptionsText),
-          birthday_only: row.birthday_only,
-          sort_order: row.sort_order,
-          active: row.active,
-        });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save");
-      } finally {
-        setSavingId(null);
-      }
+      const result = await updateRewardTierAction(id, {
+        label: row.label.trim(),
+        points_required: row.points_required,
+        discount_percent: row.discount_percent,
+        choice_options: parseChoiceOptions(row.choiceOptionsText),
+        birthday_only: row.birthday_only,
+        sort_order: row.sort_order,
+        active: row.active,
+      });
+      if (result?.error) setError(result.error);
+      setSavingId(null);
     });
   }
 
@@ -91,16 +87,18 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
     setError(null);
     setCreating(true);
     startTransition(async () => {
-      try {
-        const created = await createRewardTierAction({
-          label: newTier.label.trim(),
-          points_required: newTier.points_required,
-          discount_percent: newTier.discount_percent,
-          choice_options: parseChoiceOptions(newTier.choiceOptionsText),
-          birthday_only: newTier.birthday_only,
-          sort_order: newTier.sort_order,
-          active: newTier.active,
-        });
+      const created = await createRewardTierAction({
+        label: newTier.label.trim(),
+        points_required: newTier.points_required,
+        discount_percent: newTier.discount_percent,
+        choice_options: parseChoiceOptions(newTier.choiceOptionsText),
+        birthday_only: newTier.birthday_only,
+        sort_order: newTier.sort_order,
+        active: newTier.active,
+      });
+      if ("error" in created) {
+        setError(created.error);
+      } else {
         setRows((prev) => [...prev, toDraft(created)]);
         setNewTier({
           label: "",
@@ -111,11 +109,8 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           sort_order: rows.length + 2,
           active: true,
         });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not create tier");
-      } finally {
-        setCreating(false);
       }
+      setCreating(false);
     });
   }
 

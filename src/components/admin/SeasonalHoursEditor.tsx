@@ -66,12 +66,12 @@ export function SeasonalHoursEditor({
   function handleSave() {
     setError(null);
     startTransition(async () => {
-      try {
-        await saveWineryHoursAction(wineryId, rows);
-        setSaved(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not save seasonal hours.");
+      const result = await saveWineryHoursAction(wineryId, rows);
+      if (result?.error) {
+        setError(result.error);
+        return;
       }
+      setSaved(true);
     });
   }
 

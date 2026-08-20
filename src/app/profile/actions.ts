@@ -83,20 +83,23 @@ export async function updateProfileAction(input: {
 }
 
 /** Submits or updates the guest's 1-5 star rating of the app itself. */
-export async function submitAppRatingAction(rating: number, feedback: string) {
+export async function submitAppRatingAction(
+  rating: number,
+  feedback: string
+): Promise<{ error: string } | void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Sign in to rate the app");
+  if (!user) return { error: "Sign in to rate the app" };
 
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-    throw new Error("Rating must be 1-5 stars");
+    return { error: "Rating must be 1-5 stars" };
   }
 
   const trimmedFeedback = feedback.trim();
   if (rating < LOW_RATING_THRESHOLD && !trimmedFeedback) {
-    throw new Error("Please let us know what went wrong so we can improve.");
+    return { error: "Please let us know what went wrong so we can improve." };
   }
 
   const { error } = await supabase.from("app_ratings").upsert(
@@ -108,7 +111,7 @@ export async function submitAppRatingAction(rating: number, feedback: string) {
     },
     { onConflict: "user_id" }
   );
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/profile");
 }
@@ -117,18 +120,18 @@ export async function submitAppRatingAction(rating: number, feedback: string) {
  * this just flips the same is_subscriber flag an admin can also set from
  * the Members page. RLS already allows a user to update their own profile
  * row, so no separate policy is needed for this one. */
-export async function toggleSubscriptionAction(isSubscriber: boolean) {
+export async function toggleSubscriptionAction(isSubscriber: boolean): Promise<{ error: string } | void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Sign in to manage your subscription");
+  if (!user) return { error: "Sign in to manage your subscription" };
 
   const { error } = await supabase
     .from("profiles")
     .update({ is_subscriber: isSubscriber })
     .eq("id", user.id);
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath("/profile");
   revalidatePath("/rewards");
@@ -136,20 +139,23 @@ export async function toggleSubscriptionAction(isSubscriber: boolean) {
 }
 
 /** Submits a "something's broken" report from the Profile page. */
-export async function submitBugReportAction(description: string, pageUrl: string) {
+export async function submitBugReportAction(
+  description: string,
+  pageUrl: string
+): Promise<{ error: string } | void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Sign in to report a bug");
+  if (!user) return { error: "Sign in to report a bug" };
 
   const trimmed = description.trim();
-  if (!trimmed) throw new Error("Please describe what happened");
+  if (!trimmed) return { error: "Please describe what happened" };
 
   const { error } = await supabase.from("bug_reports").insert({
     user_id: user.id,
     description: trimmed,
     page_url: pageUrl || null,
   });
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 }

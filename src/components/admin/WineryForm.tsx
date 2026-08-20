@@ -14,7 +14,7 @@ export function WineryForm({
   action,
 }: {
   winery?: Winery;
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => { error: string } | void | Promise<{ error: string } | void>;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -24,11 +24,8 @@ export function WineryForm({
       action={(formData) => {
         setError(null);
         startTransition(async () => {
-          try {
-            await action(formData);
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong.");
-          }
+          const result = await action(formData);
+          if (result?.error) setError(result.error);
         });
       }}
       className="flex flex-col gap-5"

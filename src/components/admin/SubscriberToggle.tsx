@@ -18,9 +18,8 @@ export function SubscriberToggle({
     const next = !isSubscriber;
     setIsSubscriber(next);
     startTransition(async () => {
-      try {
-        await setSubscriberAction(userId, next);
-      } catch {
+      const result = await setSubscriberAction(userId, next);
+      if (result?.error) {
         setIsSubscriber(!next);
       }
     });

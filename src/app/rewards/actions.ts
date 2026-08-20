@@ -24,12 +24,12 @@ import type { RewardRedemption } from "@/lib/types";
 export async function generateRedemptionAction(
   tierId: string,
   chosenOption?: string
-): Promise<RewardRedemption> {
+): Promise<RewardRedemption | { error: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Sign in to redeem a reward");
+  if (!user) return { error: "Sign in to redeem a reward" };
 
   const [tiers, wineries, wines, profile, referralCount] = await Promise.all([
     getActiveRewardTiers(),
@@ -39,7 +39,7 @@ export async function generateRedemptionAction(
     getQualifyingReferralCount(),
   ]);
   const tier = tiers.find((t) => t.id === tierId);
-  if (!tier) throw new Error("Reward tier not found");
+  if (!tier) return { error: "Reward tier not found" };
 
   const periodKey = tier.birthday_only ? currentRewardPeriodKey() : "";
 
@@ -54,16 +54,16 @@ export async function generateRedemptionAction(
 
   if (tier.birthday_only) {
     if (!isBirthdayToday(profile?.birth_date ?? null)) {
-      throw new Error("This reward only unlocks on your birthday");
+      return { error: "This reward only unlocks on your birthday" };
     }
   } else {
     const points = computeRewardsPoints(wineries, wines, referralCount, profile?.is_subscriber ?? false);
-    if (points.total < tier.points_required) throw new Error("Not enough points yet");
+    if (points.total < tier.points_required) return { error: "Not enough points yet" };
   }
 
   if (tier.choice_options && tier.choice_options.length > 0) {
     if (!chosenOption || !tier.choice_options.includes(chosenOption)) {
-      throw new Error("Choose a reward first");
+      return { error: "Choose a reward first" };
     }
   }
 
@@ -78,7 +78,7 @@ export async function generateRedemptionAction(
       revalidatePath("/rewards");
       return data as RewardRedemption;
     }
-    if (error?.code !== "23505") throw new Error(error?.message ?? "Could not redeem");
+    if (error?.code !== "23505") return { error: error?.message ?? "Could not redeem" };
   }
-  throw new Error("Could not generate a unique code — please try again");
+  return { error: "Could not generate a unique code — please try again" };
 }

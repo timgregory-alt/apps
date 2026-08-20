@@ -37,14 +37,14 @@ export function AppRatingCard({
     }
 
     startTransition(async () => {
-      try {
-        await submitAppRatingAction(rating, feedback);
-        setSaved(true);
-        setRating(0);
-        setFeedback("");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not submit your rating");
+      const result = await submitAppRatingAction(rating, feedback);
+      if (result?.error) {
+        setError(result.error);
+        return;
       }
+      setSaved(true);
+      setRating(0);
+      setFeedback("");
     });
   }
 
