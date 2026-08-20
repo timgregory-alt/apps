@@ -46,7 +46,45 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="3. Location Services and Check-Ins">
+        <Section title="3. Privacy and Data">
+          <p className="font-medium text-[var(--color-charcoal)]">What we collect</p>
+          <p className="mt-1">
+            To create an account and use the Service, we collect your name, email address, date
+            of birth (to confirm you&rsquo;re 21+), and zip code (so we can tell local guests
+            from travelers). When you check in at a winery, we collect your device&rsquo;s
+            location at that moment to verify the visit. We also keep a record of the activity
+            you generate in the app — check-ins, wine ratings, custom tasting notes, referrals,
+            reward redemptions, app ratings, and bug reports.
+          </p>
+          <p className="mt-2 font-medium text-[var(--color-charcoal)]">How we use it</p>
+          <p className="mt-1">
+            We use this information to run your account, verify check-ins, calculate your trail
+            progress and reward points, personalize recommendations, and improve the Service. We
+            do not sell your personal information to third parties. We may share it with service
+            providers who help us run the app — currently Supabase (authentication and database
+            hosting) and Mapbox (map rendering) — solely to provide the Service, and with law
+            enforcement if legally required.
+          </p>
+          <p className="mt-2 font-medium text-[var(--color-charcoal)]">How we protect it</p>
+          <p className="mt-1">
+            Your data is stored with Supabase, encrypted in transit and at rest. Access to guest
+            data is restricted by row-level security policies, so an account can only read its
+            own data, and by role, so only authorized admins can view aggregate or member-level
+            information for legitimate operational purposes (like responding to a bug report). No
+            system is 100% secure, and we can&rsquo;t guarantee absolute security, but we take
+            reasonable, industry-standard measures to protect your information.
+          </p>
+          <p className="mt-2 font-medium text-[var(--color-charcoal)]">Your choices</p>
+          <p className="mt-1">
+            You can review and update most of your information anytime from the Profile page. You
+            can permanently delete your account and all associated data (check-ins, ratings,
+            redemptions, referral history, and more) at any time from the Delete Account section
+            of your Profile — this cannot be undone. Location access is optional, though check-ins
+            require it.
+          </p>
+        </Section>
+
+        <Section title="4. Location Services and Check-Ins">
           <p>
             The Service uses your device&rsquo;s location to verify winery check-ins — confirming
             you&rsquo;re physically at a winery before crediting a visit toward your trail
@@ -56,7 +94,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="4. Rewards, Points, and Redemptions">
+        <Section title="5. Rewards, Points, and Redemptions">
           <p>
             The Service may award points for activity such as check-ins, wine ratings, referrals,
             and completing the trail, and may let you redeem points for rewards. Points have no
@@ -69,7 +107,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="5. Referrals">
+        <Section title="6. Referrals">
           <p>
             If you refer another guest using your referral link or code, you may earn bonus
             points once they meet the qualifying criteria we set (for example, completing their
@@ -78,7 +116,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="6. Ratings, Feedback, and Bug Reports">
+        <Section title="7. Ratings, Feedback, and Bug Reports">
           <p>
             You may submit wine ratings, app ratings, written feedback, and bug reports through
             the Service. By submitting content, you grant us a non-exclusive, royalty-free license
@@ -87,7 +125,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="7. Acceptable Use">
+        <Section title="8. Acceptable Use">
           <p>You agree not to:</p>
           <ul className="ml-5 mt-2 list-disc space-y-1">
             <li>Falsify your location, age, or other account information</li>
@@ -98,7 +136,7 @@ export default function TermsPage() {
           </ul>
         </Section>
 
-        <Section title="8. Wineries Are Independent Businesses">
+        <Section title="9. Wineries Are Independent Businesses">
           <p>
             The wineries featured on the trail are independently owned and operated. We are not
             responsible for their hours, service, safety, alcohol service practices, pricing, or
@@ -108,7 +146,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="9. Intellectual Property">
+        <Section title="10. Intellectual Property">
           <p>
             The Service, including its design, text, graphics, and trail branding, is owned by us
             or our licensors and protected by intellectual property law. We grant you a limited,
@@ -117,7 +155,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="10. Disclaimer of Warranties">
+        <Section title="11. Disclaimer of Warranties">
           <p>
             The Service is provided &ldquo;as is&rdquo; without warranties of any kind, express or
             implied. We don&rsquo;t guarantee the Service will be uninterrupted, error-free, or
@@ -125,7 +163,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="11. Limitation of Liability">
+        <Section title="12. Limitation of Liability">
           <p>
             To the fullest extent permitted by law, we are not liable for any indirect,
             incidental, or consequential damages arising from your use of the Service, including
@@ -133,15 +171,15 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="12. Termination">
+        <Section title="13. Termination">
           <p>
             We may suspend or terminate your account at our discretion, including for violating
-            these Terms. You may stop using the Service and request account deletion at any time
-            by contacting us.
+            these Terms. You may stop using the Service and delete your account at any time from
+            the Profile page, or by contacting us.
           </p>
         </Section>
 
-        <Section title="13. Changes to These Terms">
+        <Section title="14. Changes to These Terms">
           <p>
             We may update these Terms from time to time. If we make material changes, we&rsquo;ll
             take reasonable steps to let you know (such as an in-app notice). Continued use of the
@@ -149,14 +187,14 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="14. Governing Law">
+        <Section title="15. Governing Law">
           <p>
             These Terms are governed by the laws of the State of Tennessee, without regard to
             conflict-of-law principles.
           </p>
         </Section>
 
-        <Section title="15. Contact">
+        <Section title="16. Contact">
           <p>Questions about these Terms? Reach out to us through the app&rsquo;s bug report or feedback form on your Profile page.</p>
         </Section>
       </div>

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { calculateAge } from "@/lib/utils";
 import { LOW_RATING_THRESHOLD } from "@/lib/appRating";
 
@@ -156,4 +156,23 @@ export async function submitBugReportAction(
     page_url: pageUrl || null,
   });
   if (error) return { error: error.message };
+}
+
+/** Permanently deletes the guest's account. Deleting the auth user cascades
+ * through every table that references it (check-ins, ratings, redemptions,
+ * etc. all have ON DELETE CASCADE), so no manual cleanup is needed here. */
+export async function deleteAccountAction(): Promise<{ error: string } | void> {
+  if (!isSupabaseConfigured) return { error: "Account deletion isn't available yet" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sign in to delete your account" };
+
+  const adminClient = await createAdminClient();
+  const { error } = await adminClient.auth.admin.deleteUser(user.id);
+  if (error) return { error: error.message };
+
+  await supabase.auth.signOut();
 }

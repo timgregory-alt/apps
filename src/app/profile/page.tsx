@@ -13,6 +13,7 @@ import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { DeleteAccountSection } from "@/components/profile/DeleteAccountSection";
 import { AccountInfoForm } from "@/components/profile/AccountInfoForm";
 import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
 import { AppRatingCard } from "@/components/profile/AppRatingCard";
@@ -175,6 +176,10 @@ export default async function ProfilePage() {
 
       <div className="px-6">
         <SignOutButton />
+      </div>
+
+      <div className="px-6">
+        <DeleteAccountSection />
       </div>
     </main>
   );
