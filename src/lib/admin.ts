@@ -320,6 +320,7 @@ export interface MemberRow {
   email: string | null;
   zip_code: string | null;
   is_subscriber: boolean;
+  agreed_to_terms_at: string | null;
   created_at: string;
 }
 
@@ -331,7 +332,7 @@ export async function getAllMembersAdmin(): Promise<MemberRow[]> {
     const supabase = await createClient();
     const { data } = await supabase
       .from("profiles")
-      .select("id, name, email, zip_code, is_subscriber, created_at")
+      .select("id, name, email, zip_code, is_subscriber, agreed_to_terms_at, created_at")
       .order("created_at", { ascending: true });
     return (data as MemberRow[]) ?? [];
   } catch {

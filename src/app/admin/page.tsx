@@ -3,6 +3,7 @@ import {
   getAllWineriesAdmin,
   getWineLikeStats,
   getAppRatingStats,
+  getAllMembersAdmin,
   LIKED_RATING_THRESHOLD,
 } from "@/lib/admin";
 import { formatCheckinDate } from "@/lib/utils";
@@ -17,15 +18,17 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default async function AdminDashboardPage() {
-  const [stats, wineries, wineLikeStats, appRatingStats] = await Promise.all([
+  const [stats, wineries, wineLikeStats, appRatingStats, members] = await Promise.all([
     getAdminStats(),
     getAllWineriesAdmin(),
     getWineLikeStats(),
     getAppRatingStats(),
+    getAllMembersAdmin(),
   ]);
 
   const mostPopular = Object.entries(stats.checkinsByWinery).sort((a, b) => b[1] - a[1])[0];
   const mostPopularWinery = wineries.find((w) => w.id === mostPopular?.[0]);
+  const termsAgreedCount = members.filter((m) => m.agreed_to_terms_at).length;
 
   return (
     <div className="flex flex-col gap-8">
@@ -66,6 +69,10 @@ export default async function AdminDashboardPage() {
         <StatCard
           label="Avg App Rating"
           value={appRatingStats.count > 0 ? `${appRatingStats.average.toFixed(1)} ★ (${appRatingStats.count})` : "—"}
+        />
+        <StatCard
+          label="Terms Agreed"
+          value={members.length > 0 ? `${termsAgreedCount} / ${members.length}` : "—"}
         />
       </div>
 

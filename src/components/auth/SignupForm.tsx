@@ -21,6 +21,8 @@ export function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
@@ -37,6 +39,14 @@ export function SignupForm() {
       setError(`You must be ${MIN_AGE} or older to create a Tennessee Wine Trails account.`);
       return;
     }
+    if (!/^\d{5}(-\d{4})?$/.test(zipCode.trim())) {
+      setError("Please enter a valid zip code.");
+      return;
+    }
+    if (!termsAccepted) {
+      setError("Please agree to the Terms and Conditions to create an account.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -45,7 +55,13 @@ export function SignupForm() {
         email,
         password,
         options: {
-          data: { name, birth_date: birthDate, referred_by: referredBy || undefined },
+          data: {
+            name,
+            birth_date: birthDate,
+            zip_code: zipCode.trim(),
+            referred_by: referredBy || undefined,
+            terms_accepted: "true",
+          },
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
       });
@@ -123,6 +139,37 @@ export function SignupForm() {
           <p className="-mt-2 text-xs text-[var(--color-charcoal)]/50">
             You must be {MIN_AGE}+ to join — Tennessee wineries only serve guests {MIN_AGE} and older.
           </p>
+          <AuthField
+            label="Zip Code"
+            type="text"
+            required
+            inputMode="numeric"
+            autoComplete="postal-code"
+            maxLength={10}
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+          />
+          <label className="flex items-start gap-2 text-xs text-[var(--color-charcoal)]/70">
+            <input
+              type="checkbox"
+              required
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0"
+            />
+            <span>
+              I agree to the{" "}
+              <Link
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[var(--color-burgundy)] hover:underline"
+              >
+                Terms and Conditions
+              </Link>
+              .
+            </span>
+          </label>
           {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
           <Button type="submit" size="lg" fullWidth disabled={loading}>
             {loading ? "Creating your account…" : "Create Account"}

@@ -14,12 +14,13 @@ export async function GET() {
   const members = await getAllMembersAdmin();
 
   const rows = [
-    ["Name", "Email", "Zip Code", "City", "Signed Up"],
+    ["Name", "Email", "Zip Code", "City", "Terms Agreed At", "Signed Up"],
     ...members.map((m) => [
       m.name ?? "",
       m.email ?? "",
       m.zip_code ?? "",
       cityFromZip(m.zip_code) ?? "",
+      m.agreed_to_terms_at ? new Date(m.agreed_to_terms_at).toISOString().slice(0, 10) : "",
       new Date(m.created_at).toISOString().slice(0, 10),
     ]),
   ];

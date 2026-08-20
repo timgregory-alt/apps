@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -209,6 +210,7 @@ function SignupFields({
   const [password, setPassword] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [zipCode, setZipCode] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
@@ -229,6 +231,10 @@ function SignupFields({
       setError("Please enter a valid zip code.");
       return;
     }
+    if (!termsAccepted) {
+      setError("Please agree to the Terms and Conditions to create an account.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -243,6 +249,7 @@ function SignupFields({
             birth_date: birthDate,
             zip_code: zipCode.trim(),
             referred_by: referredBy || undefined,
+            terms_accepted: "true",
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
@@ -313,6 +320,27 @@ function SignupFields({
         value={zipCode}
         onChange={(e) => setZipCode(e.target.value)}
       />
+      <label className="flex items-start gap-2 text-xs text-[var(--color-charcoal)]/70">
+        <input
+          type="checkbox"
+          required
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0"
+        />
+        <span>
+          I agree to the{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-[var(--color-burgundy)] hover:underline"
+          >
+            Terms and Conditions
+          </Link>
+          .
+        </span>
+      </label>
       {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
       <Button type="submit" size="lg" fullWidth disabled={loading}>
         {loading ? "Creating your account…" : "Create Account"}

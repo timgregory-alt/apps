@@ -34,6 +34,13 @@ export default async function AdminMembersPage() {
                   {m.email} · Joined {formatCheckinDate(m.created_at)}
                   {city ? ` · ${city}` : ""}
                 </p>
+                <p
+                  className={`mt-0.5 text-xs ${m.agreed_to_terms_at ? "text-[var(--color-charcoal)]/45" : "font-medium text-[var(--color-burgundy)]"}`}
+                >
+                  {m.agreed_to_terms_at
+                    ? `Terms agreed ${formatCheckinDate(m.agreed_to_terms_at)}`
+                    : "Terms not agreed"}
+                </p>
               </div>
               <SubscriberToggle userId={m.id} initialIsSubscriber={m.is_subscriber} />
             </div>

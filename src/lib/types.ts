@@ -197,6 +197,9 @@ export interface Profile {
   referred_by: UUID | null;
   /** Collected at signup, optional — where the guest is traveling from. */
   zip_code: string | null;
+  /** When the guest agreed to the Terms and Conditions at signup — null for
+   * accounts created before this requirement existed. */
+  agreed_to_terms_at: string | null;
   /** Manually toggled by an admin for now — stands in for a real subscription
    * until billing exists. Gates things like early access to new events. */
   is_subscriber: boolean;
