@@ -14,6 +14,7 @@ import {
   computeRewardsPoints,
   currentRewardPeriodKey,
   isBirthdayToday,
+  totalPointsSpent,
   POINTS_PER_CHECKIN,
   POINTS_PER_WINE_RATED,
   COMPLETION_BONUS,
@@ -67,9 +68,15 @@ export default async function RewardsPage() {
     referralCount,
     profile?.is_subscriber ?? false
   );
+  const balance = points.total - totalPointsSpent(redemptions);
   const ladderTiers = tiers.filter((t) => !t.birthday_only);
+  // Only a currently-pending (unredeemed) code should hide a tier's
+  // redeem/progress UI — once staff mark it redeemed, the guest can earn
+  // toward and redeem that tier again.
   const redemptionByTier = new Map(
-    redemptions.filter((r) => r.period_key === "").map((r) => [r.tier_id, r])
+    redemptions
+      .filter((r) => r.period_key === "" && r.status === "issued")
+      .map((r) => [r.tier_id, r])
   );
   const sortedTiers = [...ladderTiers].sort((a, b) => a.points_required - b.points_required);
 
@@ -95,9 +102,14 @@ export default async function RewardsPage() {
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] p-6 text-[var(--color-ivory)]">
           <TrailCoverFrame />
           <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
-            Total Points
+            Points Available to Redeem
           </p>
-          <p className="font-serif-display relative mt-1 text-4xl">{points.total}</p>
+          <p className="font-serif-display relative mt-1 text-4xl">{balance}</p>
+          {balance !== points.total && (
+            <p className="relative mt-1 text-xs text-[var(--color-ivory)]/60">
+              {points.total} lifetime points earned
+            </p>
+          )}
           <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[var(--color-ivory)]/70">
             <span>{points.checkins} check-ins</span>
             <span>{points.winesRated} wines rated</span>
@@ -175,7 +187,8 @@ export default async function RewardsPage() {
           <div className="px-6">
             <RewardTierCarousel
               tiers={sortedTiers}
-              pointsTotal={points.total}
+              balance={balance}
+              lifetimeTotal={points.total}
               redemptionByTier={redemptionByTier}
             />
           </div>

@@ -8,11 +8,13 @@ import type { RewardRedemption, RewardTier } from "@/lib/types";
 
 export function RewardTierCarousel({
   tiers,
-  pointsTotal,
+  balance,
+  lifetimeTotal,
   redemptionByTier,
 }: {
   tiers: RewardTier[];
-  pointsTotal: number;
+  balance: number;
+  lifetimeTotal: number;
   redemptionByTier: Map<string, RewardRedemption>;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -45,7 +47,8 @@ export function RewardTierCarousel({
           <div key={tier.id} className="w-full shrink-0 snap-center">
             <RewardTierCard
               tier={tier}
-              pointsTotal={pointsTotal}
+              balance={balance}
+              lifetimeTotal={lifetimeTotal}
               redemption={redemptionByTier.get(tier.id) ?? null}
             />
           </div>

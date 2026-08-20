@@ -303,6 +303,9 @@ export interface RewardRedemption {
   period_key: string;
   /** The option the guest picked, for tiers with choice_options. */
   chosen_option: string | null;
+  /** Points deducted from the guest's spendable balance for this redemption
+   * (captured at redemption time — 0 for the free, date-gated birthday tier). */
+  points_spent: number;
   status: RewardRedemptionStatus;
   issued_at: string;
   redeemed_at: string | null;

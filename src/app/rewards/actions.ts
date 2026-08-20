@@ -9,19 +9,25 @@ import {
   getWinesWithTastings,
   getQualifyingReferralCount,
   getUserCheckins,
+  getUserRewardRedemptions,
 } from "@/lib/data";
 import {
   computeRewardsPoints,
   currentRewardPeriodKey,
   generateRedemptionCode,
   isBirthdayToday,
+  totalPointsSpent,
 } from "@/lib/rewards";
 import type { RewardRedemption } from "@/lib/types";
 
-/** Issues (or returns the already-issued) redemption code for a tier the user has unlocked.
- * chosenOption is required for tiers with choice_options (e.g. Sommelier's Choice).
- * birthday_only tiers are gated by today's date instead of points, and use a
- * per-year period_key so the same tier can be redeemed again next birthday. */
+/** Issues a redemption code for a tier the guest can currently afford, spending
+ * that tier's points out of their spendable balance (lifetime points minus
+ * points already spent). Reaching a tier's threshold is a permanent status —
+ * once lifetime points cross it, the guest can redeem it again and again as
+ * they earn the points back, same as an airline miles balance. chosenOption
+ * is required for tiers with choice_options (e.g. Sommelier's Choice).
+ * birthday_only tiers are free (0 points) and gated by today's date, capped
+ * to one per calendar year via period_key. */
 export async function generateRedemptionAction(
   tierId: string,
   chosenOption?: string
@@ -32,33 +38,37 @@ export async function generateRedemptionAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to redeem a reward" };
 
-  const [tiers, wineries, wines, profile, referralCount, checkins] = await Promise.all([
+  const [tiers, wineries, wines, profile, referralCount, checkins, redemptions] = await Promise.all([
     getActiveRewardTiers(),
     getWineriesWithStatus(user.id),
     getWinesWithTastings(user.id),
     getProfile(user.id),
     getQualifyingReferralCount(),
     getUserCheckins(user.id),
+    getUserRewardRedemptions(user.id),
   ]);
   const tier = tiers.find((t) => t.id === tierId);
   if (!tier) return { error: "Reward tier not found" };
 
   const periodKey = tier.birthday_only ? currentRewardPeriodKey() : "";
-
-  const { data: existing } = await supabase
-    .from("reward_redemptions")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("tier_id", tierId)
-    .eq("period_key", periodKey)
-    .maybeSingle();
-  if (existing) return existing as RewardRedemption;
+  let pointsSpent = 0;
 
   if (tier.birthday_only) {
+    // Once per calendar year, whether or not last year's code was ever redeemed.
+    const alreadyThisYear = redemptions.find(
+      (r) => r.tier_id === tierId && r.period_key === periodKey
+    );
+    if (alreadyThisYear) return alreadyThisYear;
+
     if (!isBirthdayToday(profile?.birth_date ?? null)) {
       return { error: "This reward only unlocks on your birthday" };
     }
   } else {
+    // At most one pending (unredeemed) code per tier at a time — once staff
+    // mark it redeemed at /redeem, the guest can earn toward and redeem it again.
+    const pending = redemptions.find((r) => r.tier_id === tierId && r.status === "issued");
+    if (pending) return pending;
+
     const points = computeRewardsPoints(
       wineries,
       wines,
@@ -66,7 +76,9 @@ export async function generateRedemptionAction(
       referralCount,
       profile?.is_subscriber ?? false
     );
-    if (points.total < tier.points_required) return { error: "Not enough points yet" };
+    const balance = points.total - totalPointsSpent(redemptions);
+    if (balance < tier.points_required) return { error: "Not enough points to redeem right now" };
+    pointsSpent = tier.points_required;
   }
 
   if (tier.choice_options && tier.choice_options.length > 0) {
@@ -79,7 +91,14 @@ export async function generateRedemptionAction(
     const code = generateRedemptionCode();
     const { data, error } = await supabase
       .from("reward_redemptions")
-      .insert({ user_id: user.id, tier_id: tierId, code, period_key: periodKey, chosen_option: chosenOption ?? null })
+      .insert({
+        user_id: user.id,
+        tier_id: tierId,
+        code,
+        period_key: periodKey,
+        chosen_option: chosenOption ?? null,
+        points_spent: pointsSpent,
+      })
       .select()
       .single();
     if (data) {

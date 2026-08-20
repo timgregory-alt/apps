@@ -1,5 +1,5 @@
 import { isTrailComplete } from "@/lib/trail";
-import type { WineryWithStatus, WineWithTasting } from "@/lib/types";
+import type { RewardRedemption, WineryWithStatus, WineWithTasting } from "@/lib/types";
 
 export const POINTS_PER_CHECKIN = 25;
 export const POINTS_PER_WINE_RATED = 5;
@@ -11,6 +11,11 @@ export const POINTS_PER_REFERRAL = 50;
 export const SUBSCRIBER_MULTIPLIER = 2;
 
 export interface RewardsPoints {
+  /** Lifetime points earned — only ever goes up, since it's derived purely
+   * from activity and is never reduced by redeeming a reward. This is the
+   * guest's permanent status (like airline status miles): once it crosses
+   * a tier's threshold, that tier is unlocked for good, even if their
+   * spendable balance later drops below it from redeeming. */
   total: number;
   checkins: number;
   winesRated: number;
@@ -47,6 +52,14 @@ export function computeRewardsPoints(
     completionBonus,
     referrals,
   };
+}
+
+/** Points already spent redeeming rewards (issuing a code deducts its tier's
+ * cost immediately, whether or not staff have scanned it yet). Subtract
+ * this from lifetime points to get what's currently available to spend —
+ * like an airline miles balance vs. lifetime status miles. */
+export function totalPointsSpent(redemptions: RewardRedemption[]): number {
+  return redemptions.reduce((sum, r) => sum + r.points_spent, 0);
 }
 
 const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L — easy to read and type
