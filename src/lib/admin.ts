@@ -239,6 +239,7 @@ export interface AppFeedbackEntry {
   created_at: string;
   memberName: string;
   memberEmail: string | null;
+  memberCity: string | null;
 }
 
 export interface AppRatingStats {
@@ -279,13 +280,15 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
     // app_ratings.user_id references auth.users, not public.profiles, so there's
     // no FK PostgREST can embed through — look member names up separately.
     const userIds = [...new Set(feedbackRows.map((r) => r.user_id))];
-    const memberById = new Map<string, { name: string | null; email: string | null }>();
+    const memberById = new Map<string, { name: string | null; email: string | null; zip_code: string | null }>();
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, name, email")
+        .select("id, name, email, zip_code")
         .in("id", userIds);
-      (profiles ?? []).forEach((p) => memberById.set(p.id, { name: p.name, email: p.email }));
+      (profiles ?? []).forEach((p) =>
+        memberById.set(p.id, { name: p.name, email: p.email, zip_code: p.zip_code })
+      );
     }
 
     const recentFeedback = feedbackRows.map((r) => {
@@ -296,6 +299,7 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
         created_at: r.created_at,
         memberName: member?.name || member?.email || "Member",
         memberEmail: member?.email ?? null,
+        memberCity: cityFromZip(member?.zip_code ?? null),
       };
     });
 
