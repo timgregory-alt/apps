@@ -234,6 +234,10 @@ create table if not exists public.event_sync_log (
   detail text
 );
 create index if not exists event_sync_log_winery_idx on public.event_sync_log (winery_id, ran_at desc);
+alter table public.event_sync_log enable row level security;
+drop policy if exists "Admins manage event sync log" on public.event_sync_log;
+create policy "Admins manage event sync log" on public.event_sync_log
+  for all using (public.is_admin()) with check (public.is_admin());
 
 create table if not exists public.app_ratings (
   id uuid primary key default gen_random_uuid(),
