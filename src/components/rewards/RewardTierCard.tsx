@@ -5,7 +5,7 @@ import { Gift, Check } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Sheet } from "@/components/ui/Sheet";
+import { CenteredDialog } from "@/components/ui/CenteredDialog";
 import { generateRedemptionAction } from "@/app/rewards/actions";
 import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
 import type { RewardRedemption, RewardTier } from "@/lib/types";
@@ -115,12 +115,12 @@ export function RewardTierCard({
         </div>
       )}
 
-      <Sheet
+      <CenteredDialog
         open={confirmOption !== null}
         onClose={() => setConfirmOption(null)}
         labelledBy="confirm-redeem-title"
       >
-        <div className="flex flex-col items-center pt-2 text-center">
+        <div className="flex flex-col items-center text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]">
             <Gift size={22} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
           </span>
@@ -145,7 +145,7 @@ export function RewardTierCard({
             </Button>
           </div>
         </div>
-      </Sheet>
+      </CenteredDialog>
     </Card>
   );
 }

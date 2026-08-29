@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { PartyPopper } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Sheet } from "@/components/ui/Sheet";
+import { CenteredDialog } from "@/components/ui/CenteredDialog";
 import { generateRedemptionAction } from "@/app/rewards/actions";
 import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
 import type { RewardRedemption, RewardTier } from "@/lib/types";
@@ -57,8 +57,8 @@ export function BirthdayRewardCard({
         </div>
       )}
 
-      <Sheet open={confirming} onClose={() => setConfirming(false)} labelledBy="confirm-birthday-title">
-        <div className="flex flex-col items-center pt-2 text-center">
+      <CenteredDialog open={confirming} onClose={() => setConfirming(false)} labelledBy="confirm-birthday-title">
+        <div className="flex flex-col items-center text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]">
             <PartyPopper size={22} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
           </span>
@@ -79,7 +79,7 @@ export function BirthdayRewardCard({
             </Button>
           </div>
         </div>
-      </Sheet>
+      </CenteredDialog>
     </Card>
   );
 }

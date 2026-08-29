@@ -36,6 +36,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "You must be signed in to log a wine." }, { status: 401 });
   }
 
+  const { data: checkin } = await supabase
+    .from("checkins")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("winery_id", body.wineryId)
+    .maybeSingle();
+  if (!checkin) {
+    return NextResponse.json(
+      { error: "Check in at this winery before logging a wine you tried." },
+      { status: 403 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("custom_wine_tastings")
     .insert({

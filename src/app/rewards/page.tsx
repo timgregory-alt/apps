@@ -25,6 +25,7 @@ import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
+import { TierCelebration } from "@/components/rewards/TierCelebration";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { AuthModal } from "@/components/auth/AuthModal";
 
@@ -82,6 +83,7 @@ export default async function RewardsPage() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
+      <TierCelebration userId={user.id} tiers={sortedTiers} lifetimeTotal={points.total} />
       <Header eyebrow="Rewards" title="Your Rewards" />
 
       {showBirthdayReward && birthdayTier && (

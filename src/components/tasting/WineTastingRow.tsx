@@ -18,10 +18,14 @@ export function WineTastingRow({
   wine,
   onRate,
   pending,
+  locked = false,
 }: {
   wine: WineWithTasting;
   onRate: (rating: number) => void;
   pending: boolean;
+  /** True when the guest hasn't checked in at this winery yet — the flight
+   * is still browsable, but rating is disabled. */
+  locked?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
@@ -187,12 +191,12 @@ export function WineTastingRow({
 
             <div className="mt-auto flex flex-col items-center gap-1.5 pt-3">
               <p className="text-xs text-[var(--color-charcoal)]/50">
-                {wine.tasting ? "Your rating" : "How was it?"}
+                {locked ? "Check in to rate" : wine.tasting ? "Your rating" : "How was it?"}
               </p>
               <StarRating
                 value={wine.tasting?.rating ?? 0}
                 onRate={onRate}
-                disabled={pending}
+                disabled={pending || locked}
               />
             </div>
           </div>

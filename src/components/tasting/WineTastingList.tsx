@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Lock } from "lucide-react";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { WineTastingRow } from "@/components/tasting/WineTastingRow";
 import { CustomWineRow } from "@/components/tasting/CustomWineRow";
@@ -13,6 +13,8 @@ import type { CustomWineTasting, WineStyle, WineWithTasting } from "@/lib/types"
 
 const STYLE_ORDER: WineStyle[] = ["red", "white", "rose", "sparkling", "sweet", "mead"];
 
+const NOT_CHECKED_IN_MESSAGE = "Check in at this winery to start rating its wines.";
+
 /** The interactive "rate these wines" list — reused on winery pages and, in
  * summary form, could be dropped anywhere else a tasting flight is shown. */
 export function WineTastingList({
@@ -20,6 +22,7 @@ export function WineTastingList({
   initialCustomTastings = [],
   wineryId,
   isLoggedIn,
+  isCheckedIn = true,
   redirectTo,
   showProgress = true,
   allowCustom = true,
@@ -28,6 +31,9 @@ export function WineTastingList({
   initialCustomTastings?: CustomWineTasting[];
   wineryId: string;
   isLoggedIn: boolean;
+  /** Ratings and custom-wine logging are gated behind a real GPS check-in —
+   * without one, the list is still browsable but rating is locked. */
+  isCheckedIn?: boolean;
   redirectTo: string;
   showProgress?: boolean;
   allowCustom?: boolean;
@@ -36,6 +42,7 @@ export function WineTastingList({
   const [wines, setWines] = useState(initialWines);
   const [customTastings, setCustomTastings] = useState(initialCustomTastings);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [activeStyle, setActiveStyle] = useState<WineStyle | "all">("all");
 
@@ -70,7 +77,13 @@ export function WineTastingList({
 
   async function handleRate(wineId: string, rating: number) {
     if (!isLoggedIn) return requireLogin();
+    if (!isCheckedIn) {
+      setError(NOT_CHECKED_IN_MESSAGE);
+      return;
+    }
 
+    setError(null);
+    const previousTasting = wines.find((w) => w.id === wineId)?.tasting ?? null;
     setPendingId(wineId);
     setWines((prev) =>
       prev.map((w) =>
@@ -90,13 +103,19 @@ export function WineTastingList({
     );
 
     try {
-      await fetch("/api/wine-tasting", {
+      const res = await fetch("/api/wine-tasting", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wineId, rating }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "Could not save your rating.");
+        setWines((prev) => prev.map((w) => (w.id === wineId ? { ...w, tasting: previousTasting } : w)));
+      }
     } catch {
-      // Optimistic update stays even if the network call fails silently.
+      setError("Could not save your rating. Please try again.");
+      setWines((prev) => prev.map((w) => (w.id === wineId ? { ...w, tasting: previousTasting } : w)));
     } finally {
       setPendingId(null);
     }
@@ -110,7 +129,12 @@ export function WineTastingList({
     liked: boolean;
   }) {
     if (!isLoggedIn) return requireLogin();
+    if (!isCheckedIn) {
+      setError(NOT_CHECKED_IN_MESSAGE);
+      return;
+    }
 
+    setError(null);
     const res = await fetch("/api/custom-wine-tasting", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -119,6 +143,8 @@ export function WineTastingList({
     const data = await res.json().catch(() => null);
     if (data?.tasting) {
       setCustomTastings((prev) => [...prev, data.tasting]);
+    } else {
+      setError(data?.error ?? "Could not save that wine.");
     }
   }
 
@@ -140,6 +166,17 @@ export function WineTastingList({
 
   return (
     <div className="flex flex-col gap-4">
+      {isLoggedIn && !isCheckedIn && (
+        <div className="flex items-center gap-2 rounded-2xl bg-black/[0.03] px-4 py-3 text-xs text-[var(--color-charcoal)]/60">
+          <Lock size={14} className="shrink-0 text-[var(--color-charcoal)]/40" strokeWidth={2} />
+          {NOT_CHECKED_IN_MESSAGE}
+        </div>
+      )}
+      {error && (
+        <p role="alert" className="text-sm text-[var(--color-burgundy)]">
+          {error}
+        </p>
+      )}
       {showProgress && (
         <div>
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
@@ -197,6 +234,7 @@ export function WineTastingList({
             key={wine.id}
             wine={wine}
             pending={pendingId === wine.id}
+            locked={isLoggedIn && !isCheckedIn}
             onRate={(rating) => handleRate(wine.id, rating)}
           />
         ))}
@@ -211,7 +249,12 @@ export function WineTastingList({
       </div>
 
       {allowCustom && (
-        <AddWineCard isLoggedIn={isLoggedIn} redirectTo={redirectTo} onAdd={handleAddCustom} />
+        <AddWineCard
+          isLoggedIn={isLoggedIn}
+          locked={isLoggedIn && !isCheckedIn}
+          redirectTo={redirectTo}
+          onAdd={handleAddCustom}
+        />
       )}
     </div>
   );

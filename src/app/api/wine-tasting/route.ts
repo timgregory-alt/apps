@@ -24,6 +24,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "You must be signed in to rate wines." }, { status: 401 });
   }
 
+  const { data: wine } = await supabase.from("wines").select("winery_id").eq("id", wineId).single();
+  if (!wine) {
+    return NextResponse.json({ error: "Wine not found." }, { status: 404 });
+  }
+
+  const { data: checkin } = await supabase
+    .from("checkins")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("winery_id", wine.winery_id)
+    .maybeSingle();
+  if (!checkin) {
+    return NextResponse.json(
+      { error: "Check in at this winery before rating its wines." },
+      { status: 403 }
+    );
+  }
+
   const { error } = await supabase
     .from("wine_tastings")
     .upsert({ user_id: user.id, wine_id: wineId, rating }, { onConflict: "user_id,wine_id" });

@@ -123,6 +123,7 @@ export default async function WineryDetailPage({
             initialCustomTastings={wineryCustomTastings}
             wineryId={winery.id}
             isLoggedIn={!!user}
+            isCheckedIn={wineryWithStatus.status !== "not_visited"}
             redirectTo={`/winery/${winery.slug}`}
             showProgress={false}
           />
@@ -141,6 +142,7 @@ export default async function WineryDetailPage({
               initialWines={meadWines}
               wineryId={winery.id}
               isLoggedIn={!!user}
+              isCheckedIn={wineryWithStatus.status !== "not_visited"}
               redirectTo={`/winery/${winery.slug}`}
               showProgress={false}
               allowCustom={false}

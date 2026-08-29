@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, ThumbsUp, ThumbsDown, X } from "lucide-react";
+import { Plus, ThumbsUp, ThumbsDown, X, Lock } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { STYLE_BADGE } from "@/lib/recommendations";
 import { cn } from "@/lib/utils";
@@ -12,10 +12,13 @@ const STYLES: WineStyle[] = ["red", "white", "rose", "sweet", "sparkling", "mead
 
 export function AddWineCard({
   isLoggedIn,
+  locked = false,
   redirectTo,
   onAdd,
 }: {
   isLoggedIn: boolean;
+  /** True when the guest hasn't checked in at this winery yet. */
+  locked?: boolean;
   redirectTo: string;
   onAdd: (input: {
     name: string;
@@ -38,6 +41,7 @@ export function AddWineCard({
       router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
       return;
     }
+    if (locked) return;
     setOpen(true);
   }
 
@@ -71,10 +75,16 @@ export function AddWineCard({
       <button
         type="button"
         onClick={startAdding}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--color-gold)]/50 bg-white/30 px-4 py-4 text-sm font-medium text-[var(--color-burgundy)] transition-colors hover:bg-white/50"
+        disabled={locked}
+        className={cn(
+          "flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-4 text-sm font-medium transition-colors",
+          locked
+            ? "cursor-not-allowed border-[var(--color-line)] bg-black/[0.02] text-[var(--color-charcoal)]/40"
+            : "border-[var(--color-gold)]/50 bg-white/30 text-[var(--color-burgundy)] hover:bg-white/50"
+        )}
       >
-        <Plus size={16} strokeWidth={2} />
-        Add a Wine You Tried
+        {locked ? <Lock size={15} strokeWidth={2} /> : <Plus size={16} strokeWidth={2} />}
+        {locked ? "Check in to add a wine" : "Add a Wine You Tried"}
       </button>
     );
   }
