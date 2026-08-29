@@ -1,12 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, Cormorant_Garamond } from "next/font/google";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { GlobalTierCelebration } from "@/components/rewards/GlobalTierCelebration";
 import "./globals.css";
-
-// GlobalTierCelebration is temporarily unmounted here — its per-navigation
-// points lookup added load across the whole app and coincided with a
-// production outage. Re-add once Supabase load is confirmed stable, ideally
-// behind a longer throttle or scoped back to just the Rewards page.
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -59,6 +55,7 @@ export default function RootLayout({
       <body className="min-h-dvh antialiased">
         <div className="pb-24">{children}</div>
         <BottomNav />
+        <GlobalTierCelebration />
       </body>
     </html>
   );

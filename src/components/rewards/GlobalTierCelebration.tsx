@@ -12,10 +12,12 @@ function storageKey(userId: string) {
 }
 
 /** /api/rewards/status recomputes points from several queries — too heavy
- * to run on every single navigation, especially on a slow mobile
- * connection. Throttling still checks "any screen" in practice since
- * guests rarely sit on one screen for 20s+ between taps. */
-const MIN_CHECK_INTERVAL_MS = 20_000;
+ * to run on every single navigation. A prior, much shorter throttle here
+ * (20s) coincided with the production database going unhealthy on its
+ * smallest compute tier, so this is now deliberately conservative: still
+ * covers "any screen" over the course of a normal visit, just far less
+ * often. */
+const MIN_CHECK_INTERVAL_MS = 5 * 60_000;
 
 interface RewardsStatus {
   loggedIn: boolean;
