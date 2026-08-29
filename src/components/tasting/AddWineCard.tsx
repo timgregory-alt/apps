@@ -15,6 +15,7 @@ export function AddWineCard({
   locked = false,
   redirectTo,
   onAdd,
+  onLockedAttempt,
 }: {
   isLoggedIn: boolean;
   /** True when the guest hasn't checked in at this winery yet. */
@@ -27,6 +28,9 @@ export function AddWineCard({
     foodPairing: string;
     liked: boolean;
   }) => Promise<void>;
+  /** Called instead of opening the form when a locked guest taps this card,
+   * so the parent can explain why with a popup. */
+  onLockedAttempt?: () => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -41,7 +45,10 @@ export function AddWineCard({
       router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
       return;
     }
-    if (locked) return;
+    if (locked) {
+      onLockedAttempt?.();
+      return;
+    }
     setOpen(true);
   }
 
@@ -75,7 +82,6 @@ export function AddWineCard({
       <button
         type="button"
         onClick={startAdding}
-        disabled={locked}
         className={cn(
           "flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-4 text-sm font-medium transition-colors",
           locked

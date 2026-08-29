@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Lock } from "lucide-react";
+import { Search, Lock, MapPin } from "lucide-react";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { WineTastingRow } from "@/components/tasting/WineTastingRow";
 import { CustomWineRow } from "@/components/tasting/CustomWineRow";
 import { AddWineCard } from "@/components/tasting/AddWineCard";
+import { Button } from "@/components/ui/Button";
+import { CenteredDialog } from "@/components/ui/CenteredDialog";
 import { STYLE_BADGE } from "@/lib/recommendations";
 import { cn } from "@/lib/utils";
 import type { CustomWineTasting, WineStyle, WineWithTasting } from "@/lib/types";
@@ -43,6 +45,7 @@ export function WineTastingList({
   const [customTastings, setCustomTastings] = useState(initialCustomTastings);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showLockedPopup, setShowLockedPopup] = useState(false);
   const [query, setQuery] = useState("");
   const [activeStyle, setActiveStyle] = useState<WineStyle | "all">("all");
 
@@ -75,10 +78,14 @@ export function WineTastingList({
     router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
   }
 
+  function handleLockedAttempt() {
+    setShowLockedPopup(true);
+  }
+
   async function handleRate(wineId: string, rating: number) {
     if (!isLoggedIn) return requireLogin();
     if (!isCheckedIn) {
-      setError(NOT_CHECKED_IN_MESSAGE);
+      handleLockedAttempt();
       return;
     }
 
@@ -130,7 +137,7 @@ export function WineTastingList({
   }) {
     if (!isLoggedIn) return requireLogin();
     if (!isCheckedIn) {
-      setError(NOT_CHECKED_IN_MESSAGE);
+      handleLockedAttempt();
       return;
     }
 
@@ -236,6 +243,7 @@ export function WineTastingList({
             pending={pendingId === wine.id}
             locked={isLoggedIn && !isCheckedIn}
             onRate={(rating) => handleRate(wine.id, rating)}
+            onLockedAttempt={handleLockedAttempt}
           />
         ))}
         {customTastings.map((tasting) => (
@@ -254,8 +262,35 @@ export function WineTastingList({
           locked={isLoggedIn && !isCheckedIn}
           redirectTo={redirectTo}
           onAdd={handleAddCustom}
+          onLockedAttempt={handleLockedAttempt}
         />
       )}
+
+      <CenteredDialog
+        open={showLockedPopup}
+        onClose={() => setShowLockedPopup(false)}
+        labelledBy="checkin-required-title"
+      >
+        <div className="flex flex-col items-center text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]">
+            <MapPin size={22} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
+          </span>
+          <h2
+            id="checkin-required-title"
+            className="font-serif-display mt-4 text-2xl text-[var(--color-charcoal)]"
+          >
+            Looks Like You Haven&rsquo;t Checked In Yet
+          </h2>
+          <p className="mt-2 max-w-[32ch] text-sm text-[var(--color-charcoal)]/65">
+            {NOT_CHECKED_IN_MESSAGE} Once you check in, rating and adding wines unlocks right away.
+          </p>
+          <div className="mt-6 w-full">
+            <Button fullWidth onClick={() => setShowLockedPopup(false)}>
+              Got It
+            </Button>
+          </div>
+        </div>
+      </CenteredDialog>
     </div>
   );
 }

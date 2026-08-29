@@ -19,6 +19,7 @@ export function WineTastingRow({
   onRate,
   pending,
   locked = false,
+  onLockedAttempt,
 }: {
   wine: WineWithTasting;
   onRate: (rating: number) => void;
@@ -26,6 +27,9 @@ export function WineTastingRow({
   /** True when the guest hasn't checked in at this winery yet — the flight
    * is still browsable, but rating is disabled. */
   locked?: boolean;
+  /** Called instead of onRate when a locked guest taps a star, so the
+   * parent can explain why with a popup. */
+  onLockedAttempt?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
@@ -193,11 +197,13 @@ export function WineTastingRow({
               <p className="text-xs text-[var(--color-charcoal)]/50">
                 {locked ? "Check in to rate" : wine.tasting ? "Your rating" : "How was it?"}
               </p>
-              <StarRating
-                value={wine.tasting?.rating ?? 0}
-                onRate={onRate}
-                disabled={pending || locked}
-              />
+              <div className={locked ? "opacity-50" : undefined}>
+                <StarRating
+                  value={wine.tasting?.rating ?? 0}
+                  onRate={locked ? () => onLockedAttempt?.() : onRate}
+                  disabled={pending}
+                />
+              </div>
             </div>
           </div>
         </motion.div>
