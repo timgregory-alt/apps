@@ -27,17 +27,22 @@ interface RewardsStatus {
 }
 
 /** Mounted once in the root layout so it can catch a newly crossed reward
- * tier on any screen, not just the Rewards page — re-checks on navigation,
- * throttled to avoid re-running the points computation on every single tap.
- * Points are derived, never stored, so there's no server-side "last seen
- * tier" to diff against — this compares the current highest-unlocked tier
- * to one remembered in localStorage per user. */
+ * tier on any guest-facing screen, not just the Rewards page — re-checks
+ * on navigation, throttled to avoid re-running the points computation on
+ * every single tap. Skips /admin routes entirely — that's staff tooling,
+ * not something a guest experiences, and the reset-my-test-data flow there
+ * would otherwise trigger it. Points are derived, never stored, so there's
+ * no server-side "last seen tier" to diff against — this compares the
+ * current highest-unlocked tier to one remembered in localStorage per
+ * user. */
 export function GlobalTierCelebration() {
   const pathname = usePathname();
   const [newTier, setNewTier] = useState<RewardTier | null>(null);
   const lastCheckedAt = useRef(0);
 
   useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+
     const now = Date.now();
     if (now - lastCheckedAt.current < MIN_CHECK_INTERVAL_MS) return;
     lastCheckedAt.current = now;
