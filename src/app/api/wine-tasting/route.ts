@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -49,6 +50,10 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: "Could not save your rating. Please try again." }, { status: 500 });
   }
+
+  // Rating a wine changes lifetime reward points — make sure the Rewards
+  // page picks that up instead of serving a cached snapshot from before.
+  revalidatePath("/rewards");
 
   return NextResponse.json({ saved: true });
 }

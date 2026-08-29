@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, FOUNDING_TRAIL } from "@/lib/seed-data";
 import { evaluateDistance } from "@/lib/geo";
@@ -148,6 +149,10 @@ export async function POST(request: Request) {
   if (insertError) {
     return NextResponse.json({ error: "Could not save your check-in. Please try again." }, { status: 500 });
   }
+
+  // A check-in changes lifetime reward points — make sure the Rewards page
+  // picks that up instead of serving a cached snapshot from before.
+  revalidatePath("/rewards");
 
   // If this completes the Founding Trail, record the trail completion.
   const { data: trail } = await supabase
