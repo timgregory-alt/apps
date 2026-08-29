@@ -1,5 +1,6 @@
 import { getAllRewardTiersAdmin } from "@/lib/admin";
 import { RewardTiersAdmin } from "@/components/admin/RewardTiersAdmin";
+import { ResetTestDataCard } from "@/components/admin/ResetTestDataCard";
 
 export default async function AdminRewardsPage() {
   const tiers = await getAllRewardTiersAdmin();
@@ -13,6 +14,7 @@ export default async function AdminRewardsPage() {
         </p>
       </div>
       <RewardTiersAdmin tiers={tiers} />
+      <ResetTestDataCard />
     </div>
   );
 }
