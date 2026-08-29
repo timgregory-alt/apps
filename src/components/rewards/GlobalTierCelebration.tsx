@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,12 @@ function storageKey(userId: string) {
   return `twt-highest-tier-${userId}`;
 }
 
+/** /api/rewards/status recomputes points from several queries — too heavy
+ * to run on every single navigation, especially on a slow mobile
+ * connection. Throttling still checks "any screen" in practice since
+ * guests rarely sit on one screen for 20s+ between taps. */
+const MIN_CHECK_INTERVAL_MS = 20_000;
+
 interface RewardsStatus {
   loggedIn: boolean;
   userId?: string;
@@ -19,15 +25,21 @@ interface RewardsStatus {
 }
 
 /** Mounted once in the root layout so it can catch a newly crossed reward
- * tier on any screen, not just the Rewards page — re-checks on every
- * navigation. Points are derived, never stored, so there's no server-side
- * "last seen tier" to diff against — this compares the current
- * highest-unlocked tier to one remembered in localStorage per user. */
+ * tier on any screen, not just the Rewards page — re-checks on navigation,
+ * throttled to avoid re-running the points computation on every single tap.
+ * Points are derived, never stored, so there's no server-side "last seen
+ * tier" to diff against — this compares the current highest-unlocked tier
+ * to one remembered in localStorage per user. */
 export function GlobalTierCelebration() {
   const pathname = usePathname();
   const [newTier, setNewTier] = useState<RewardTier | null>(null);
+  const lastCheckedAt = useRef(0);
 
   useEffect(() => {
+    const now = Date.now();
+    if (now - lastCheckedAt.current < MIN_CHECK_INTERVAL_MS) return;
+    lastCheckedAt.current = now;
+
     let cancelled = false;
 
     fetch("/api/rewards/status")
