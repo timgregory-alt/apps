@@ -22,12 +22,16 @@ import type { RewardRedemption } from "@/lib/types";
 
 /** Issues a redemption code for a tier the guest can currently afford, spending
  * that tier's points out of their spendable balance (lifetime points minus
- * points already spent). Reaching a tier's threshold is a permanent status —
+ * points already spent). The code is marked redeemed immediately — showing
+ * it at the register *is* the redemption, there's no separate staff
+ * confirmation step. Reaching a tier's threshold is a permanent status —
  * once lifetime points cross it, the guest can redeem it again and again as
  * they earn the points back, same as an airline miles balance. chosenOption
  * is required for tiers with choice_options (e.g. Sommelier's Choice).
  * birthday_only tiers are free (0 points) and gated by today's date, capped
- * to one per calendar year via period_key. */
+ * to one per calendar year via period_key. The client is expected to confirm
+ * with the guest before calling this — it spends points/claims the year's
+ * birthday reward the instant it succeeds, with no undo. */
 export async function generateRedemptionAction(
   tierId: string,
   chosenOption?: string
@@ -54,7 +58,7 @@ export async function generateRedemptionAction(
   let pointsSpent = 0;
 
   if (tier.birthday_only) {
-    // Once per calendar year, whether or not last year's code was ever redeemed.
+    // Once per calendar year.
     const alreadyThisYear = redemptions.find(
       (r) => r.tier_id === tierId && r.period_key === periodKey
     );
@@ -64,11 +68,6 @@ export async function generateRedemptionAction(
       return { error: "This reward only unlocks on your birthday" };
     }
   } else {
-    // At most one pending (unredeemed) code per tier at a time — once staff
-    // mark it redeemed at /redeem, the guest can earn toward and redeem it again.
-    const pending = redemptions.find((r) => r.tier_id === tierId && r.status === "issued");
-    if (pending) return pending;
-
     const points = computeRewardsPoints(
       wineries,
       wines,
@@ -87,6 +86,7 @@ export async function generateRedemptionAction(
     }
   }
 
+  const now = new Date().toISOString();
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateRedemptionCode();
     const { data, error } = await supabase
@@ -98,6 +98,8 @@ export async function generateRedemptionAction(
         period_key: periodKey,
         chosen_option: chosenOption ?? null,
         points_spent: pointsSpent,
+        status: "redeemed",
+        redeemed_at: now,
       })
       .select()
       .single();

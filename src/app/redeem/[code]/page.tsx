@@ -2,7 +2,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
-import { RedeemActionButton } from "@/components/rewards/RedeemActionButton";
+import { formatCheckinDate } from "@/lib/utils";
 import type { RewardTier } from "@/lib/types";
 
 async function findRedemption(code: string) {
@@ -29,7 +29,7 @@ export default async function RedeemCodePage({ params }: { params: Promise<{ cod
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="Winery Redemption" title="Redeem a Guest Reward" />
+      <Header eyebrow="Winery Redemption" title="Verify a Guest Reward" />
 
       <div className="px-6">
         {!data || !tier ? (
@@ -48,13 +48,9 @@ export default async function RedeemCodePage({ params }: { params: Promise<{ cod
             </p>
             <p className="font-mono text-lg tracking-[0.3em] text-[var(--color-charcoal)]">{code}</p>
 
-            {data.status === "redeemed" ? (
-              <div className="flex items-center gap-2 rounded-full bg-black/5 px-4 py-2 text-sm font-medium text-[var(--color-charcoal)]/60">
-                <CheckCircle2 size={16} /> Already redeemed
-              </div>
-            ) : (
-              <RedeemActionButton code={code} />
-            )}
+            <div className="flex items-center gap-2 rounded-full bg-[var(--color-gold-pale)]/50 px-4 py-2 text-sm font-medium text-[var(--color-burgundy-deep)]">
+              <CheckCircle2 size={16} /> Redeemed {formatCheckinDate(data.redeemed_at)}
+            </div>
           </Card>
         )}
       </div>

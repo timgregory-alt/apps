@@ -70,14 +70,6 @@ export default async function RewardsPage() {
   );
   const balance = points.total - totalPointsSpent(redemptions);
   const ladderTiers = tiers.filter((t) => !t.birthday_only);
-  // Only a currently-pending (unredeemed) code should hide a tier's
-  // redeem/progress UI — once staff mark it redeemed, the guest can earn
-  // toward and redeem that tier again.
-  const redemptionByTier = new Map(
-    redemptions
-      .filter((r) => r.period_key === "" && r.status === "issued")
-      .map((r) => [r.tier_id, r])
-  );
   const sortedTiers = [...ladderTiers].sort((a, b) => a.points_required - b.points_required);
 
   const birthdayTier = tiers.find((t) => t.birthday_only) ?? null;
@@ -185,12 +177,7 @@ export default async function RewardsPage() {
           </div>
         ) : (
           <div className="px-6">
-            <RewardTierCarousel
-              tiers={sortedTiers}
-              balance={balance}
-              lifetimeTotal={points.total}
-              redemptionByTier={redemptionByTier}
-            />
+            <RewardTierCarousel tiers={sortedTiers} balance={balance} lifetimeTotal={points.total} />
           </div>
         )}
       </div>

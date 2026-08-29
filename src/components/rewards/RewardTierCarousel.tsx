@@ -4,18 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { RewardTierCard } from "@/components/rewards/RewardTierCard";
 import { cn } from "@/lib/utils";
-import type { RewardRedemption, RewardTier } from "@/lib/types";
+import type { RewardTier } from "@/lib/types";
 
 export function RewardTierCarousel({
   tiers,
   balance,
   lifetimeTotal,
-  redemptionByTier,
 }: {
   tiers: RewardTier[];
   balance: number;
   lifetimeTotal: number;
-  redemptionByTier: Map<string, RewardRedemption>;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -45,12 +43,7 @@ export function RewardTierCarousel({
       >
         {tiers.map((tier) => (
           <div key={tier.id} className="w-full shrink-0 snap-center">
-            <RewardTierCard
-              tier={tier}
-              balance={balance}
-              lifetimeTotal={lifetimeTotal}
-              redemption={redemptionByTier.get(tier.id) ?? null}
-            />
+            <RewardTierCard tier={tier} balance={balance} lifetimeTotal={lifetimeTotal} />
           </div>
         ))}
       </div>

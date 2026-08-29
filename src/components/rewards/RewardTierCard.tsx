@@ -5,6 +5,7 @@ import { Gift, Check } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Sheet } from "@/components/ui/Sheet";
 import { generateRedemptionAction } from "@/app/rewards/actions";
 import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
 import type { RewardRedemption, RewardTier } from "@/lib/types";
@@ -13,7 +14,6 @@ export function RewardTierCard({
   tier,
   balance,
   lifetimeTotal,
-  redemption,
 }: {
   tier: RewardTier;
   /** Currently spendable — lifetime points minus points already redeemed. */
@@ -22,10 +22,9 @@ export function RewardTierCard({
    * never decreases, so a tier stays marked as reached even after its
    * points have been spent. */
   lifetimeTotal: number;
-  /** The guest's current pending (unredeemed) code for this tier, if any. */
-  redemption: RewardRedemption | null;
 }) {
-  const [code, setCode] = useState(redemption);
+  const [code, setCode] = useState<RewardRedemption | null>(null);
+  const [confirmOption, setConfirmOption] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const everUnlocked = lifetimeTotal >= tier.points_required;
@@ -33,6 +32,7 @@ export function RewardTierCard({
   const isChoiceTier = !!tier.choice_options && tier.choice_options.length > 0;
 
   function reveal(option?: string) {
+    setConfirmOption(null);
     setError(null);
     startTransition(async () => {
       const result = await generateRedemptionAction(tier.id, option);
@@ -78,10 +78,10 @@ export function RewardTierCard({
                     key={option}
                     variant="outline"
                     size="sm"
-                    onClick={() => reveal(option)}
+                    onClick={() => setConfirmOption(option)}
                     disabled={isPending}
                   >
-                    {isPending ? "Generating…" : option}
+                    {option}
                   </Button>
                 ))}
               </div>
@@ -90,8 +90,8 @@ export function RewardTierCard({
                 <p className="text-sm text-[var(--color-charcoal)]/70">
                   {tier.discount_percent}% off your next purchase
                 </p>
-                <Button onClick={() => reveal()} disabled={isPending} size="sm">
-                  {isPending ? "Generating…" : `Redeem for ${tier.points_required} pts`}
+                <Button onClick={() => setConfirmOption("")} disabled={isPending} size="sm">
+                  Redeem for {tier.points_required} pts
                 </Button>
               </>
             )
@@ -114,6 +114,38 @@ export function RewardTierCard({
           <RedemptionCodeDisplay redemption={code} />
         </div>
       )}
+
+      <Sheet
+        open={confirmOption !== null}
+        onClose={() => setConfirmOption(null)}
+        labelledBy="confirm-redeem-title"
+      >
+        <div className="flex flex-col items-center pt-2 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]">
+            <Gift size={22} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
+          </span>
+          <h2 id="confirm-redeem-title" className="font-serif-display mt-4 text-2xl text-[var(--color-charcoal)]">
+            Redeem {tier.label}?
+          </h2>
+          <p className="mt-2 max-w-[32ch] text-sm text-[var(--color-charcoal)]/65">
+            This uses {tier.points_required} points and shows your code right away — have your
+            phone ready to show the register. This can&rsquo;t be undone.
+          </p>
+
+          <div className="mt-6 flex w-full flex-col gap-2.5">
+            <Button
+              fullWidth
+              disabled={isPending}
+              onClick={() => reveal(confirmOption || undefined)}
+            >
+              {isPending ? "Redeeming…" : "Yes, Reveal My Code"}
+            </Button>
+            <Button variant="ghost" fullWidth onClick={() => setConfirmOption(null)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Sheet>
     </Card>
   );
 }
