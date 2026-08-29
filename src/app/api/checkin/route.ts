@@ -48,26 +48,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Winery not found" }, { status: 404 });
   }
 
-  const distance = evaluateDistance(
-    latitude,
-    longitude,
-    winery.latitude,
-    winery.longitude,
-    winery.checkin_radius_meters
-  );
-
-  if (!distance.withinRadius) {
-    return NextResponse.json(
-      {
-        verified: false,
-        message: NOT_CLOSE_MESSAGE,
-        distanceMeters: Math.round(distance.meters),
-      },
-      { status: 403 }
-    );
-  }
-
   if (!isSupabaseConfigured) {
+    const distance = evaluateDistance(
+      latitude,
+      longitude,
+      winery.latitude,
+      winery.longitude,
+      winery.checkin_radius_meters
+    );
+    if (!distance.withinRadius) {
+      return NextResponse.json(
+        { verified: false, message: NOT_CLOSE_MESSAGE, distanceMeters: Math.round(distance.meters) },
+        { status: 403 }
+      );
+    }
     return NextResponse.json({
       verified: true,
       demo: true,
@@ -87,6 +81,30 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "You must be signed in to check in." }, { status: 401 });
+  }
+
+  // Admins can check in from anywhere, so they can test check-in-gated
+  // features (ratings, rewards) without driving to every winery.
+  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+  const isAdmin = !!profile?.is_admin;
+
+  const distance = evaluateDistance(
+    latitude,
+    longitude,
+    winery.latitude,
+    winery.longitude,
+    winery.checkin_radius_meters
+  );
+
+  if (!distance.withinRadius && !isAdmin) {
+    return NextResponse.json(
+      {
+        verified: false,
+        message: NOT_CLOSE_MESSAGE,
+        distanceMeters: Math.round(distance.meters),
+      },
+      { status: 403 }
+    );
   }
 
   const { data: lastCheckin } = await supabase
