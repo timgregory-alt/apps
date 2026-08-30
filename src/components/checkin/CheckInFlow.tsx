@@ -77,6 +77,11 @@ export function CheckInFlow({
       setTrailComplete(Boolean(data.trailComplete));
       setStage("celebrating");
       notifyPointsChanged();
+      // The winery page's other server-rendered sections (like wine tasting,
+      // which is locked until checked in) were computed before this
+      // check-in landed — refresh so they pick it up without the guest
+      // needing to reload the page themselves.
+      router.refresh();
     } catch {
       setBlockedMessage(
         "We couldn't verify your location. Please enable location services and try again."
