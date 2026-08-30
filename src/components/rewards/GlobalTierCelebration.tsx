@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import confetti from "canvas-confetti";
-import { PartyPopper } from "lucide-react";
+import { PartyPopper, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
+import { ShareSheet } from "@/components/share/ShareSheet";
 import { onPointsChanged } from "@/lib/pointsEvents";
 import type { RewardTier } from "@/lib/types";
 
@@ -53,6 +54,8 @@ export function GlobalTierCelebration() {
   }, [pathname]);
 
   const [newTier, setNewTier] = useState<RewardTier | null>(null);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const lastCheckedAt = useRef(0);
 
   const checkForNewTier = useCallback((bypassThrottle: boolean) => {
@@ -82,6 +85,7 @@ export function GlobalTierCelebration() {
 
         if (highest.points_required > seen) {
           setNewTier(highest);
+          setCelebrationOpen(true);
           try {
             localStorage.setItem(storageKey(userId), String(highest.points_required));
           } catch {
@@ -101,40 +105,67 @@ export function GlobalTierCelebration() {
   useEffect(() => onPointsChanged(() => checkForNewTier(true)), [checkForNewTier]);
 
   useEffect(() => {
-    if (newTier) fireConfetti();
-  }, [newTier]);
+    if (celebrationOpen) fireConfetti();
+  }, [celebrationOpen]);
 
   return (
-    <CenteredDialog
-      open={newTier != null}
-      onClose={() => setNewTier(null)}
-      labelledBy="tier-celebration-title"
-    >
-      {newTier && (
-        <div className="flex flex-col items-center text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]">
-            <PartyPopper size={22} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
-          </span>
-          <p className="mt-4 text-xs font-medium uppercase tracking-[0.24em] text-[var(--color-gold)]">
-            New Tier Unlocked
-          </p>
-          <h2
-            id="tier-celebration-title"
-            className="font-serif-display mt-1 text-3xl text-[var(--color-charcoal)]"
-          >
-            Congratulations!
-          </h2>
-          <p className="mt-2 max-w-[32ch] text-sm text-[var(--color-charcoal)]/65">
-            You&rsquo;ve reached <span className="font-medium">{newTier.label}</span> —{" "}
-            {newTier.points_required} lifetime points earned.
-          </p>
-          <div className="mt-6 w-full">
-            <Button fullWidth onClick={() => setNewTier(null)}>
-              Nice!
-            </Button>
+    <>
+      <CenteredDialog
+        open={celebrationOpen}
+        onClose={() => setCelebrationOpen(false)}
+        labelledBy="tier-celebration-title"
+      >
+        {newTier && (
+          <div className="flex flex-col items-center text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-gold-pale)]">
+              <PartyPopper size={22} className="text-[var(--color-burgundy)]" strokeWidth={1.5} />
+            </span>
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.24em] text-[var(--color-gold)]">
+              New Tier Unlocked
+            </p>
+            <h2
+              id="tier-celebration-title"
+              className="font-serif-display mt-1 text-3xl text-[var(--color-charcoal)]"
+            >
+              Congratulations!
+            </h2>
+            <p className="mt-2 max-w-[32ch] text-sm text-[var(--color-charcoal)]/65">
+              You&rsquo;ve reached <span className="font-medium">{newTier.label}</span> —{" "}
+              {newTier.points_required} lifetime points earned.
+            </p>
+            <div className="mt-6 flex w-full flex-col gap-2.5">
+              <Button
+                variant="gold"
+                fullWidth
+                onClick={() => {
+                  setCelebrationOpen(false);
+                  setShareOpen(true);
+                }}
+              >
+                <Share2 size={16} strokeWidth={2} />
+                Share This Milestone
+              </Button>
+              <Button variant="ghost" fullWidth onClick={() => setCelebrationOpen(false)}>
+                Nice!
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
+      </CenteredDialog>
+
+      {newTier && (
+        <ShareSheet
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          wineryId={null}
+          headline={newTier.label}
+          subheadline="NEW REWARD UNLOCKED"
+          checklist={[`${newTier.points_required} Lifetime Points`]}
+          visited={0}
+          total={0}
+          shareUrl="https://tennesseewinetrails.com"
+        />
       )}
-    </CenteredDialog>
+    </>
   );
 }
