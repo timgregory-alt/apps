@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Gift, Check } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -8,12 +9,14 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
 import { generateRedemptionAction } from "@/app/rewards/actions";
 import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
+import { discountLabel, effectiveDiscountPercent } from "@/lib/rewards";
 import type { RewardRedemption, RewardTier } from "@/lib/types";
 
 export function RewardTierCard({
   tier,
   balance,
   lifetimeTotal,
+  isSubscriber,
 }: {
   tier: RewardTier;
   /** Currently spendable — lifetime points minus points already redeemed. */
@@ -22,6 +25,7 @@ export function RewardTierCard({
    * never decreases, so a tier stays marked as reached even after its
    * points have been spent. */
   lifetimeTotal: number;
+  isSubscriber: boolean;
 }) {
   const [code, setCode] = useState<RewardRedemption | null>(null);
   const [confirmOption, setConfirmOption] = useState<string | null>(null);
@@ -30,6 +34,9 @@ export function RewardTierCard({
   const everUnlocked = lifetimeTotal >= tier.points_required;
   const canRedeemNow = balance >= tier.points_required;
   const isChoiceTier = !!tier.choice_options && tier.choice_options.length > 0;
+  const percent = effectiveDiscountPercent(tier, isSubscriber);
+  const hasSubscriberBoost =
+    !isSubscriber && tier.subscriber_discount_percent != null && tier.subscriber_discount_percent > tier.discount_percent;
 
   function reveal(option?: string) {
     setConfirmOption(null);
@@ -87,9 +94,15 @@ export function RewardTierCard({
               </div>
             ) : (
               <>
-                <p className="text-sm text-[var(--color-charcoal)]/70">
-                  {tier.discount_percent}% off your next purchase
-                </p>
+                <p className="text-sm text-[var(--color-charcoal)]/70">{discountLabel(percent)}</p>
+                {hasSubscriberBoost && (
+                  <Link
+                    href="/profile#premium"
+                    className="text-xs text-[var(--color-burgundy)] underline decoration-[var(--color-burgundy)]/30 underline-offset-2"
+                  >
+                    Subscribers get {tier.subscriber_discount_percent}% off here — Go Premium
+                  </Link>
+                )}
                 <Button onClick={() => setConfirmOption("")} disabled={isPending} size="sm">
                   Redeem for {tier.points_required} pts
                 </Button>
@@ -109,7 +122,7 @@ export function RewardTierCard({
       {code && (
         <div className="flex flex-col items-center gap-3 border-t border-[var(--color-line)] pt-4">
           <p className="text-sm font-medium text-[var(--color-charcoal)]">
-            {code.chosen_option ?? `${tier.discount_percent}% off your next purchase`}
+            {code.chosen_option ?? discountLabel(percent)}
           </p>
           <RedemptionCodeDisplay redemption={code} />
         </div>

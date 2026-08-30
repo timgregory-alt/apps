@@ -3,6 +3,7 @@ import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { formatCheckinDate } from "@/lib/utils";
+import { discountLabel, effectiveDiscountPercent } from "@/lib/rewards";
 import type { RewardTier } from "@/lib/types";
 
 async function findRedemption(code: string) {
@@ -14,7 +15,15 @@ async function findRedemption(code: string) {
       .select("*, reward_tiers(*)")
       .eq("code", code)
       .maybeSingle();
-    return data;
+    if (!data) return null;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_subscriber")
+      .eq("id", data.user_id)
+      .maybeSingle();
+
+    return { ...data, isSubscriber: profile?.is_subscriber ?? false };
   } catch {
     return null;
   }
@@ -26,6 +35,7 @@ export default async function RedeemCodePage({ params }: { params: Promise<{ cod
 
   const data = await findRedemption(code);
   const tier = (data?.reward_tiers ?? null) as RewardTier | null;
+  const percent = tier ? effectiveDiscountPercent(tier, data?.isSubscriber ?? false) : 0;
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
@@ -44,7 +54,7 @@ export default async function RedeemCodePage({ params }: { params: Promise<{ cod
           <Card className="flex flex-col items-center gap-3 p-6 text-center">
             <p className="font-serif-display text-2xl text-[var(--color-charcoal)]">{tier.label}</p>
             <p className="text-sm text-[var(--color-charcoal)]/60">
-              {data.chosen_option ?? `${tier.discount_percent}% off`}
+              {data.chosen_option ?? discountLabel(percent)}
             </p>
             <p className="font-mono text-lg tracking-[0.3em] text-[var(--color-charcoal)]">{code}</p>
 

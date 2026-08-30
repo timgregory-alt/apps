@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
 import { generateRedemptionAction } from "@/app/rewards/actions";
 import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
+import { effectiveDiscountPercent } from "@/lib/rewards";
 import type { RewardRedemption, RewardTier } from "@/lib/types";
 
 /** A surprise, not part of the regular points ladder — only rendered by the
@@ -14,14 +15,17 @@ import type { RewardRedemption, RewardTier } from "@/lib/types";
 export function BirthdayRewardCard({
   tier,
   redemption,
+  isSubscriber,
 }: {
   tier: RewardTier;
   redemption: RewardRedemption | null;
+  isSubscriber: boolean;
 }) {
   const [code, setCode] = useState(redemption);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const percent = effectiveDiscountPercent(tier, isSubscriber);
 
   function reveal() {
     setConfirming(false);
@@ -41,7 +45,7 @@ export function BirthdayRewardCard({
       <PartyPopper size={24} className="text-[var(--color-gold)]" />
       <p className="font-serif-display text-xl text-[var(--color-charcoal)]">Happy Birthday!</p>
       <p className="text-sm text-[var(--color-charcoal)]/70">
-        Enjoy {tier.discount_percent}% off today, on us.
+        Enjoy {percent}% off food & merch today, on us.
       </p>
 
       {!code ? (

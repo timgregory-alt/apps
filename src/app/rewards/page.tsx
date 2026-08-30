@@ -86,7 +86,11 @@ export default async function RewardsPage() {
 
       {showBirthdayReward && birthdayTier && (
         <div className="px-6">
-          <BirthdayRewardCard tier={birthdayTier} redemption={birthdayRedemption} />
+          <BirthdayRewardCard
+            tier={birthdayTier}
+            redemption={birthdayRedemption}
+            isSubscriber={profile?.is_subscriber ?? false}
+          />
         </div>
       )}
 
@@ -177,7 +181,12 @@ export default async function RewardsPage() {
           </div>
         ) : (
           <div className="px-6">
-            <RewardTierCarousel tiers={sortedTiers} balance={balance} lifetimeTotal={points.total} />
+            <RewardTierCarousel
+              tiers={sortedTiers}
+              balance={balance}
+              lifetimeTotal={points.total}
+              isSubscriber={profile?.is_subscriber ?? false}
+            />
           </div>
         )}
       </div>

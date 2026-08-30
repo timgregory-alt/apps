@@ -358,13 +358,20 @@ create table if not exists public.reward_tiers (
   id uuid primary key default gen_random_uuid(),
   label text not null,
   points_required integer not null,
+  -- Tennessee law prohibits discounting bottle purchases — this applies to
+  -- food, merch, and tastings only, never a bottle.
   discount_percent integer not null check (discount_percent between 1 and 100),
+  -- Optional richer discount for subscribers at this same tier; null means
+  -- subscribers get the same discount_percent as everyone else.
+  subscriber_discount_percent integer check (subscriber_discount_percent between 1 and 100),
   choice_options jsonb,
   birthday_only boolean not null default false,
   sort_order integer not null default 0,
   active boolean not null default true,
   created_at timestamptz not null default now()
 );
+alter table public.reward_tiers
+  add column if not exists subscriber_discount_percent integer check (subscriber_discount_percent between 1 and 100);
 
 create table if not exists public.reward_redemptions (
   id uuid primary key default gen_random_uuid(),
@@ -409,27 +416,27 @@ create policy "Users issue their own redemptions" on public.reward_redemptions
   for insert with check (auth.uid() = user_id);
 
 -- Seed the current reward ladder if it isn't there yet.
-insert into public.reward_tiers (label, points_required, discount_percent, choice_options, birthday_only, sort_order, active)
-select 'First Pour', 150, 10, null, false, 1, true
+insert into public.reward_tiers (label, points_required, discount_percent, subscriber_discount_percent, choice_options, birthday_only, sort_order, active)
+select 'First Pour', 150, 10, 15, null, false, 1, true
 where not exists (select 1 from public.reward_tiers where label = 'First Pour');
 
-insert into public.reward_tiers (label, points_required, discount_percent, choice_options, birthday_only, sort_order, active)
-select 'Trail Blazer', 400, 15, null, false, 2, true
+insert into public.reward_tiers (label, points_required, discount_percent, subscriber_discount_percent, choice_options, birthday_only, sort_order, active)
+select 'Trail Blazer', 400, 15, 20, null, false, 2, true
 where not exists (select 1 from public.reward_tiers where label = 'Trail Blazer');
 
-insert into public.reward_tiers (label, points_required, discount_percent, choice_options, birthday_only, sort_order, active)
-select 'Estate Insider', 750, 20, null, false, 3, true
+insert into public.reward_tiers (label, points_required, discount_percent, subscriber_discount_percent, choice_options, birthday_only, sort_order, active)
+select 'Estate Insider', 750, 20, 30, null, false, 3, true
 where not exists (select 1 from public.reward_tiers where label = 'Estate Insider');
 
-insert into public.reward_tiers (label, points_required, discount_percent, choice_options, birthday_only, sort_order, active)
+insert into public.reward_tiers (label, points_required, discount_percent, subscriber_discount_percent, choice_options, birthday_only, sort_order, active)
 select
-  'Sommelier''s Choice', 1250, 35,
-  '["35% off your next purchase", "A complimentary tasting for two"]'::jsonb,
+  'Sommelier''s Choice', 1250, 35, null,
+  '["35% off food & merch", "A complimentary tasting for two"]'::jsonb,
   false, 4, true
 where not exists (select 1 from public.reward_tiers where label = 'Sommelier''s Choice');
 
-insert into public.reward_tiers (label, points_required, discount_percent, choice_options, birthday_only, sort_order, active)
-select 'Happy Birthday!', 0, 10, null, true, 99, true
+insert into public.reward_tiers (label, points_required, discount_percent, subscriber_discount_percent, choice_options, birthday_only, sort_order, active)
+select 'Happy Birthday!', 0, 10, 15, null, true, 99, true
 where not exists (select 1 from public.reward_tiers where birthday_only = true);
 
 -- ===========================================================================

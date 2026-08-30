@@ -1,5 +1,5 @@
 import { isTrailComplete } from "@/lib/trail";
-import type { RewardRedemption, WineryWithStatus, WineWithTasting } from "@/lib/types";
+import type { RewardRedemption, RewardTier, WineryWithStatus, WineWithTasting } from "@/lib/types";
 
 export const POINTS_PER_CHECKIN = 25;
 export const POINTS_PER_WINE_RATED = 5;
@@ -84,4 +84,25 @@ export function isBirthdayToday(birthDate: string | null, today: Date = new Date
 /** The current calendar year, as the period_key for a recurring (e.g. birthday) reward tier. */
 export function currentRewardPeriodKey(): string {
   return String(new Date().getFullYear());
+}
+
+/** Subscribers can get a richer discount at the same tier — falls back to
+ * the regular discount_percent when the tier has no subscriber override, or
+ * the guest isn't a subscriber. Tennessee law prohibits discounting bottle
+ * purchases, so this percentage only ever applies to food, merch, or a
+ * tasting — never a bottle. */
+export function effectiveDiscountPercent(
+  tier: Pick<RewardTier, "discount_percent" | "subscriber_discount_percent">,
+  isSubscriber: boolean
+): number {
+  if (isSubscriber && tier.subscriber_discount_percent != null) {
+    return tier.subscriber_discount_percent;
+  }
+  return tier.discount_percent;
+}
+
+/** Guest-facing copy for a flat-percent tier — always food/merch/tasting,
+ * never a bottle, per Tennessee law. */
+export function discountLabel(percent: number): string {
+  return `${percent}% off food & merch`;
 }

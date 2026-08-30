@@ -9,6 +9,7 @@ export interface RewardTierInput {
   label: string;
   points_required: number;
   discount_percent: number;
+  subscriber_discount_percent: number | null;
   choice_options: string[] | null;
   birthday_only: boolean;
   sort_order: number;

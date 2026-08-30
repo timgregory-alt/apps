@@ -9,6 +9,8 @@ interface DraftTier {
   label: string;
   points_required: number;
   discount_percent: number;
+  /** Blank means subscribers get the same discount_percent as everyone else. */
+  subscriberDiscountPercentText: string;
   /** One choice option per line; blank means a plain discount tier. */
   choiceOptionsText: string;
   birthday_only: boolean;
@@ -22,11 +24,18 @@ function toDraft(t: RewardTier): DraftTier {
     label: t.label,
     points_required: t.points_required,
     discount_percent: t.discount_percent,
+    subscriberDiscountPercentText:
+      t.subscriber_discount_percent != null ? String(t.subscriber_discount_percent) : "",
     choiceOptionsText: (t.choice_options ?? []).join("\n"),
     birthday_only: t.birthday_only,
     sort_order: t.sort_order,
     active: t.active,
   };
+}
+
+function parseSubscriberDiscountPercent(text: string): number | null {
+  const trimmed = text.trim();
+  return trimmed === "" ? null : Number(trimmed);
 }
 
 function parseChoiceOptions(text: string): string[] | null {
@@ -51,6 +60,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
     label: "",
     points_required: 100,
     discount_percent: 10,
+    subscriberDiscountPercentText: "",
     choiceOptionsText: "",
     birthday_only: false,
     sort_order: rows.length + 1,
@@ -71,6 +81,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
         label: row.label.trim(),
         points_required: row.points_required,
         discount_percent: row.discount_percent,
+        subscriber_discount_percent: parseSubscriberDiscountPercent(row.subscriberDiscountPercentText),
         choice_options: parseChoiceOptions(row.choiceOptionsText),
         birthday_only: row.birthday_only,
         sort_order: row.sort_order,
@@ -91,6 +102,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
         label: newTier.label.trim(),
         points_required: newTier.points_required,
         discount_percent: newTier.discount_percent,
+        subscriber_discount_percent: parseSubscriberDiscountPercent(newTier.subscriberDiscountPercentText),
         choice_options: parseChoiceOptions(newTier.choiceOptionsText),
         birthday_only: newTier.birthday_only,
         sort_order: newTier.sort_order,
@@ -104,6 +116,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
           label: "",
           points_required: 100,
           discount_percent: 10,
+          subscriberDiscountPercentText: "",
           choiceOptionsText: "",
           birthday_only: false,
           sort_order: rows.length + 2,
@@ -122,7 +135,13 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
         &ldquo;Birthday only&rdquo; tiers skip the points requirement entirely and only unlock
         (once per year) on the guest&apos;s actual birthday — they&apos;re never shown in the
         regular rewards list. Deactivate a tier instead of deleting it — redemptions already
-        issued reference it.
+        issued reference it. Subscriber Discount % is optional — set it higher than the regular
+        Discount % to give subscribers a richer perk at the same tier; leave it blank for no
+        difference.
+      </p>
+      <p className="mt-2 rounded-lg bg-[var(--color-gold-pale)]/50 px-3 py-2 text-xs text-[var(--color-charcoal)]/70">
+        Tennessee law prohibits discounting bottle purchases — keep every discount and choice
+        option scoped to food, merch, or a tasting, never a bottle.
       </p>
 
       {error && <p className="mt-3 text-xs text-[var(--color-burgundy)]">{error}</p>}
@@ -157,7 +176,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-[0.65rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
-                Discount %
+                Discount % (food/merch)
               </span>
               <input
                 type="number"
@@ -165,6 +184,20 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
                 max={100}
                 value={row.discount_percent}
                 onChange={(e) => updateRow(row.id, { discount_percent: Number(e.target.value) })}
+                className={inputClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                Subscriber Discount % (optional)
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                placeholder="Same as above"
+                value={row.subscriberDiscountPercentText}
+                onChange={(e) => updateRow(row.id, { subscriberDiscountPercentText: e.target.value })}
                 className={inputClass}
               />
             </label>
@@ -187,7 +220,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
                 value={row.choiceOptionsText}
                 onChange={(e) => updateRow(row.id, { choiceOptionsText: e.target.value })}
                 rows={2}
-                placeholder={"e.g. 35% off your next purchase\nA complimentary tasting for two"}
+                placeholder={"e.g. 20% off food & merch\nA complimentary tasting for two"}
                 className={`${inputClass} resize-y`}
               />
             </label>
@@ -252,7 +285,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-[0.65rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
-            Discount %
+            Discount % (food/merch)
           </span>
           <input
             type="number"
@@ -260,6 +293,20 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
             max={100}
             value={newTier.discount_percent}
             onChange={(e) => setNewTier((p) => ({ ...p, discount_percent: Number(e.target.value) }))}
+            className={inputClass}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[0.65rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
+            Subscriber Discount % (optional)
+          </span>
+          <input
+            type="number"
+            min={1}
+            max={100}
+            placeholder="Same as above"
+            value={newTier.subscriberDiscountPercentText}
+            onChange={(e) => setNewTier((p) => ({ ...p, subscriberDiscountPercentText: e.target.value }))}
             className={inputClass}
           />
         </label>
@@ -282,7 +329,7 @@ export function RewardTiersAdmin({ tiers }: { tiers: RewardTier[] }) {
             value={newTier.choiceOptionsText}
             onChange={(e) => setNewTier((p) => ({ ...p, choiceOptionsText: e.target.value }))}
             rows={2}
-            placeholder={"e.g. 35% off your next purchase\nA complimentary tasting for two"}
+            placeholder={"e.g. 20% off food & merch\nA complimentary tasting for two"}
             className={`${inputClass} resize-y`}
           />
         </label>

@@ -10,10 +10,12 @@ export function RewardTierCarousel({
   tiers,
   balance,
   lifetimeTotal,
+  isSubscriber,
 }: {
   tiers: RewardTier[];
   balance: number;
   lifetimeTotal: number;
+  isSubscriber: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -43,7 +45,12 @@ export function RewardTierCarousel({
       >
         {tiers.map((tier) => (
           <div key={tier.id} className="w-full shrink-0 snap-center">
-            <RewardTierCard tier={tier} balance={balance} lifetimeTotal={lifetimeTotal} />
+            <RewardTierCard
+              tier={tier}
+              balance={balance}
+              lifetimeTotal={lifetimeTotal}
+              isSubscriber={isSubscriber}
+            />
           </div>
         ))}
       </div>

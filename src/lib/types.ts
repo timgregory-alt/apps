@@ -280,7 +280,12 @@ export interface RewardTier {
   id: UUID;
   label: string;
   points_required: number;
+  /** Tennessee law prohibits discounting bottle purchases — this applies to
+   * food, merch, and tastings only, never a bottle. */
   discount_percent: number;
+  /** Optional richer discount for subscribers at this same tier — null
+   * means subscribers get the same discount_percent as everyone else. */
+  subscriber_discount_percent: number | null;
   /** When set, the guest picks one of these instead of getting a flat discount_percent reward. */
   choice_options: string[] | null;
   /** A surprise reward that isn't part of the regular points ladder — only
