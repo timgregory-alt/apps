@@ -216,9 +216,9 @@ export function ShareSheet({
           {copied ? <Check size={16} strokeWidth={2} /> : <Link2 size={16} strokeWidth={2} />}
           {copied ? "Copied" : "Copy Link"}
         </Button>
-        <Button variant="outline" onClick={handleFacebook}>
+        <Button variant="outline" onClick={handleFacebook} disabled={generating}>
           <FacebookIcon size={16} strokeWidth={2} />
-          Facebook
+          {generating ? "Preparing…" : "Facebook"}
         </Button>
         <Button variant="outline" onClick={handleInstagram} disabled={generating}>
           <InstagramIcon size={16} strokeWidth={2} />
