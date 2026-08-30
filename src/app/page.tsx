@@ -13,12 +13,12 @@ import {
 import { DEFAULT_TRAIL_SLUG } from "@/lib/seed-data";
 import { visitedCount } from "@/lib/trail";
 import { getWineryTastingProgress } from "@/lib/recommendations";
-import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { WineryImage } from "@/components/winery/WineryImage";
 import { WineryTastingGlass } from "@/components/tasting/WineryTastingGlass";
 import { TrailMap } from "@/components/map/TrailMap";
+import { TrailPicker } from "@/components/trail/TrailPicker";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
@@ -83,29 +83,7 @@ export default async function HomePage({
         <p className="font-serif-elegant mb-3 text-xl italic text-[var(--color-charcoal)]/80 [text-shadow:0_1px_12px_rgba(250,246,238,0.9)]">
           Trails
         </p>
-        <div className="flex gap-3 overflow-x-auto pb-1">
-          {trails.map((t) => {
-            const stops = stopCountBySlug.get(t.slug) ?? 0;
-            const active = t.slug === selectedSlug;
-            return (
-              <Link
-                key={t.slug}
-                href={`/?trail=${t.slug}`}
-                className={cn(
-                  "flex h-20 w-40 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border px-3 text-center transition-colors",
-                  active
-                    ? "border-[var(--color-gold)] bg-[var(--color-burgundy)] text-[var(--color-ivory)]"
-                    : "border-dashed border-[var(--color-line)] bg-white/40 text-[var(--color-charcoal)]/60"
-                )}
-              >
-                <span className="text-xs font-medium">{t.name}</span>
-                <span className={cn("text-[0.65rem]", active ? "text-[var(--color-gold-pale)]" : "text-[var(--color-charcoal)]/45")}>
-                  {stops > 0 ? `${stops} stops` : "Coming soon"}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        <TrailPicker trails={trails} selectedSlug={selectedSlug} stopCountBySlug={stopCountBySlug} basePath="/" />
       </div>
 
       <div className="flex flex-col gap-3 px-6">

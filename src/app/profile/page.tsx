@@ -38,7 +38,7 @@ export default async function ProfilePage() {
     return (
       <>
         <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-          <Header eyebrow="My Trail" title="Your Trail" />
+          <Header eyebrow="My Trails" title="Your Trail" />
 
           <div className="px-6">
             <div className="flex items-baseline justify-between">
@@ -90,7 +90,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-      <Header eyebrow="My Trail" title={`${possessive} Trail`} />
+      <Header eyebrow="My Trails" title={`${possessive} Trail`} />
 
       <div className="px-6">
         <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} tiers={rewardTiers} />

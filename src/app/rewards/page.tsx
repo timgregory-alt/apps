@@ -195,7 +195,7 @@ export default async function RewardsPage() {
         <p className="text-center text-xs text-[var(--color-charcoal)]/45">
           Check in and rate wines on{" "}
           <Link href="/my-trail" className="underline">
-            My Trail
+            My Trails
           </Link>{" "}
           to start earning.
         </p>

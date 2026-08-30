@@ -92,7 +92,7 @@ export function computeRecommendations(
         matchingWines,
         reason:
           winery.status === "not_visited"
-            ? `Pours ${STYLE_LABELS[matchingWines[0]?.style ?? topStyles[0]]} — not yet on My Trail`
+            ? `Pours ${STYLE_LABELS[matchingWines[0]?.style ?? topStyles[0]]} — not yet on My Trails`
             : `Pours ${STYLE_LABELS[matchingWines[0]?.style ?? topStyles[0]]}`,
       };
     });

@@ -52,7 +52,7 @@ export default async function CompletionPage() {
       >
         <CompletionShareButton wineryNames={wineries.map((w) => w.name)} />
         <LinkButton href="/my-trail" variant="outline" fullWidth>
-          Back to My Trail
+          Back to My Trails
         </LinkButton>
       </div>
     </main>
