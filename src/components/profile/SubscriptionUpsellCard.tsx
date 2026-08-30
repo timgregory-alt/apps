@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Check, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -73,6 +74,13 @@ export function SubscriptionUpsellCard({
       </ul>
 
       {error && <p className="relative text-sm text-[var(--color-gold-pale)]">{error}</p>}
+
+      <Link
+        href="/vip"
+        className="relative text-center text-xs font-medium text-[var(--color-gold-pale)] underline underline-offset-2"
+      >
+        See VIP Events
+      </Link>
 
       <Button
         type="button"

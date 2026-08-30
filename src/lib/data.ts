@@ -392,10 +392,23 @@ async function getAllWineryEvents(): Promise<WineryEvent[]> {
  * becoming visible to everyone. */
 const EARLY_ACCESS_HOURS = 72;
 
+/** VIP events get a much longer subscriber-exclusive window than regular
+ * events — that's the "early access" a Premium membership buys — before
+ * opening up to everyone. */
+const VIP_EARLY_ACCESS_HOURS = 240;
+
+function isLocked(e: WineryEvent, isSubscriber: boolean): boolean {
+  if (isSubscriber) return false;
+  const windowHours = e.vip_only ? VIP_EARLY_ACCESS_HOURS : EARLY_ACCESS_HOURS;
+  const cutoff = Date.now() - windowHours * 60 * 60 * 1000;
+  return new Date(e.created_at).getTime() > cutoff;
+}
+
 /** Upcoming events grouped one entry per winery (trail order, including
  * wineries with none scheduled) — public, so it's fine to show a logged-out
  * Explore visitor too. Grouped rather than a single soonest-first list so a
- * winery with lots of upcoming events can't crowd the others out.
+ * winery with lots of upcoming events can't crowd the others out. VIP events
+ * don't appear here — they're exclusive to the /vip page instead.
  *
  * Non-subscribers still see that an event exists during its early-access
  * window (date shown, details locked) rather than it being invisible —
@@ -407,14 +420,12 @@ export async function getUpcomingEventsByWinery(
 ): Promise<WineryEventGroup[]> {
   const [events, wineries] = await Promise.all([getAllWineryEvents(), getTrailWineries(trailSlug)]);
   const todayISO = new Date().toISOString().slice(0, 10);
-  const earlyAccessCutoff = Date.now() - EARLY_ACCESS_HOURS * 60 * 60 * 1000;
 
   const eventsByWinery = new Map<string, LockableWineryEvent[]>();
   for (const e of events) {
-    if (e.event_date < todayISO) continue;
-    const locked = !isSubscriber && new Date(e.created_at).getTime() > earlyAccessCutoff;
+    if (e.event_date < todayISO || e.vip_only) continue;
     const list = eventsByWinery.get(e.winery_id) ?? [];
-    list.push({ ...e, locked });
+    list.push({ ...e, locked: isLocked(e, isSubscriber) });
     eventsByWinery.set(e.winery_id, list);
   }
 
@@ -424,4 +435,38 @@ export async function getUpcomingEventsByWinery(
     winery_slug: w.slug,
     events: (eventsByWinery.get(w.id) ?? []).sort((a, b) => a.event_date.localeCompare(b.event_date)),
   }));
+}
+
+/** One VIP event merged with its winery, for the /vip page. */
+export interface VipEvent extends LockableWineryEvent {
+  winery_name: string;
+  winery_slug: string;
+}
+
+async function getAllActiveWineries(): Promise<Winery[]> {
+  if (!isSupabaseConfigured) return SEED_WINERIES;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("wineries").select("*").eq("active", true);
+    if (error || !data) throw error;
+    return data as Winery[];
+  } catch {
+    return SEED_WINERIES;
+  }
+}
+
+/** Every upcoming VIP event across every winery (not trail-scoped — VIP
+ * access is a Premium perk, not tied to any one trail), soonest first. */
+export async function getVipEvents(isSubscriber = false): Promise<VipEvent[]> {
+  const [events, wineries] = await Promise.all([getAllWineryEvents(), getAllActiveWineries()]);
+  const wineryById = new Map(wineries.map((w) => [w.id, w]));
+  const todayISO = new Date().toISOString().slice(0, 10);
+
+  return events
+    .filter((e) => e.vip_only && e.event_date >= todayISO && wineryById.get(e.winery_id))
+    .map((e) => {
+      const winery = wineryById.get(e.winery_id)!;
+      return { ...e, locked: isLocked(e, isSubscriber), winery_name: winery.name, winery_slug: winery.slug };
+    })
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
 }

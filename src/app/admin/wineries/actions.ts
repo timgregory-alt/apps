@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { isCurrentUserAdmin, getWineryByIdAdmin } from "@/lib/admin";
+import { isCurrentUserStaffFor } from "@/lib/portal";
 import { feetToMeters } from "@/lib/geo";
 import { syncWineryWines, type SyncResult } from "@/lib/wine-sync";
 import { syncWineryEvents, type EventSyncResult } from "@/lib/event-sync";
@@ -81,7 +82,9 @@ export async function saveWineryHoursAction(
   wineryId: string,
   rows: SeasonalHoursInput[]
 ): Promise<WineryActionResult> {
-  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+  if (!(await isCurrentUserAdmin()) && !(await isCurrentUserStaffFor(wineryId))) {
+    return { error: "Not authorized" };
+  }
 
   const supabase = await createClient();
   const { error: deleteError } = await supabase
@@ -164,6 +167,45 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
       detail: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+/** Invites a winery contact by email — creates their auth account (Supabase
+ * emails them a set-password link) and links their profile to this winery
+ * via signup metadata, same pattern as the existing referred_by flow. */
+export async function inviteWineryStaffAction(wineryId: string, email: string): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const trimmed = email.trim();
+  if (!trimmed) return { error: "Email is required" };
+
+  const redirectTo = `https://tennesseewinetrails.com/auth/callback?redirectTo=${encodeURIComponent(
+    "/update-password?next=/portal"
+  )}`;
+
+  const adminClient = await createAdminClient();
+  const { error } = await adminClient.auth.admin.inviteUserByEmail(trimmed, {
+    data: { winery_id: wineryId },
+    redirectTo,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/wineries/${wineryId}`);
+}
+
+/** Removes portal access without deleting the account — they stay a
+ * regular signed-in user, just no longer linked to this winery. */
+export async function revokeWineryStaffAction(wineryId: string, profileId: string): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ winery_id: null })
+    .eq("id", profileId)
+    .eq("winery_id", wineryId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/wineries/${wineryId}`);
 }
 
 export async function syncEventsNowAction(wineryId: string): Promise<EventSyncResult> {

@@ -115,6 +115,19 @@ export default async function HomePage({
 
       <UpcomingEventsSection groups={eventGroups} />
 
+      <div className="px-6">
+        <Link
+          href="/vip"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-gold)]/30 bg-[var(--color-gold-pale)]/20 px-5 py-3.5"
+        >
+          <div>
+            <p className="text-sm font-medium text-[var(--color-charcoal)]">VIP Events</p>
+            <p className="text-xs text-[var(--color-charcoal)]/55">Premium members get early access</p>
+          </div>
+          <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/40" />
+        </Link>
+      </div>
+
       {hasWineries && <TrailMap wineries={wineries} />}
 
       {hasWineries && (

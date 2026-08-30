@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import {
   getCurrentUser,
   getProfile,
@@ -91,6 +92,18 @@ export default async function ProfilePage() {
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
       <Header eyebrow="My Trails" title={`${possessive} Trail`} />
+
+      {profile?.winery_id && (
+        <div className="px-6">
+          <Link
+            href="/portal"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-line)] bg-white px-5 py-3.5 text-sm font-medium text-[var(--color-charcoal)]"
+          >
+            Go to Winery Portal
+            <span className="text-[var(--color-burgundy)]">→</span>
+          </Link>
+        </div>
+      )}
 
       <div className="px-6">
         <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} tiers={rewardTiers} />

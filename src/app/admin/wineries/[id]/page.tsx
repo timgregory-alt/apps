@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { getWineryByIdAdmin, getWineryWinesAdmin } from "@/lib/admin";
+import { getWineryByIdAdmin, getWineryWinesAdmin, getWineryStaffAdmin } from "@/lib/admin";
 import { getWineryHours } from "@/lib/data";
 import { WineryForm } from "@/components/admin/WineryForm";
 import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
 import { WineSyncPanel } from "@/components/admin/WineSyncPanel";
 import { EventSyncPanel } from "@/components/admin/EventSyncPanel";
 import { WineSoldOutList } from "@/components/admin/WineSoldOutList";
+import { PortalAccessPanel } from "@/components/admin/PortalAccessPanel";
 import { QrCode } from "@/components/ui/QrCode";
 import { updateWineryAction } from "@/app/admin/wineries/actions";
 
@@ -18,9 +19,10 @@ export default async function EditWineryPage({
   const winery = await getWineryByIdAdmin(id);
   if (!winery) notFound();
 
-  const [hoursSeasons, wines] = await Promise.all([
+  const [hoursSeasons, wines, staff] = await Promise.all([
     getWineryHours(winery.id),
     getWineryWinesAdmin(winery.id),
+    getWineryStaffAdmin(winery.id),
   ]);
   const boundAction = updateWineryAction.bind(null, winery.id);
   const qrUrl = `https://tennesseewinetrails.com/winery/${winery.slug}`;
@@ -56,6 +58,10 @@ export default async function EditWineryPage({
 
         <div className="mt-6">
           <WineSoldOutList wineryId={winery.id} wines={wines} />
+        </div>
+
+        <div className="mt-6">
+          <PortalAccessPanel wineryId={winery.id} staff={staff} />
         </div>
       </div>
 

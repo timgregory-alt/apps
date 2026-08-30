@@ -151,6 +151,7 @@ alter table public.profiles add column if not exists is_subscriber boolean not n
 alter table public.profiles add column if not exists zip_code text;
 alter table public.profiles add column if not exists agreed_to_terms_at timestamptz;
 alter table public.profiles add column if not exists referred_by uuid references public.profiles (id) on delete set null;
+alter table public.profiles add column if not exists winery_id uuid references public.wineries (id) on delete set null;
 
 alter table public.wineries add column if not exists wine_menu_url text;
 alter table public.wineries add column if not exists events_page_url text;
@@ -216,6 +217,8 @@ create table if not exists public.winery_events (
   created_at timestamptz not null default now(),
   unique (winery_id, title, event_date)
 );
+alter table public.winery_events add column if not exists vip_only boolean not null default false;
+alter table public.winery_events add column if not exists ticket_url text;
 create index if not exists winery_events_date_idx on public.winery_events (event_date);
 create index if not exists winery_events_winery_idx on public.winery_events (winery_id);
 alter table public.winery_events enable row level security;
@@ -290,6 +293,7 @@ security definer set search_path = public
 as $$
 declare
   ref_id uuid;
+  target_winery_id uuid;
 begin
   begin
     ref_id := nullif(new.raw_user_meta_data ->> 'referred_by', '')::uuid;
@@ -301,8 +305,17 @@ begin
     ref_id := null;
   end if;
 
+  begin
+    target_winery_id := nullif(new.raw_user_meta_data ->> 'winery_id', '')::uuid;
+  exception when others then
+    target_winery_id := null;
+  end;
+  if target_winery_id is not null and not exists (select 1 from public.wineries where id = target_winery_id) then
+    target_winery_id := null;
+  end if;
+
   insert into public.profiles (
-    id, email, name, birth_date, zip_code, trail_start_date, referred_by, agreed_to_terms_at
+    id, email, name, birth_date, zip_code, trail_start_date, referred_by, agreed_to_terms_at, winery_id
   )
   values (
     new.id,
@@ -312,9 +325,10 @@ begin
     nullif(new.raw_user_meta_data ->> 'zip_code', ''),
     now(),
     ref_id,
-    case when (new.raw_user_meta_data ->> 'terms_accepted') = 'true' then now() else null end
+    case when (new.raw_user_meta_data ->> 'terms_accepted') = 'true' then now() else null end,
+    target_winery_id
   )
-  on conflict (id) do nothing;
+  on conflict (id) do update set winery_id = excluded.winery_id where public.profiles.winery_id is null;
   return new;
 end;
 $$;
@@ -462,6 +476,56 @@ select 'East Tennessee Wine Trail', 'east-tennessee', null, true
 where not exists (select 1 from public.trails where slug = 'east-tennessee');
 
 -- ===========================================================================
--- 7. One-time: make your own account an admin (edit the email first!)
+-- 7. Winery portal: staff-scoped access + VIP event early access
+-- ===========================================================================
+
+create or replace function public.is_winery_staff_for(target_winery_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select coalesce(
+    (select winery_id = target_winery_id from public.profiles where id = auth.uid()),
+    false
+  );
+$$;
+
+drop policy if exists "Winery staff manage their own winery" on public.wineries;
+create policy "Winery staff manage their own winery" on public.wineries
+  for all using (public.is_winery_staff_for(id)) with check (public.is_winery_staff_for(id));
+
+drop policy if exists "Winery staff manage their own hours" on public.winery_hours;
+create policy "Winery staff manage their own hours" on public.winery_hours
+  for all using (public.is_winery_staff_for(winery_id)) with check (public.is_winery_staff_for(winery_id));
+
+drop policy if exists "Winery staff manage their own events" on public.winery_events;
+create policy "Winery staff manage their own events" on public.winery_events
+  for all using (public.is_winery_staff_for(winery_id)) with check (public.is_winery_staff_for(winery_id));
+
+create or replace function public.winery_repeat_guest_stats(target_winery_id uuid)
+returns table (visit_bucket text, guest_count integer)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  with counts as (
+    select user_id, count(*)::integer as visits
+    from public.checkins
+    where winery_id = target_winery_id
+      and (public.is_admin() or public.is_winery_staff_for(target_winery_id))
+    group by user_id
+  )
+  select
+    case when visits = 1 then '1' when visits = 2 then '2' else '3+' end as visit_bucket,
+    count(*)::integer as guest_count
+  from counts
+  group by 1;
+$$;
+
+-- ===========================================================================
+-- 8. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

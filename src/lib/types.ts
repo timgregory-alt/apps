@@ -58,7 +58,8 @@ export interface WineSyncLogEntry {
   detail: string | null;
 }
 
-/** A single upcoming event at a winery, kept current by the weekly sync job. */
+/** A single upcoming event at a winery, kept current by the weekly sync job
+ * (or added manually by that winery's staff via the portal). */
 export interface WineryEvent {
   id: UUID;
   winery_id: UUID;
@@ -70,6 +71,11 @@ export interface WineryEvent {
   event_time: string | null;
   source_url: string | null;
   created_at: string;
+  /** Marks this as a premium event shown on the VIP page — subscribers get
+   * early access, same as the early-access window on regular events. */
+  vip_only: boolean;
+  /** Optional link to buy tickets / RSVP. */
+  ticket_url: string | null;
 }
 
 /** An event still within its early-access window for a non-subscriber
@@ -205,6 +211,10 @@ export interface Profile {
   is_subscriber: boolean;
   trail_start_date: string | null;
   created_at: string;
+  /** Set only on winery-staff accounts (created by an admin invite, never by
+   * self-signup) — marks this profile as belonging to that winery's portal
+   * rather than being a guest. Null for every regular guest account. */
+  winery_id: UUID | null;
 }
 
 /** Winery merged with the current user's visit state — the shape most UI consumes. */

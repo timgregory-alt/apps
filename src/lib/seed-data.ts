@@ -929,6 +929,8 @@ export const SEED_WINERY_EVENTS: WineryEvent[] = [
     event_time: "5:00 PM – 8:00 PM",
     source_url: "https://arringtonvineyards.com",
     created_at: "2026-08-01T00:00:00.000Z",
+    vip_only: false,
+    ticket_url: null,
   },
   {
     id: "event-arrington-foodtruck",
@@ -939,6 +941,8 @@ export const SEED_WINERY_EVENTS: WineryEvent[] = [
     event_time: "4:00 PM – 8:00 PM",
     source_url: "https://arringtonvineyards.com",
     created_at: "2026-08-01T00:00:00.000Z",
+    vip_only: false,
+    ticket_url: null,
   },
   {
     id: "event-arrington-yoga",
@@ -949,6 +953,8 @@ export const SEED_WINERY_EVENTS: WineryEvent[] = [
     event_time: "9:00 AM – 10:30 AM",
     source_url: "https://arringtonvineyards.com",
     created_at: "2026-08-01T00:00:00.000Z",
+    vip_only: false,
+    ticket_url: null,
   },
   {
     id: "event-woodfeather-harvest",
@@ -959,6 +965,8 @@ export const SEED_WINERY_EVENTS: WineryEvent[] = [
     event_time: "11:00 AM – 5:00 PM",
     source_url: "https://woodfeatherfarm.com",
     created_at: "2026-08-01T00:00:00.000Z",
+    vip_only: false,
+    ticket_url: null,
   },
   {
     id: "event-grinders-newrelease",
@@ -969,6 +977,21 @@ export const SEED_WINERY_EVENTS: WineryEvent[] = [
     event_time: "6:00 PM – 9:00 PM",
     source_url: "https://gswinery.com",
     created_at: "2026-08-16T12:00:00.000Z",
+    vip_only: false,
+    ticket_url: null,
+  },
+  {
+    id: "event-grinders-vip-harvest-dinner",
+    winery_id: "winery-grinders-switch",
+    title: "VIP Harvest Dinner",
+    description:
+      "A seated, five-course dinner in the barrel room paired with library vintages not otherwise poured to guests.",
+    event_date: "2026-10-10",
+    event_time: "6:30 PM – 9:30 PM",
+    source_url: null,
+    created_at: "2026-08-20T12:00:00.000Z",
+    vip_only: true,
+    ticket_url: "https://gswinery.com/events",
   },
 ];
 

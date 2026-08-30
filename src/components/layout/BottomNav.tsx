@@ -15,7 +15,7 @@ const ITEMS = [
 export function BottomNav() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/admin") || pathname.startsWith("/redeem")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/redeem") || pathname.startsWith("/portal")) return null;
 
   return (
     <nav

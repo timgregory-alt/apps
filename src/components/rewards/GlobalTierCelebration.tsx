@@ -59,7 +59,7 @@ export function GlobalTierCelebration() {
   const lastCheckedAt = useRef(0);
 
   const checkForNewTier = useCallback((bypassThrottle: boolean) => {
-    if (pathnameRef.current.startsWith("/admin")) return;
+    if (pathnameRef.current.startsWith("/admin") || pathnameRef.current.startsWith("/portal")) return;
 
     const now = Date.now();
     if (!bypassThrottle && now - lastCheckedAt.current < MIN_PERIODIC_CHECK_INTERVAL_MS) return;

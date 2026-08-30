@@ -115,6 +115,30 @@ export async function getAllWineriesAdmin(): Promise<Winery[]> {
   }
 }
 
+export interface WineryStaffAccount {
+  id: UUID;
+  email: string | null;
+  name: string | null;
+  created_at: string;
+}
+
+/** Accounts with portal access to one winery — never guests, only profiles
+ * an admin has explicitly linked via winery_id. */
+export async function getWineryStaffAdmin(wineryId: string): Promise<WineryStaffAccount[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, email, name, created_at")
+      .eq("winery_id", wineryId)
+      .order("created_at", { ascending: true });
+    return (data as WineryStaffAccount[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getWineryByIdAdmin(id: string): Promise<Winery | null> {
   if (!isSupabaseConfigured) return SEED_WINERIES.find((w) => w.id === id) ?? null;
   try {
