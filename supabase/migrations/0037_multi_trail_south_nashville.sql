@@ -10,7 +10,7 @@
 
 update public.trails
 set
-  name = 'South Nashville',
+  name = 'South Nashville Trail',
   description = 'A countryside tour through Middle Tennessee''s boutique wineries, just south of Nashville.'
 where slug = 'founding-trail';
 

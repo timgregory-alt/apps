@@ -24,7 +24,7 @@ export const DEFAULT_TRAIL_SLUG = "founding-trail";
 
 export const SOUTH_NASHVILLE_TRAIL: Trail = {
   id: "trail-founding",
-  name: "South Nashville",
+  name: "South Nashville Trail",
   slug: DEFAULT_TRAIL_SLUG,
   description:
     "A countryside tour through Middle Tennessee's boutique wineries, just south of Nashville.",

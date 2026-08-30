@@ -445,7 +445,7 @@ where not exists (select 1 from public.reward_tiers where birthday_only = true);
 
 update public.trails
 set
-  name = 'South Nashville',
+  name = 'South Nashville Trail',
   description = 'A countryside tour through Middle Tennessee''s boutique wineries, just south of Nashville.'
 where slug = 'founding-trail';
 
