@@ -14,10 +14,16 @@ import { feetToMeters } from "./geo";
  * relying on check-in geofencing in production.
  */
 
-export const DEFAULT_TRAIL_SLUG = "south-nashville";
+// The trail's slug stays "founding-trail" — it's the stable database key
+// existing production data is keyed on, unrelated to the display name. Only
+// the name/description say "South Nashville" now; renaming the slug too
+// would make every trail lookup miss until the DB migration below has run,
+// silently falling back to this file's incomplete placeholder data (no
+// photos, etc.) in the meantime.
+export const DEFAULT_TRAIL_SLUG = "founding-trail";
 
 export const SOUTH_NASHVILLE_TRAIL: Trail = {
-  id: "trail-south-nashville",
+  id: "trail-founding",
   name: "South Nashville",
   slug: DEFAULT_TRAIL_SLUG,
   description:

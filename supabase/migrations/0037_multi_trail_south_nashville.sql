@@ -1,15 +1,16 @@
 -- Tennessee Wine Trails — migration 0037: turn the single "Founding Trail"
 -- into the first of several selectable trails. Renames it to South
--- Nashville (its existing 4 wineries stay mapped via trail_wineries, no
--- change needed there) and seeds placeholder rows for the trails the
--- Explore page has long teased as "coming soon" — they carry no wineries
--- yet, so they show up in the trail picker as unselectable until wineries
--- are actually assigned to them via trail_wineries.
+-- Nashville for display only — the slug stays "founding-trail" (its
+-- existing 4 wineries stay mapped via trail_wineries under that same key,
+-- and the app's code looks it up by that slug, so nothing needs to change
+-- there). Also seeds placeholder rows for the trails the Explore page has
+-- long teased as "coming soon" — they carry no wineries yet, so they show
+-- up in the trail picker as unselectable until wineries are actually
+-- assigned to them via trail_wineries.
 
 update public.trails
 set
   name = 'South Nashville',
-  slug = 'south-nashville',
   description = 'A countryside tour through Middle Tennessee''s boutique wineries, just south of Nashville.'
 where slug = 'founding-trail';
 
