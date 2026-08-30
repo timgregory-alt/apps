@@ -4,13 +4,16 @@ import { ArrowRight } from "lucide-react";
 import {
   getCurrentUser,
   getProfile,
-  getTrail,
+  getAllTrails,
+  getTrailWineries,
   getWineriesWithStatus,
   getWinesWithTastings,
   getUpcomingEventsByWinery,
 } from "@/lib/data";
+import { DEFAULT_TRAIL_SLUG } from "@/lib/seed-data";
 import { visitedCount } from "@/lib/trail";
 import { getWineryTastingProgress } from "@/lib/recommendations";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { WineryImage } from "@/components/winery/WineryImage";
@@ -21,16 +24,27 @@ import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
 import { AuthModal } from "@/components/auth/AuthModal";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ trail?: string }>;
+}) {
+  const { trail: trailParam } = await searchParams;
   const user = await getCurrentUser();
   const profile = user ? await getProfile(user.id) : null;
-  const [trail, wineries, wines, eventGroups] = await Promise.all([
-    getTrail(),
-    getWineriesWithStatus(user?.id ?? null),
-    getWinesWithTastings(user?.id ?? null),
-    getUpcomingEventsByWinery(profile?.is_subscriber ?? false),
+  const trails = await getAllTrails();
+  const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
+  const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;
+
+  const [trailWineryLists, wineries, wines, eventGroups] = await Promise.all([
+    Promise.all(trails.map((t) => getTrailWineries(t.slug))),
+    getWineriesWithStatus(user?.id ?? null, selectedSlug),
+    getWinesWithTastings(user?.id ?? null, selectedSlug),
+    getUpcomingEventsByWinery(profile?.is_subscriber ?? false, selectedSlug),
   ]);
+  const stopCountBySlug = new Map(trails.map((t, i) => [t.slug, trailWineryLists[i].length]));
   const visited = visitedCount(wineries);
+  const hasWineries = wineries.length > 0;
 
   return (
     <>
@@ -51,33 +65,46 @@ export default async function HomePage() {
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
           <TrailCoverFrame />
           <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
-            {wineries.length} Stops · Middle Tennessee
+            {hasWineries ? `${wineries.length} Stops · Middle Tennessee` : "Middle Tennessee"}
           </p>
-          <p className="font-serif-display relative mt-2 text-2xl leading-tight">{trail.name}</p>
-          {trail.description && (
-            <p className="relative mt-2 text-sm text-[var(--color-ivory)]/70">{trail.description}</p>
+          <p className="font-serif-display relative mt-2 text-2xl leading-tight">
+            {selectedTrail?.name ?? "Coming Soon"}
+          </p>
+          {selectedTrail?.description && (
+            <p className="relative mt-2 text-sm text-[var(--color-ivory)]/70">{selectedTrail.description}</p>
           )}
           <p className="relative mt-4 text-sm font-medium text-[var(--color-gold-pale)]">
-            {visited} of {wineries.length} visited
+            {hasWineries ? `${visited} of ${wineries.length} visited` : "Wineries coming soon"}
           </p>
         </Card>
       </div>
 
       <div className="px-6">
         <p className="font-serif-elegant mb-3 text-xl italic text-[var(--color-charcoal)]/80 [text-shadow:0_1px_12px_rgba(250,246,238,0.9)]">
-          More trails coming soon
+          Trails
         </p>
         <div className="flex gap-3 overflow-x-auto pb-1">
-          {["Nashville Wine Trail", "Upper Cumberland Wine Trail", "East Tennessee Wine Trail"].map(
-            (name) => (
-              <div
-                key={name}
-                className="flex h-20 w-40 shrink-0 items-center justify-center rounded-2xl border border-dashed border-[var(--color-line)] bg-white/40 px-3 text-center text-xs text-[var(--color-charcoal)]/45"
+          {trails.map((t) => {
+            const stops = stopCountBySlug.get(t.slug) ?? 0;
+            const active = t.slug === selectedSlug;
+            return (
+              <Link
+                key={t.slug}
+                href={`/?trail=${t.slug}`}
+                className={cn(
+                  "flex h-20 w-40 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border px-3 text-center transition-colors",
+                  active
+                    ? "border-[var(--color-gold)] bg-[var(--color-burgundy)] text-[var(--color-ivory)]"
+                    : "border-dashed border-[var(--color-line)] bg-white/40 text-[var(--color-charcoal)]/60"
+                )}
               >
-                {name}
-              </div>
-            )
-          )}
+                <span className="text-xs font-medium">{t.name}</span>
+                <span className={cn("text-[0.65rem]", active ? "text-[var(--color-gold-pale)]" : "text-[var(--color-charcoal)]/45")}>
+                  {stops > 0 ? `${stops} stops` : "Coming soon"}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -85,32 +112,40 @@ export default async function HomePage() {
         <p className="font-serif-elegant text-xl italic text-[var(--color-charcoal)] [text-shadow:0_1px_12px_rgba(250,246,238,0.9)]">
           All Wineries
         </p>
-        {wineries.map((w) => (
-          <Link key={w.id} href={`/winery/${w.slug}`}>
-            <Card className="flex items-center gap-4 overflow-hidden p-3">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                <WineryImage name={w.name} slug={w.slug} src={w.hero_image} rows={false} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
-                <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
-              </div>
-              <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={40} />
-              <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
-            </Card>
-          </Link>
-        ))}
+        {hasWineries ? (
+          wineries.map((w) => (
+            <Link key={w.id} href={`/winery/${w.slug}`}>
+              <Card className="flex items-center gap-4 overflow-hidden p-3">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+                  <WineryImage name={w.name} slug={w.slug} src={w.hero_image} rows={false} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
+                  <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
+                </div>
+                <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={40} />
+                <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
+              </Card>
+            </Link>
+          ))
+        ) : (
+          <Card className="px-4 py-6 text-center text-sm text-[var(--color-charcoal)]/55">
+            {selectedTrail?.name ?? "This trail"} is coming soon — check back for wineries to visit.
+          </Card>
+        )}
       </div>
 
       <UpcomingEventsSection groups={eventGroups} />
 
-      <TrailMap wineries={wineries} />
+      {hasWineries && <TrailMap wineries={wineries} />}
 
-      <div className="px-6">
-        <LinkButton href="/trail/plan" variant="primary" size="lg" fullWidth>
-          Plan My Wine Trail
-        </LinkButton>
-      </div>
+      {hasWineries && (
+        <div className="px-6">
+          <LinkButton href="/trail/plan" variant="primary" size="lg" fullWidth>
+            Plan My Wine Trail
+          </LinkButton>
+        </div>
+      )}
       </main>
       {!user && (
         <Suspense>

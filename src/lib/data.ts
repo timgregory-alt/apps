@@ -1,7 +1,9 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
-  FOUNDING_TRAIL,
+  DEFAULT_TRAIL_SLUG,
+  SOUTH_NASHVILLE_TRAIL,
+  PLACEHOLDER_TRAILS,
   SEED_WINERIES,
   SEED_WINES,
   SEED_WINERY_HOURS,
@@ -28,10 +30,43 @@ import type {
   WineryWithStatus,
 } from "@/lib/types";
 
-/** All active wineries on the Founding Trail, ordered for display. */
-export async function getFoundingTrailWineries(): Promise<Winery[]> {
+/** All trails a guest can browse on the Explore page, real ones first. */
+export async function getAllTrails(): Promise<Trail[]> {
+  if (!isSupabaseConfigured) return [SOUTH_NASHVILLE_TRAIL, ...PLACEHOLDER_TRAILS];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("trails")
+      .select("*")
+      .eq("active", true)
+      .order("created_at", { ascending: true });
+    if (error || !data) throw error;
+    return data as Trail[];
+  } catch {
+    return [SOUTH_NASHVILLE_TRAIL, ...PLACEHOLDER_TRAILS];
+  }
+}
+
+export async function getTrailBySlug(slug: string): Promise<Trail | null> {
   if (!isSupabaseConfigured) {
-    return [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order);
+    return [SOUTH_NASHVILLE_TRAIL, ...PLACEHOLDER_TRAILS].find((t) => t.slug === slug) ?? null;
+  }
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("trails").select("*").eq("slug", slug).maybeSingle();
+    return (data as Trail) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** All active wineries on the given trail, ordered for display. A trail
+ * with no wineries mapped yet (a "coming soon" placeholder) returns []. */
+export async function getTrailWineries(trailSlug: string = DEFAULT_TRAIL_SLUG): Promise<Winery[]> {
+  if (!isSupabaseConfigured) {
+    return trailSlug === DEFAULT_TRAIL_SLUG
+      ? [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order)
+      : [];
   }
 
   try {
@@ -39,10 +74,12 @@ export async function getFoundingTrailWineries(): Promise<Winery[]> {
     const { data: trail } = await supabase
       .from("trails")
       .select("id")
-      .eq("slug", "founding-trail")
-      .single();
+      .eq("slug", trailSlug)
+      .maybeSingle();
 
-    if (!trail) return [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order);
+    if (!trail) return trailSlug === DEFAULT_TRAIL_SLUG
+      ? [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order)
+      : [];
 
     const { data, error } = await supabase
       .from("trail_wineries")
@@ -56,22 +93,9 @@ export async function getFoundingTrailWineries(): Promise<Winery[]> {
       .map((row) => row.wineries as unknown as Winery)
       .filter((w): w is Winery => !!w && w.active);
   } catch {
-    return [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order);
-  }
-}
-
-export async function getTrail(): Promise<Trail> {
-  if (!isSupabaseConfigured) return FOUNDING_TRAIL;
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("trails")
-      .select("*")
-      .eq("slug", "founding-trail")
-      .single();
-    return (data as Trail) ?? FOUNDING_TRAIL;
-  } catch {
-    return FOUNDING_TRAIL;
+    return trailSlug === DEFAULT_TRAIL_SLUG
+      ? [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order)
+      : [];
   }
 }
 
@@ -173,8 +197,11 @@ function statusFor(checkin: Checkin | undefined, allComplete: boolean): CheckinS
 }
 
 /** Merges trail wineries with the current user's check-in state. */
-export async function getWineriesWithStatus(userId: string | null): Promise<WineryWithStatus[]> {
-  const wineries = await getFoundingTrailWineries();
+export async function getWineriesWithStatus(
+  userId: string | null,
+  trailSlug: string = DEFAULT_TRAIL_SLUG
+): Promise<WineryWithStatus[]> {
+  const wineries = await getTrailWineries(trailSlug);
   if (!userId) {
     return wineries.map((w) => ({ ...w, status: "not_visited" as const, checkin: null }));
   }
@@ -257,8 +284,11 @@ export async function getUserWineTastings(userId: string): Promise<WineTasting[]
 }
 
 /** Every tasting-flight wine merged with its winery and the current user's rating, if any. */
-export async function getWinesWithTastings(userId: string | null): Promise<WineWithTasting[]> {
-  const [wines, wineries] = await Promise.all([getAllWines(), getFoundingTrailWineries()]);
+export async function getWinesWithTastings(
+  userId: string | null,
+  trailSlug: string = DEFAULT_TRAIL_SLUG
+): Promise<WineWithTasting[]> {
+  const [wines, wineries] = await Promise.all([getAllWines(), getTrailWineries(trailSlug)]);
   const wineryById = new Map(wineries.map((w) => [w.id, w]));
   const tastings = userId ? await getUserWineTastings(userId) : [];
   const tastingByWineId = new Map(tastings.map((t) => [t.wine_id, t]));
@@ -371,8 +401,11 @@ const EARLY_ACCESS_HOURS = 72;
  * window (date shown, details locked) rather than it being invisible —
  * a hidden event just looks like a bug, a locked one reads as a real
  * feature and doubles as an upsell. */
-export async function getUpcomingEventsByWinery(isSubscriber = false): Promise<WineryEventGroup[]> {
-  const [events, wineries] = await Promise.all([getAllWineryEvents(), getFoundingTrailWineries()]);
+export async function getUpcomingEventsByWinery(
+  isSubscriber = false,
+  trailSlug: string = DEFAULT_TRAIL_SLUG
+): Promise<WineryEventGroup[]> {
+  const [events, wineries] = await Promise.all([getAllWineryEvents(), getTrailWineries(trailSlug)]);
   const todayISO = new Date().toISOString().slice(0, 10);
   const earlyAccessCutoff = Date.now() - EARLY_ACCESS_HOURS * 60 * 60 * 1000;
 

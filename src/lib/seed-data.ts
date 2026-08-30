@@ -14,16 +14,50 @@ import { feetToMeters } from "./geo";
  * relying on check-in geofencing in production.
  */
 
-export const FOUNDING_TRAIL: Trail = {
-  id: "trail-founding",
-  name: "Tennessee Wine Trails",
-  slug: "founding-trail",
+export const DEFAULT_TRAIL_SLUG = "south-nashville";
+
+export const SOUTH_NASHVILLE_TRAIL: Trail = {
+  id: "trail-south-nashville",
+  name: "South Nashville",
+  slug: DEFAULT_TRAIL_SLUG,
   description:
-    "The original Middle Tennessee wine trail — a countryside tour through the region's boutique wineries.",
+    "A countryside tour through Middle Tennessee's boutique wineries, just south of Nashville.",
   image: null,
   active: true,
   created_at: "2026-01-01T00:00:00.000Z",
 };
+
+/** Trails announced but with no wineries mapped to them yet — shown in the
+ * Explore page's trail picker as "Coming soon" and not selectable. */
+export const PLACEHOLDER_TRAILS: Trail[] = [
+  {
+    id: "trail-nashville",
+    name: "Nashville Wine Trail",
+    slug: "nashville",
+    description: null,
+    image: null,
+    active: true,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "trail-upper-cumberland",
+    name: "Upper Cumberland Wine Trail",
+    slug: "upper-cumberland",
+    description: null,
+    image: null,
+    active: true,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: "trail-east-tennessee",
+    name: "East Tennessee Wine Trail",
+    slug: "east-tennessee",
+    description: null,
+    image: null,
+    active: true,
+    created_at: "2026-01-01T00:00:00.000Z",
+  },
+];
 
 export const SEED_WINERIES: Winery[] = [
   {
@@ -173,7 +207,7 @@ export const SEED_WINERIES: Winery[] = [
 
 export const SEED_TRAIL_WINERIES: TrailWinery[] = SEED_WINERIES.map((w, i) => ({
   id: `tw-${w.slug}`,
-  trail_id: FOUNDING_TRAIL.id,
+  trail_id: SOUTH_NASHVILLE_TRAIL.id,
   winery_id: w.id,
   display_order: i + 1,
 }));

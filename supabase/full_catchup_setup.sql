@@ -440,6 +440,29 @@ select 'Happy Birthday!', 0, 10, 15, null, true, 99, true
 where not exists (select 1 from public.reward_tiers where birthday_only = true);
 
 -- ===========================================================================
--- 6. One-time: make your own account an admin (edit the email first!)
+-- 6. Trails: rename Founding Trail to South Nashville + seed placeholder trails
+-- ===========================================================================
+
+update public.trails
+set
+  name = 'South Nashville',
+  slug = 'south-nashville',
+  description = 'A countryside tour through Middle Tennessee''s boutique wineries, just south of Nashville.'
+where slug = 'founding-trail';
+
+insert into public.trails (name, slug, description, active)
+select 'Nashville Wine Trail', 'nashville', null, true
+where not exists (select 1 from public.trails where slug = 'nashville');
+
+insert into public.trails (name, slug, description, active)
+select 'Upper Cumberland Wine Trail', 'upper-cumberland', null, true
+where not exists (select 1 from public.trails where slug = 'upper-cumberland');
+
+insert into public.trails (name, slug, description, active)
+select 'East Tennessee Wine Trail', 'east-tennessee', null, true
+where not exists (select 1 from public.trails where slug = 'east-tennessee');
+
+-- ===========================================================================
+-- 7. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

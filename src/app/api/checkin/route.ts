@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { SEED_WINERIES, FOUNDING_TRAIL } from "@/lib/seed-data";
+import { SEED_WINERIES, SOUTH_NASHVILLE_TRAIL } from "@/lib/seed-data";
 import { evaluateDistance } from "@/lib/geo";
 import type { Winery } from "@/lib/types";
 
@@ -154,32 +154,37 @@ export async function POST(request: Request) {
   // picks that up instead of serving a cached snapshot from before.
   revalidatePath("/rewards");
 
-  // If this completes the Founding Trail, record the trail completion.
-  const { data: trail } = await supabase
-    .from("trails")
-    .select("id")
-    .eq("slug", "founding-trail")
-    .maybeSingle();
-  const trailId = trail?.id ?? FOUNDING_TRAIL.id;
-
-  const { data: trailWineryIds } = await supabase
+  // Check every trail this winery belongs to (a winery can appear on more
+  // than one trail) — if this check-in completes any of them, record it.
+  const { data: wineryTrails } = await supabase
     .from("trail_wineries")
-    .select("winery_id")
-    .eq("trail_id", trailId);
+    .select("trail_id")
+    .eq("winery_id", wineryId);
+
+  const trailIds = wineryTrails?.length
+    ? [...new Set(wineryTrails.map((r) => r.trail_id))]
+    : [SOUTH_NASHVILLE_TRAIL.id];
 
   const { data: userCheckins } = await supabase
     .from("checkins")
     .select("winery_id")
     .eq("user_id", user.id);
-
-  const requiredIds = (trailWineryIds ?? SEED_WINERIES.map((w) => ({ winery_id: w.id }))).map(
-    (r) => r.winery_id
-  );
   const visitedIds = new Set((userCheckins ?? []).map((c) => c.winery_id));
-  const trailComplete = requiredIds.every((id) => visitedIds.has(id));
 
+  let trailComplete = false;
   let completion = null;
-  if (trailComplete) {
+  for (const trailId of trailIds) {
+    const { data: trailWineryIds } = await supabase
+      .from("trail_wineries")
+      .select("winery_id")
+      .eq("trail_id", trailId);
+
+    const requiredIds = (trailWineryIds ?? SEED_WINERIES.map((w) => ({ winery_id: w.id }))).map(
+      (r) => r.winery_id
+    );
+    if (requiredIds.length === 0 || !requiredIds.every((id) => visitedIds.has(id))) continue;
+
+    trailComplete = true;
     const { data } = await supabase
       .from("trail_completions")
       .upsert(
@@ -188,7 +193,7 @@ export async function POST(request: Request) {
       )
       .select()
       .maybeSingle();
-    completion = data;
+    completion = completion ?? data;
   }
 
   return NextResponse.json({ verified: true, checkin, trailComplete, completion });
