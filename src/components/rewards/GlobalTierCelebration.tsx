@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import confetti from "canvas-confetti";
 import { PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
@@ -10,6 +11,16 @@ import type { RewardTier } from "@/lib/types";
 
 function storageKey(userId: string) {
   return `twt-highest-tier-${userId}`;
+}
+
+const CONFETTI_COLORS = ["#b0904f", "#cfb579", "#e8dcb8", "#5e1a2e"];
+
+function fireConfetti() {
+  const shared = { colors: CONFETTI_COLORS, zIndex: 9999, disableForReducedMotion: true };
+  confetti({ ...shared, particleCount: 90, spread: 75, startVelocity: 45, origin: { y: 0.35 } });
+  window.setTimeout(() => {
+    confetti({ ...shared, particleCount: 50, spread: 100, startVelocity: 30, scalar: 0.85, origin: { y: 0.4 } });
+  }, 200);
 }
 
 /** /api/rewards/status recomputes points from several queries — too heavy
@@ -88,6 +99,10 @@ export function GlobalTierCelebration() {
   }, [pathname, checkForNewTier]);
 
   useEffect(() => onPointsChanged(() => checkForNewTier(true)), [checkForNewTier]);
+
+  useEffect(() => {
+    if (newTier) fireConfetti();
+  }, [newTier]);
 
   return (
     <CenteredDialog
