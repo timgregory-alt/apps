@@ -26,19 +26,15 @@ export function SubscriptionUpsellCard({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  // Reward-tier discounts are admin-configurable, so pull the actual
-  // subscriber-boosted percentages instead of hardcoding numbers that
-  // would drift out of sync whenever a tier is edited.
-  const discountBenefits = tiers
-    .filter(
-      (t) =>
-        t.subscriber_discount_percent != null && t.subscriber_discount_percent > t.discount_percent
-    )
-    .map(
-      (t) =>
-        `${t.label}: ${t.subscriber_discount_percent}% off food & merch, instead of ${t.discount_percent}%`
-    );
-  const benefits = [...BASE_BENEFITS, ...discountBenefits];
+  // Whether any tier currently has a subscriber-only boost — checked
+  // rather than hardcoded so this stops claiming a perk that isn't
+  // actually configured if all the boosts are ever removed.
+  const hasSubscriberDiscounts = tiers.some(
+    (t) => t.subscriber_discount_percent != null && t.subscriber_discount_percent > t.discount_percent
+  );
+  const benefits = hasSubscriberDiscounts
+    ? [...BASE_BENEFITS, "Access to bigger discounts on food, merch & tastings at select reward tiers"]
+    : BASE_BENEFITS;
 
   function toggle() {
     const next = !subscriber;
