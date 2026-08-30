@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/Button";
 import { ShareGraphic } from "@/components/share/ShareGraphic";
 import { FacebookIcon, InstagramIcon } from "@/components/ui/BrandIcons";
 
+/** Both the Facebook and Instagram apps register as native share-sheet
+ * targets on a phone, but neither reliably does on desktop — Facebook's
+ * sharer.php popup gets intercepted by the Facebook app on mobile instead
+ * of showing its own share dialog, and there's no desktop Instagram app at
+ * all. So mobile routes through navigator.share() for both; desktop keeps
+ * Facebook's web popup and falls back to save+copy for Instagram. */
+function isMobileDevice(): boolean {
+  return typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 export function ShareSheet({
   open,
   onClose,
@@ -111,8 +121,18 @@ export function ShareSheet({
     setTimeout(() => setCopied(false), 2000);
   }
 
-  function handleFacebook() {
+  // On mobile, opening facebook.com/sharer.php gets intercepted by the
+  // Facebook app itself, which just deep-links to whatever it opens to by
+  // default instead of showing a share dialog — the popup approach only
+  // actually works as intended on desktop, where there's no app to
+  // intercept it. On mobile, go through the native share sheet instead,
+  // where Facebook reliably shows up as a real target.
+  async function handleFacebook() {
     track("facebook");
+    if (isMobileDevice()) {
+      await handleNativeShare();
+      return;
+    }
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
     window.open(url, "_blank", "noopener,noreferrer,width=600,height=600");
   }
@@ -120,23 +140,27 @@ export function ShareSheet({
   // Instagram doesn't offer a public web API for pre-filled posts the way
   // Facebook's sharer.php does — the only real path in is the device's own
   // share sheet (navigator.share), where the guest picks Instagram
-  // themselves. That share sheet exists on desktop too (e.g. macOS Safari),
-  // but Instagram is never one of its options there — there's no desktop
-  // Instagram app registered with the OS, only on iOS/Android. So routing
-  // through navigator.share on desktop just shows a share sheet with no
-  // Instagram in it, which looks broken. Only use it on an actual phone;
-  // everywhere else, save the image and copy the link so the guest can post
-  // it from the Instagram app themselves.
+  // themselves, and only with an actual image/video attached — Instagram's
+  // iOS share extension doesn't do anything useful with a plain text/link
+  // share. So this never falls back to a text-only native share the way
+  // handleNativeShare does for the other buttons: without a real photo to
+  // hand off, it goes straight to save+copy so the guest has something
+  // they can actually post manually.
   async function handleInstagram() {
     track("instagram");
     setInstagramNote(null);
 
-    const isMobile =
-      typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    if (isMobile && typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      await handleNativeShare();
-      return;
+    if (isMobileDevice() && shareFile && navigator.canShare?.({ files: [shareFile] })) {
+      try {
+        await navigator.share({
+          files: [shareFile],
+          title: "Tennessee Wine Trails",
+          text: `${subheadline} — ${shareUrl}`,
+        });
+        return;
+      } catch {
+        // Cancelled or rejected — fall through to the manual-post fallback below.
+      }
     }
 
     handleSave();
@@ -180,9 +204,9 @@ export function ShareSheet({
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-2.5">
-        <Button variant="primary" onClick={handleNativeShare} className="col-span-2">
+        <Button variant="primary" onClick={handleNativeShare} disabled={generating} className="col-span-2">
           <Share2 size={16} strokeWidth={2} />
-          Share
+          {generating ? "Preparing…" : "Share"}
         </Button>
         <Button variant="outline" onClick={handleSave}>
           <Download size={16} strokeWidth={2} />
@@ -196,9 +220,9 @@ export function ShareSheet({
           <FacebookIcon size={16} strokeWidth={2} />
           Facebook
         </Button>
-        <Button variant="outline" onClick={handleInstagram}>
+        <Button variant="outline" onClick={handleInstagram} disabled={generating}>
           <InstagramIcon size={16} strokeWidth={2} />
-          Instagram
+          {generating ? "Preparing…" : "Instagram"}
         </Button>
       </div>
 
