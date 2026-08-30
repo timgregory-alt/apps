@@ -7,17 +7,38 @@ import { Button } from "@/components/ui/Button";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { toggleSubscriptionAction } from "@/app/profile/actions";
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
+import type { RewardTier } from "@/lib/types";
 
-const BENEFITS = [
+const BASE_BENEFITS = [
   `Earn ${SUBSCRIBER_MULTIPLIER}x points on every check-in, wine rating, and referral`,
   "Early access to new winery events, before anyone else sees them",
   "Unlock gated features, like winery review links",
 ];
 
-export function SubscriptionUpsellCard({ isSubscriber }: { isSubscriber: boolean }) {
+export function SubscriptionUpsellCard({
+  isSubscriber,
+  tiers,
+}: {
+  isSubscriber: boolean;
+  tiers: RewardTier[];
+}) {
   const [subscriber, setSubscriber] = useState(isSubscriber);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // Reward-tier discounts are admin-configurable, so pull the actual
+  // subscriber-boosted percentages instead of hardcoding numbers that
+  // would drift out of sync whenever a tier is edited.
+  const discountBenefits = tiers
+    .filter(
+      (t) =>
+        t.subscriber_discount_percent != null && t.subscriber_discount_percent > t.discount_percent
+    )
+    .map(
+      (t) =>
+        `${t.label}: ${t.subscriber_discount_percent}% off food & merch, instead of ${t.discount_percent}%`
+    );
+  const benefits = [...BASE_BENEFITS, ...discountBenefits];
 
   function toggle() {
     const next = !subscriber;
@@ -47,7 +68,7 @@ export function SubscriptionUpsellCard({ isSubscriber }: { isSubscriber: boolean
       </div>
 
       <ul className="relative flex flex-col gap-1.5">
-        {BENEFITS.map((b) => (
+        {benefits.map((b) => (
           <li key={b} className="flex items-start gap-2 text-sm text-[var(--color-ivory)]/85">
             <Check size={14} className="mt-0.5 shrink-0 text-[var(--color-gold-pale)]" />
             {b}

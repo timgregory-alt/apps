@@ -6,6 +6,7 @@ import {
   getWineriesWithStatus,
   getUserAppRating,
   getQualifyingReferralCount,
+  getActiveRewardTiers,
 } from "@/lib/data";
 import { visitedCount } from "@/lib/trail";
 import { formatCheckinDate } from "@/lib/utils";
@@ -64,12 +65,13 @@ export default async function ProfilePage() {
     );
   }
 
-  const [profile, completions, wineries, appRating, referralCount] = await Promise.all([
+  const [profile, completions, wineries, appRating, referralCount, rewardTiers] = await Promise.all([
     getProfile(user.id),
     getTrailCompletions(user.id),
     getWineriesWithStatus(user.id),
     getUserAppRating(user.id),
     getQualifyingReferralCount(),
+    getActiveRewardTiers(),
   ]);
 
   const visited = visitedCount(wineries);
@@ -91,7 +93,7 @@ export default async function ProfilePage() {
       <Header eyebrow="My Trail" title={`${possessive} Trail`} />
 
       <div className="px-6">
-        <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} />
+        <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} tiers={rewardTiers} />
       </div>
 
       <div className="px-6">
