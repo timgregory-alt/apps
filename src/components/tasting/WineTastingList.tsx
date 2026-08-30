@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
 import { STYLE_BADGE } from "@/lib/recommendations";
 import { cn } from "@/lib/utils";
+import { notifyPointsChanged } from "@/lib/pointsEvents";
 import type { CustomWineTasting, WineStyle, WineWithTasting } from "@/lib/types";
 
 const STYLE_ORDER: WineStyle[] = ["red", "white", "rose", "sparkling", "sweet", "mead"];
@@ -119,6 +120,8 @@ export function WineTastingList({
         const data = await res.json().catch(() => null);
         setError(data?.error ?? "Could not save your rating.");
         setWines((prev) => prev.map((w) => (w.id === wineId ? { ...w, tasting: previousTasting } : w)));
+      } else {
+        notifyPointsChanged();
       }
     } catch {
       setError("Could not save your rating. Please try again.");

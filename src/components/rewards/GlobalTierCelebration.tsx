@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
+import { onPointsChanged } from "@/lib/pointsEvents";
 import type { RewardTier } from "@/lib/types";
 
 function storageKey(userId: string) {
@@ -12,12 +13,13 @@ function storageKey(userId: string) {
 }
 
 /** /api/rewards/status recomputes points from several queries — too heavy
- * to run on every single navigation. A prior, much shorter throttle here
- * (20s) coincided with the production database going unhealthy on its
- * smallest compute tier, so this is now deliberately conservative: still
- * covers "any screen" over the course of a normal visit, just far less
- * often. */
-const MIN_CHECK_INTERVAL_MS = 5 * 60_000;
+ * to run on every single navigation. This periodic check is a low-frequency
+ * fallback (e.g. for points that change from someone else's actions, like a
+ * referral) — the responsive path is notifyPointsChanged(), fired right
+ * after a check-in or wine rating succeeds, which bypasses this throttle
+ * since it's inherently rate-limited by how often someone can actually earn
+ * points. */
+const MIN_PERIODIC_CHECK_INTERVAL_MS = 5 * 60_000;
 
 interface RewardsStatus {
   loggedIn: boolean;
@@ -27,32 +29,32 @@ interface RewardsStatus {
 }
 
 /** Mounted once in the root layout so it can catch a newly crossed reward
- * tier on any guest-facing screen, not just the Rewards page — re-checks
- * on navigation, throttled to avoid re-running the points computation on
- * every single tap. Skips /admin routes entirely — that's staff tooling,
- * not something a guest experiences, and the reset-my-test-data flow there
- * would otherwise trigger it. Points are derived, never stored, so there's
- * no server-side "last seen tier" to diff against — this compares the
- * current highest-unlocked tier to one remembered in localStorage per
- * user. */
+ * tier on any guest-facing screen, not just the Rewards page. Skips /admin
+ * routes entirely — that's staff tooling, not something a guest
+ * experiences. Points are derived, never stored, so there's no server-side
+ * "last seen tier" to diff against — this compares the current
+ * highest-unlocked tier to one remembered in localStorage per user. */
 export function GlobalTierCelebration() {
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+
   const [newTier, setNewTier] = useState<RewardTier | null>(null);
   const lastCheckedAt = useRef(0);
 
-  useEffect(() => {
-    if (pathname.startsWith("/admin")) return;
+  const checkForNewTier = useCallback((bypassThrottle: boolean) => {
+    if (pathnameRef.current.startsWith("/admin")) return;
 
     const now = Date.now();
-    if (now - lastCheckedAt.current < MIN_CHECK_INTERVAL_MS) return;
+    if (!bypassThrottle && now - lastCheckedAt.current < MIN_PERIODIC_CHECK_INTERVAL_MS) return;
     lastCheckedAt.current = now;
-
-    let cancelled = false;
 
     fetch("/api/rewards/status")
       .then((res) => (res.ok ? (res.json() as Promise<RewardsStatus>) : null))
       .then((data) => {
-        if (cancelled || !data?.loggedIn || !data.userId || !data.tiers) return;
+        if (!data?.loggedIn || !data.userId || !data.tiers) return;
         const { userId, tiers } = data;
         const lifetimeTotal = data.lifetimeTotal ?? 0;
 
@@ -77,14 +79,15 @@ export function GlobalTierCelebration() {
         }
       })
       .catch(() => {
-        // Best-effort — a missed check just means the celebration shows up
-        // on the next screen instead.
+        // Best-effort — a missed check just means the celebration shows up next time.
       });
+  }, []);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname]);
+  useEffect(() => {
+    checkForNewTier(false);
+  }, [pathname, checkForNewTier]);
+
+  useEffect(() => onPointsChanged(() => checkForNewTier(true)), [checkForNewTier]);
 
   return (
     <CenteredDialog

@@ -11,6 +11,7 @@ import { ShareSheet } from "@/components/share/ShareSheet";
 import { WineClubModal } from "@/components/wineclub/WineClubModal";
 import { recommendNextStop } from "@/lib/trail";
 import { formatCheckinDate } from "@/lib/utils";
+import { notifyPointsChanged } from "@/lib/pointsEvents";
 import type { Winery, WineryWithStatus } from "@/lib/types";
 
 type Stage = "idle" | "celebrating" | "wineclub" | "nextstop" | "sharing";
@@ -75,6 +76,7 @@ export function CheckInFlow({
       setAlreadyVisited(true);
       setTrailComplete(Boolean(data.trailComplete));
       setStage("celebrating");
+      notifyPointsChanged();
     } catch {
       setBlockedMessage(
         "We couldn't verify your location. Please enable location services and try again."
