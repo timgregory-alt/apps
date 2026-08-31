@@ -186,16 +186,33 @@ async function portalPasswordRedirect(): Promise<string> {
   return `${origin}/update-password?next=${encodeURIComponent("/portal")}`;
 }
 
-/** Invites a winery contact by email — creates their auth account (Supabase
- * emails them a set-password link) and links their profile to this winery
- * via signup metadata, same pattern as the existing referred_by flow. Fails
- * with "already registered" if this email already has an account — use
- * resendWineryStaffInviteAction for that case instead. */
+/** Grants portal access for a winery contact by email. If that email
+ * already has an account — a guest who'd signed up before, or a staff
+ * account for another winery — Supabase's invite API just fails outright
+ * with "already registered" and never links anything, which silently drops
+ * the request. So this checks for an existing profile first and links it
+ * directly (no invite email needed — they already have credentials to sign
+ * in with); only a genuinely new email goes through the invite-by-email
+ * flow that creates a brand new account. */
 export async function inviteWineryStaffAction(wineryId: string, email: string): Promise<WineryActionResult> {
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const trimmed = email.trim();
   if (!trimmed) return { error: "Email is required" };
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id")
+    .ilike("email", trimmed)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase.from("profiles").update({ winery_id: wineryId }).eq("id", existing.id);
+    if (error) return { error: error.message };
+    revalidatePath(`/admin/wineries/${wineryId}`);
+    return;
+  }
 
   const adminClient = await createAdminClient();
   const { error } = await adminClient.auth.admin.inviteUserByEmail(trimmed, {

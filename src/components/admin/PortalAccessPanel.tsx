@@ -30,7 +30,7 @@ export function PortalAccessPanel({
         setError(result.error);
         return;
       }
-      setMessage(`Invite sent to ${email}`);
+      setMessage(`${email} now has portal access — resend a sign-in link with the icon below if they need one`);
       setEmail("");
     });
   }
