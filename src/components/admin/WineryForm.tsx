@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { metersToFeet } from "@/lib/geo";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import type { Winery } from "@/lib/types";
 
 const inputClass =
@@ -100,10 +101,11 @@ export function WineryForm({
         />
       </label>
 
-      <label className={labelClass}>
-        <span className={labelTextClass}>Hero Image URL (optional — placeholder art used until set)</span>
-        <input name="hero_image" defaultValue={winery?.hero_image ?? ""} className={inputClass} />
-      </label>
+      <ImageUploadField
+        name="hero_image"
+        label="Hero Image (optional — placeholder art used until set)"
+        defaultValue={winery?.hero_image}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <label className={labelClass}>

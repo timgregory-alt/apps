@@ -47,6 +47,41 @@ function parseWineryForm(formData: FormData) {
 
 export type WineryActionResult = { error: string } | void;
 
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
+const ALLOWED_PHOTO_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+
+/** Uploads a winery photo to Storage and returns its public URL — used by
+ * ImageUploadField instead of requiring a hand-pasted URL, which turned out
+ * to sometimes be a Facebook CDN hotlink (unreliable across devices/
+ * sessions) or a HEIC file (unsupported outside Safari). Not tied to a
+ * specific winery id, so it works the same for a brand-new winery that
+ * hasn't been saved yet as for editing an existing one. */
+export async function uploadWineryPhotoAction(formData: FormData): Promise<{ error: string } | { url: string }> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose a photo to upload" };
+
+  const ext = ALLOWED_PHOTO_TYPES[file.type];
+  if (!ext) return { error: "Please upload a JPEG, PNG, WebP, or GIF image (not HEIC or other formats)" };
+  if (file.size > MAX_PHOTO_BYTES) return { error: "Photo is too large (max 8MB)" };
+
+  const path = `wineries/${crypto.randomUUID()}.${ext}`;
+  const supabase = await createClient();
+  const { error } = await supabase.storage
+    .from("winery-photos")
+    .upload(path, file, { contentType: file.type, cacheControl: "31536000" });
+  if (error) return { error: error.message };
+
+  const { data } = supabase.storage.from("winery-photos").getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
 export async function createWineryAction(formData: FormData): Promise<WineryActionResult> {
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 

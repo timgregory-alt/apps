@@ -526,6 +526,23 @@ as $$
 $$;
 
 -- ===========================================================================
--- 8. One-time: make your own account an admin (edit the email first!)
+-- 8. Winery photo uploads (Storage bucket)
+-- ===========================================================================
+
+insert into storage.buckets (id, name, public)
+values ('winery-photos', 'winery-photos', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Public read winery photos" on storage.objects;
+create policy "Public read winery photos" on storage.objects
+  for select using (bucket_id = 'winery-photos');
+
+drop policy if exists "Admins manage winery photos" on storage.objects;
+create policy "Admins manage winery photos" on storage.objects
+  for all using (bucket_id = 'winery-photos' and public.is_admin())
+  with check (bucket_id = 'winery-photos' and public.is_admin());
+
+-- ===========================================================================
+-- 9. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';
