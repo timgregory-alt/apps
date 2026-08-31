@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { isCurrentUserAdmin, getWineryByIdAdmin } from "@/lib/admin";
 import { isCurrentUserStaffFor } from "@/lib/portal";
@@ -171,16 +172,28 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
 
 /** Invites a winery contact by email — creates their auth account (Supabase
  * emails them a set-password link) and links their profile to this winery
- * via signup metadata, same pattern as the existing referred_by flow. */
+ * via signup metadata, same pattern as the existing referred_by flow.
+ *
+ * The redirect target is built from the actual request host rather than a
+ * hardcoded domain, since Supabase only honors a redirectTo that matches an
+ * allowlisted URL in that project's Auth settings — a guessed/wrong domain
+ * gets silently dropped in favor of the project's default Site URL. It
+ * points straight at /update-password rather than through /auth/callback:
+ * Supabase's invite emails deliver the session as a #access_token= URL
+ * fragment (never sent to a server route), so only client-side JS — which
+ * the Supabase browser client already does automatically on page load —
+ * can pick it up. */
 export async function inviteWineryStaffAction(wineryId: string, email: string): Promise<WineryActionResult> {
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const trimmed = email.trim();
   if (!trimmed) return { error: "Email is required" };
 
-  const redirectTo = `https://tennesseewinetrails.com/auth/callback?redirectTo=${encodeURIComponent(
-    "/update-password?next=/portal"
-  )}`;
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const proto = headerList.get("x-forwarded-proto") ?? "https";
+  const origin = host ? `${proto}://${host}` : "https://tennesseewinetrails.com";
+  const redirectTo = `${origin}/update-password?next=${encodeURIComponent("/portal")}`;
 
   const adminClient = await createAdminClient();
   const { error } = await adminClient.auth.admin.inviteUserByEmail(trimmed, {
