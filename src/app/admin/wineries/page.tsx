@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { getAdminStats, getAllWineriesAdmin } from "@/lib/admin";
+import { RemoveWineryButton } from "@/components/admin/RemoveWineryButton";
 
 export default async function AdminWineriesPage() {
   const [wineries, stats] = await Promise.all([getAllWineriesAdmin(), getAdminStats()]);
@@ -36,15 +37,18 @@ export default async function AdminWineriesPage() {
                 {w.city}, {w.state} · {stats.checkinsByWinery[w.id] ?? 0} check-ins
               </p>
             </div>
-            <span
-              className={
-                w.active
-                  ? "rounded-full bg-[var(--color-gold-pale)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-burgundy-deep)]"
-                  : "rounded-full bg-black/5 px-2.5 py-0.5 text-xs font-medium text-[var(--color-charcoal)]/50"
-              }
-            >
-              {w.active ? "Active" : "Inactive"}
-            </span>
+            <div className="flex shrink-0 items-center gap-2">
+              <span
+                className={
+                  w.active
+                    ? "rounded-full bg-[var(--color-gold-pale)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-burgundy-deep)]"
+                    : "rounded-full bg-black/5 px-2.5 py-0.5 text-xs font-medium text-[var(--color-charcoal)]/50"
+                }
+              >
+                {w.active ? "Active" : "Inactive"}
+              </span>
+              <RemoveWineryButton wineryId={w.id} active={w.active} name={w.name} />
+            </div>
           </Link>
         ))}
       </div>

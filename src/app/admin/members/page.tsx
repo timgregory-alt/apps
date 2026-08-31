@@ -1,5 +1,6 @@
 import { getAllMembersAdmin, cityFromZip } from "@/lib/admin";
 import { SubscriberToggle } from "@/components/admin/SubscriberToggle";
+import { RemoveMemberButton } from "@/components/admin/RemoveMemberButton";
 import { formatCheckinDate } from "@/lib/utils";
 
 export default async function AdminMembersPage() {
@@ -42,7 +43,10 @@ export default async function AdminMembersPage() {
                     : "Terms not agreed"}
                 </p>
               </div>
-              <SubscriberToggle userId={m.id} initialIsSubscriber={m.is_subscriber} />
+              <div className="flex shrink-0 items-center gap-2">
+                <SubscriberToggle userId={m.id} initialIsSubscriber={m.is_subscriber} />
+                <RemoveMemberButton userId={m.id} name={m.name || m.email || "this member"} />
+              </div>
             </div>
           );
         })}

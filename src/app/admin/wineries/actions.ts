@@ -284,6 +284,44 @@ export async function resendWineryStaffInviteAction(wineryId: string, profileId:
   if (error) return { error: error.message };
 }
 
+/** Removes a winery from the guest-facing app without deleting anything —
+ * marks it inactive, same flag the "Active" checkbox in the winery edit
+ * form already controls. Check-ins reference wineries with ON DELETE
+ * CASCADE, so an actual delete would also erase every guest's visit
+ * history, ratings, and click data tied to it; deactivating instead hides
+ * it from Explore/check-in/the trail while keeping that history intact and
+ * lets it be restored later. */
+export async function removeWineryAction(wineryId: string): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("wineries").update({ active: false }).eq("id", wineryId);
+  if (error) return { error: error.message };
+
+  const winery = await getWineryByIdAdmin(wineryId);
+  revalidatePath("/admin/wineries");
+  revalidatePath(`/admin/wineries/${wineryId}`);
+  revalidatePath("/");
+  revalidatePath("/my-trail");
+  if (winery) revalidatePath(`/winery/${winery.slug}`);
+}
+
+/** Restores a previously-removed winery back into the guest-facing app. */
+export async function restoreWineryAction(wineryId: string): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("wineries").update({ active: true }).eq("id", wineryId);
+  if (error) return { error: error.message };
+
+  const winery = await getWineryByIdAdmin(wineryId);
+  revalidatePath("/admin/wineries");
+  revalidatePath(`/admin/wineries/${wineryId}`);
+  revalidatePath("/");
+  revalidatePath("/my-trail");
+  if (winery) revalidatePath(`/winery/${winery.slug}`);
+}
+
 /** Removes portal access without deleting the account — they stay a
  * regular signed-in user, just no longer linked to this winery. */
 export async function revokeWineryStaffAction(wineryId: string, profileId: string): Promise<WineryActionResult> {
