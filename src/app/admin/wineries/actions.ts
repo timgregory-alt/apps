@@ -170,39 +170,66 @@ export async function syncWineryNowAction(wineryId: string): Promise<SyncResult>
   }
 }
 
+/** Built from the actual request host rather than a hardcoded domain, since
+ * Supabase only honors a redirectTo that matches an allowlisted URL in that
+ * project's Auth settings — a guessed/wrong domain gets silently dropped in
+ * favor of the project's default Site URL. Points straight at
+ * /update-password rather than through /auth/callback: Supabase delivers
+ * the session as a #access_token= URL fragment (never sent to a server
+ * route), so only client-side JS — which the Supabase browser client
+ * already does automatically on page load — can pick it up. */
+async function portalPasswordRedirect(): Promise<string> {
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const proto = headerList.get("x-forwarded-proto") ?? "https";
+  const origin = host ? `${proto}://${host}` : "https://tennesseewinetrails.com";
+  return `${origin}/update-password?next=${encodeURIComponent("/portal")}`;
+}
+
 /** Invites a winery contact by email — creates their auth account (Supabase
  * emails them a set-password link) and links their profile to this winery
- * via signup metadata, same pattern as the existing referred_by flow.
- *
- * The redirect target is built from the actual request host rather than a
- * hardcoded domain, since Supabase only honors a redirectTo that matches an
- * allowlisted URL in that project's Auth settings — a guessed/wrong domain
- * gets silently dropped in favor of the project's default Site URL. It
- * points straight at /update-password rather than through /auth/callback:
- * Supabase's invite emails deliver the session as a #access_token= URL
- * fragment (never sent to a server route), so only client-side JS — which
- * the Supabase browser client already does automatically on page load —
- * can pick it up. */
+ * via signup metadata, same pattern as the existing referred_by flow. Fails
+ * with "already registered" if this email already has an account — use
+ * resendWineryStaffInviteAction for that case instead. */
 export async function inviteWineryStaffAction(wineryId: string, email: string): Promise<WineryActionResult> {
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const trimmed = email.trim();
   if (!trimmed) return { error: "Email is required" };
 
-  const headerList = await headers();
-  const host = headerList.get("host");
-  const proto = headerList.get("x-forwarded-proto") ?? "https";
-  const origin = host ? `${proto}://${host}` : "https://tennesseewinetrails.com";
-  const redirectTo = `${origin}/update-password?next=${encodeURIComponent("/portal")}`;
-
   const adminClient = await createAdminClient();
   const { error } = await adminClient.auth.admin.inviteUserByEmail(trimmed, {
     data: { winery_id: wineryId },
-    redirectTo,
+    redirectTo: await portalPasswordRedirect(),
   });
   if (error) return { error: error.message };
 
   revalidatePath(`/admin/wineries/${wineryId}`);
+}
+
+/** Re-sends a set-password link to an existing (already-invited) staff
+ * account — invite links are one-time-baked, so a stale or unused one can't
+ * just be re-clicked, and re-inviting the same email fails with "already
+ * registered". This goes through the same public password-recovery flow
+ * the "Forgot password" page already uses (works regardless of whether the
+ * account ever completed its first sign-in), rather than requiring a
+ * separate invite-specific resend API. */
+export async function resendWineryStaffInviteAction(wineryId: string, profileId: string): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", profileId)
+    .eq("winery_id", wineryId)
+    .maybeSingle();
+  if (!profile?.email) return { error: "Could not find that account" };
+
+  const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
+    redirectTo: await portalPasswordRedirect(),
+  });
+  if (error) return { error: error.message };
 }
 
 /** Removes portal access without deleting the account — they stay a

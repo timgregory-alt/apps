@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { X } from "lucide-react";
-import { inviteWineryStaffAction, revokeWineryStaffAction } from "@/app/admin/wineries/actions";
+import { X, RotateCw } from "lucide-react";
+import {
+  inviteWineryStaffAction,
+  revokeWineryStaffAction,
+  resendWineryStaffInviteAction,
+} from "@/app/admin/wineries/actions";
 import type { WineryStaffAccount } from "@/lib/admin";
 
 export function PortalAccessPanel({
@@ -31,6 +35,19 @@ export function PortalAccessPanel({
     });
   }
 
+  function resend(s: WineryStaffAccount) {
+    setError(null);
+    setMessage(null);
+    startTransition(async () => {
+      const result = await resendWineryStaffInviteAction(wineryId, s.id);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+      setMessage(`Sign-in link resent to ${s.email}`);
+    });
+  }
+
   function revoke(profileId: string) {
     startTransition(async () => {
       await revokeWineryStaffAction(wineryId, profileId);
@@ -56,15 +73,28 @@ export function PortalAccessPanel({
                 <p className="truncate text-sm text-[var(--color-charcoal)]">{s.email}</p>
                 {s.name && <p className="truncate text-xs text-[var(--color-charcoal)]/50">{s.name}</p>}
               </div>
-              <button
-                type="button"
-                onClick={() => revoke(s.id)}
-                disabled={pending}
-                aria-label={`Revoke access for ${s.email}`}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--color-charcoal)]/40 hover:bg-black/5 hover:text-[var(--color-burgundy)]"
-              >
-                <X size={14} strokeWidth={2} />
-              </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => resend(s)}
+                  disabled={pending}
+                  aria-label={`Resend sign-in link to ${s.email}`}
+                  title="Resend sign-in link"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-charcoal)]/40 hover:bg-black/5 hover:text-[var(--color-burgundy)]"
+                >
+                  <RotateCw size={13} strokeWidth={2} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => revoke(s.id)}
+                  disabled={pending}
+                  aria-label={`Revoke access for ${s.email}`}
+                  title="Revoke access"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-[var(--color-charcoal)]/40 hover:bg-black/5 hover:text-[var(--color-burgundy)]"
+                >
+                  <X size={14} strokeWidth={2} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -87,6 +117,10 @@ export function PortalAccessPanel({
           {pending ? "Sending…" : "Invite"}
         </button>
       </div>
+      <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
+        If someone&rsquo;s already listed above but never finished signing in, use the resend icon next to
+        their name instead of re-inviting the same email.
+      </p>
       {error && <p className="mt-2 text-xs text-[var(--color-burgundy)]">{error}</p>}
       {message && <p className="mt-2 text-xs text-[var(--color-charcoal)]/60">{message}</p>}
     </div>
