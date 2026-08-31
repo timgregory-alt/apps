@@ -35,6 +35,8 @@ export function ImageUploadField({
       const result = await uploadWineryPhotoAction(formData);
       if ("error" in result) setError(result.error);
       else setValue(result.url);
+    } catch {
+      setError("Upload failed — please try again.");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
