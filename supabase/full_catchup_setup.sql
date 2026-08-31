@@ -543,6 +543,39 @@ create policy "Admins manage winery photos" on storage.objects
   with check (bucket_id = 'winery-photos' and public.is_admin());
 
 -- ===========================================================================
--- 9. One-time: make your own account an admin (edit the email first!)
+-- 9. Winery guest contact list
+-- ===========================================================================
+
+create or replace function public.winery_guest_list(target_winery_id uuid)
+returns table (
+  user_id uuid,
+  name text,
+  email text,
+  visit_count integer,
+  first_visit date,
+  last_visit date
+)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select
+    c.user_id,
+    p.name,
+    p.email,
+    count(*)::integer as visit_count,
+    min(c.checkin_date)::date as first_visit,
+    max(c.checkin_date)::date as last_visit
+  from public.checkins c
+  join public.profiles p on p.id = c.user_id
+  where c.winery_id = target_winery_id
+    and (public.is_admin() or public.is_winery_staff_for(target_winery_id))
+  group by c.user_id, p.name, p.email
+  order by max(c.checkin_date) desc;
+$$;
+
+-- ===========================================================================
+-- 10. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

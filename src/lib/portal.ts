@@ -91,3 +91,39 @@ export async function getRepeatGuestStats(wineryId: string): Promise<RepeatGuest
     return EMPTY_STATS;
   }
 }
+
+export interface WineryGuest {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  visitCount: number;
+  firstVisit: string;
+  lastVisit: string;
+}
+
+/** Guests who've checked in at this winery — name, email, and visit
+ * history, via the winery_guest_list() SECURITY DEFINER function (it
+ * re-checks staff/admin access itself server-side). Disclosed in the Terms
+ * of Service: a winery can see this for guests who visited that winery
+ * specifically, not any other. */
+export async function getWineryGuestList(wineryId: string): Promise<WineryGuest[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_guest_list", { target_winery_id: wineryId });
+    if (error || !data) throw error;
+
+    return (
+      data as { user_id: string; name: string | null; email: string | null; visit_count: number; first_visit: string; last_visit: string }[]
+    ).map((r) => ({
+      userId: r.user_id,
+      name: r.name,
+      email: r.email,
+      visitCount: r.visit_count,
+      firstVisit: r.first_visit,
+      lastVisit: r.last_visit,
+    }));
+  } catch {
+    return [];
+  }
+}

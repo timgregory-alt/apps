@@ -14,7 +14,7 @@ export default function TermsPage() {
         <h1 className="font-serif-display mt-1 text-2xl text-[var(--color-charcoal)]">
           Terms and Conditions
         </h1>
-        <p className="mt-2 text-xs text-[var(--color-charcoal)]/50">Last updated August 20, 2026</p>
+        <p className="mt-2 text-xs text-[var(--color-charcoal)]/50">Last updated August 31, 2026</p>
       </div>
 
       <div className="flex flex-col gap-5 text-sm leading-relaxed text-[var(--color-charcoal)]/80">
@@ -59,11 +59,14 @@ export default function TermsPage() {
           <p className="mt-2 font-medium text-[var(--color-charcoal)]">How we use it</p>
           <p className="mt-1">
             We use this information to run your account, verify check-ins, calculate your trail
-            progress and reward points, personalize recommendations, and improve the Service. We
-            do not sell your personal information to third parties. We may share it with service
-            providers who help us run the app — currently Supabase (authentication and database
-            hosting) and Mapbox (map rendering) — solely to provide the Service, and with law
-            enforcement if legally required.
+            progress and reward points, personalize recommendations, and improve the Service. When
+            you check in at a winery, that winery can see your name, email address, and your visit
+            history at their location specifically — not at any other winery — so they can
+            recognize and follow up with their own guests. We do not sell your personal
+            information to third parties. We may share it with service providers who help us run
+            the app — currently Supabase (authentication and database hosting) and Mapbox (map
+            rendering) — solely to provide the Service, and with law enforcement if legally
+            required.
           </p>
           <p className="mt-2 font-medium text-[var(--color-charcoal)]">How we protect it</p>
           <p className="mt-1">
