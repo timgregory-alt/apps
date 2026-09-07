@@ -14,9 +14,17 @@ export default async function PortalLayout({ children }: { children: React.React
             ? "Sign in with an account that's linked to a winery. If you run a winery on the trail and don't have access yet, ask the trail admin to set it up."
             : "Connect Supabase and link your profile to a winery to access the portal."}
         </p>
-        <Link href="/login?redirectTo=/portal" className="mt-2 text-sm font-medium text-[var(--color-burgundy)] hover:underline">
-          Sign in
-        </Link>
+        <div className="mt-2 flex items-center gap-4">
+          <Link href="/login?redirectTo=/portal" className="text-sm font-medium text-[var(--color-burgundy)] hover:underline">
+            Sign in
+          </Link>
+          <Link
+            href={`/reset-password?next=${encodeURIComponent("/portal")}`}
+            className="text-sm text-[var(--color-charcoal)]/55 hover:text-[var(--color-burgundy)]"
+          >
+            Forgot password?
+          </Link>
+        </div>
       </main>
     );
   }

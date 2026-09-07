@@ -98,7 +98,10 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
           />
           <div className="-mt-2 text-right">
-            <Link href="/reset-password" className="text-xs text-[var(--color-charcoal)]/55 hover:text-[var(--color-burgundy)]">
+            <Link
+              href={`/reset-password?next=${encodeURIComponent(redirectTo)}`}
+              className="text-xs text-[var(--color-charcoal)]/55 hover:text-[var(--color-burgundy)]"
+            >
               Forgot password?
             </Link>
           </div>
