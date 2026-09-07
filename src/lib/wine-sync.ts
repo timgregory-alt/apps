@@ -69,7 +69,7 @@ async function extractNewWines(
   const client = new Anthropic();
 
   const response = await client.messages.parse({
-    model: "claude-opus-5",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 4096,
     system:
       "You extract wine listings from a winery's own web page text for a wine-trail app. " +
