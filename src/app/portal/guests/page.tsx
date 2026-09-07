@@ -19,13 +19,23 @@ export default async function PortalGuestsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">Guests</h1>
-        <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
-          Guests who&rsquo;ve checked in at {ctx.winery.name} — disclosed in the Terms of Service. This
-          list is scoped to your winery only; you can&rsquo;t see visits to any other winery on the
-          trail.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">Guests</h1>
+          <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
+            Guests who&rsquo;ve checked in at {ctx.winery.name} — disclosed in the Terms of Service. This
+            list is scoped to your winery only; you can&rsquo;t see visits to any other winery on the
+            trail.
+          </p>
+        </div>
+        {guests.length > 0 && (
+          <a
+            href="/api/portal/export-guests"
+            className="shrink-0 rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-burgundy-deep)]"
+          >
+            Export Guest List (CSV)
+          </a>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
