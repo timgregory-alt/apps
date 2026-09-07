@@ -1,0 +1,51 @@
+<!--
+  Supabase → Authentication → Emails → Templates → "Confirm signup"
+  Subject line to set there: Welcome to Tennessee Wine Trails — confirm your email
+  Paste everything below into the "Message body" field.
+-->
+<div style="background-color:#f2ead9;padding:32px 16px;font-family:Georgia,'Times New Roman',serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background-color:#faf6ee;border-radius:24px;overflow:hidden;border:1px solid #e8dcb8;">
+    <tr>
+      <td style="background-color:#5e1a2e;padding:36px 32px 32px;text-align:center;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:#e8dcb8;">
+          Tennessee Wine Trails
+        </p>
+        <h1 style="margin:14px 0 0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:28px;line-height:1.2;color:#faf6ee;font-weight:normal;">
+          Your Trail Starts Here
+        </h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:36px 32px 28px;">
+        <p style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#24211d;">
+          Welcome! You're one step from checking in at Middle Tennessee's boutique wineries, earning
+          rewards, and unlocking VIP tastings and events along the way.
+        </p>
+        <p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#24211d;">
+          Confirm your email to get started:
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+          <tr>
+            <td style="border-radius:999px;background-color:#5e1a2e;">
+              <a href="{{ .ConfirmationURL }}"
+                 style="display:inline-block;padding:14px 36px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#faf6ee;text-decoration:none;border-radius:999px;">
+                Confirm My Email
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:28px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#24211d;opacity:0.55;">
+          If the button doesn't work, copy and paste this link into your browser:<br />
+          <span style="word-break:break-all;">{{ .ConfirmationURL }}</span>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px 28px;border-top:1px solid #e8dcb8;text-align:center;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#24211d;opacity:0.5;">
+          Didn't sign up for Tennessee Wine Trails? You can safely ignore this email.
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>

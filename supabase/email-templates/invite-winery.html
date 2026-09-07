@@ -1,0 +1,72 @@
+<!--
+  Supabase → Authentication → Emails → Templates → "Invite user"
+  Subject line to set there: You're invited to your winery's Tennessee Wine Trails portal
+  Paste everything below into the "Message body" field.
+-->
+<div style="background-color:#f2ead9;padding:32px 16px;font-family:Georgia,'Times New Roman',serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background-color:#faf6ee;border-radius:24px;overflow:hidden;border:1px solid #e8dcb8;">
+    <tr>
+      <td style="background-color:#5e1a2e;padding:36px 32px 32px;text-align:center;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:#e8dcb8;">
+          Tennessee Wine Trails
+        </p>
+        <h1 style="margin:14px 0 0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:28px;line-height:1.2;color:#faf6ee;font-weight:normal;">
+          You're Invited to the Winery Portal
+        </h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:36px 32px 8px;">
+        <p style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#24211d;">
+          You've been added as a manager for your winery on Tennessee Wine Trails. From your portal you can:
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+          <tr>
+            <td style="padding:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#24211d;">
+              🍷&nbsp; Manage your wine list and mark bottles sold out
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#24211d;">
+              📅&nbsp; Add events, including exclusive VIP tastings
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#24211d;">
+              🕒&nbsp; Keep your hours and links up to date
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#24211d;">
+              📈&nbsp; See how guests are discovering and returning to you
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#24211d;">
+          Set up your account to get started — it only takes a minute:
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+          <tr>
+            <td style="border-radius:999px;background-color:#5e1a2e;">
+              <a href="{{ .ConfirmationURL }}"
+                 style="display:inline-block;padding:14px 36px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#faf6ee;text-decoration:none;border-radius:999px;">
+                Set Up My Account
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:28px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#24211d;opacity:0.55;">
+          If the button doesn't work, copy and paste this link into your browser:<br />
+          <span style="word-break:break-all;">{{ .ConfirmationURL }}</span>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:20px 32px 28px;border-top:1px solid #e8dcb8;text-align:center;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#24211d;opacity:0.5;">
+          Questions about your portal access? Reach out to the Tennessee Wine Trails team.
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
