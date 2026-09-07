@@ -576,6 +576,14 @@ as $$
 $$;
 
 -- ===========================================================================
--- 10. One-time: make your own account an admin (edit the email first!)
+-- 10. Winery staff manage their own wines
+-- ===========================================================================
+
+drop policy if exists "Winery staff manage their own wines" on public.wines;
+create policy "Winery staff manage their own wines" on public.wines
+  for all using (public.is_winery_staff_for(winery_id)) with check (public.is_winery_staff_for(winery_id));
+
+-- ===========================================================================
+-- 11. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

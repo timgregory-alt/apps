@@ -1,7 +1,6 @@
 import { getWineryStaffContext } from "@/lib/portal";
 import { createClient } from "@/lib/supabase/server";
 import { WineryEventsManager } from "@/components/portal/WineryEventsManager";
-import { EventSyncPanel } from "@/components/admin/EventSyncPanel";
 import type { WineryEvent } from "@/lib/types";
 
 export default async function PortalEventsPage() {
@@ -26,12 +25,6 @@ export default async function PortalEventsPage() {
       </div>
 
       <WineryEventsManager wineryId={ctx.winery.id} events={(data as WineryEvent[]) ?? []} />
-
-      <EventSyncPanel
-        wineryId={ctx.winery.id}
-        eventsPageUrl={ctx.winery.events_page_url}
-        websiteUrl={ctx.winery.website_url}
-      />
     </div>
   );
 }

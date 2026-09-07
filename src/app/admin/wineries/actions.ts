@@ -155,9 +155,7 @@ export async function setWineSoldOutAction(
   wineryId: string,
   soldOut: boolean
 ): Promise<WineryActionResult> {
-  if (!(await isCurrentUserAdmin()) && !(await isCurrentUserStaffFor(wineryId))) {
-    return { error: "Not authorized" };
-  }
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("wines").update({ sold_out: soldOut }).eq("id", wineId);
@@ -170,7 +168,7 @@ export async function setWineSoldOutAction(
 }
 
 export async function syncWineryNowAction(wineryId: string): Promise<SyncResult> {
-  if (!(await isCurrentUserAdmin()) && !(await isCurrentUserStaffFor(wineryId))) {
+  if (!(await isCurrentUserAdmin())) {
     return { wineryId, wineryName: "", added: 0, status: "error", detail: "Not authorized" };
   }
 
@@ -343,7 +341,7 @@ export async function revokeWineryStaffAction(wineryId: string, profileId: strin
 }
 
 export async function syncEventsNowAction(wineryId: string): Promise<EventSyncResult> {
-  if (!(await isCurrentUserAdmin()) && !(await isCurrentUserStaffFor(wineryId))) {
+  if (!(await isCurrentUserAdmin())) {
     return { wineryId, wineryName: "", added: 0, status: "error", detail: "Not authorized" };
   }
 
