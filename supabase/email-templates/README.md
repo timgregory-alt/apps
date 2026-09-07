@@ -13,6 +13,7 @@ save.
 |---|---|---|
 | `confirm-signup.html` | Confirm signup | Guest signup email confirmation |
 | `invite-winery.html` | Invite user | Winery portal access invite |
+| `magic-link.html` | Magic Link | Passwordless sign-in link |
 
 Both use Supabase's `{{ .ConfirmationURL }}` template variable — don't
 rename or remove it, that's the actual working link.
