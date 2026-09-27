@@ -104,7 +104,7 @@ export async function getTrailWineries(trailSlug: string = DEFAULT_TRAIL_SLUG): 
  * trail-scoped queries), but a page reached directly via /winery/[slug]
  * doesn't already know which trail context the visitor came from. A winery
  * can belong to more than one trail (e.g. Woodfeather and Picker's Creek
- * are on both the Founding Trail and Highland Rim), so this prefers the
+ * are on both the Founding Trail and the Backroads trail), so this prefers the
  * Founding Trail when the winery is on it — keeping existing behavior
  * unchanged there — and otherwise falls back to whichever trail it's
  * actually on, so wineries exclusive to a newer trail (e.g. Big Creek)

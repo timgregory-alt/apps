@@ -740,6 +740,18 @@ update public.trails set sort_order = 4 where slug = 'upper-cumberland';
 update public.trails set sort_order = 5 where slug = 'east-tennessee';
 
 -- ===========================================================================
--- 18. One-time: make your own account an admin (edit the email first!)
+-- 18. Rename Highland Rim Wine Trail to Backroads Wine Trail
+-- ===========================================================================
+-- Slug stays 'highland-rim' (the stable DB key) — only display name and
+-- description change.
+
+update public.trails
+set
+  name = 'Backroads Wine Trail',
+  description = 'A full-day loop down the back roads of Middle Tennessee, from Marshall County through Giles County and out to Coffee County.'
+where slug = 'highland-rim';
+
+-- ===========================================================================
+-- 19. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';
