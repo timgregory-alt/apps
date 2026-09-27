@@ -132,7 +132,12 @@ export default async function HomePage({
 
       {hasWineries && (
         <div className="px-6">
-          <LinkButton href="/trail/plan" variant="primary" size="lg" fullWidth>
+          <LinkButton
+            href={`/trail/plan?trail=${encodeURIComponent(selectedSlug)}`}
+            variant="primary"
+            size="lg"
+            fullWidth
+          >
             Plan My Wine Trail
           </LinkButton>
         </div>
