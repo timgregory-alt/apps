@@ -61,6 +61,26 @@ async function fetchMenuText(url: string): Promise<string> {
     .slice(0, MAX_PAGE_CHARS);
 }
 
+/** Fetches every configured page and concatenates their text into one pass
+ * for extraction — some wineries split their wine list across several
+ * category pages rather than one consolidated menu, so a single fetch
+ * can't see the whole thing. Tolerates individual page failures (a typo'd
+ * or removed URL doesn't sink the whole sync) as long as at least one page
+ * succeeds. */
+async function fetchMenuTextForUrls(urls: string[]): Promise<string> {
+  const results = await Promise.allSettled(urls.map((url) => fetchMenuText(url)));
+  const succeeded = results.filter(
+    (r): r is PromiseFulfilledResult<string> => r.status === "fulfilled"
+  );
+  if (succeeded.length === 0) {
+    const firstError = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+    throw new Error(
+      firstError?.reason instanceof Error ? firstError.reason.message : "All pages failed to fetch"
+    );
+  }
+  return succeeded.map((r) => r.value).join("\n\n---\n\n");
+}
+
 async function extractNewWines(
   wineryName: string,
   pageText: string,
@@ -116,10 +136,15 @@ export interface SyncResult {
 }
 
 export async function syncWineryWines(winery: Winery): Promise<SyncResult> {
-  const sourceUrl = winery.wine_menu_url ?? winery.website_url;
+  const sourceUrls =
+    winery.wine_menu_url && winery.wine_menu_url.length > 0
+      ? winery.wine_menu_url
+      : winery.website_url
+        ? [winery.website_url]
+        : [];
   const base: Omit<SyncResult, "status" | "detail"> = { wineryId: winery.id, wineryName: winery.name, added: 0 };
 
-  if (!sourceUrl) {
+  if (sourceUrls.length === 0) {
     return { ...base, status: "ok", detail: "No wine menu URL configured — skipped." };
   }
 
@@ -135,7 +160,7 @@ export async function syncWineryWines(winery: Winery): Promise<SyncResult> {
     const existingNames = (existingWines ?? []).map((w) => w.name);
     let nextSort = (existingWines?.[0]?.sort_order ?? 0) + 1;
 
-    const pageText = await fetchMenuText(sourceUrl);
+    const pageText = await fetchMenuTextForUrls(sourceUrls);
     const extracted = await extractNewWines(winery.name, pageText, existingNames);
 
     if (extracted.length === 0) {

@@ -10,13 +10,13 @@ export function WineSyncPanel({
   websiteUrl,
 }: {
   wineryId: string;
-  wineMenuUrl: string | null;
+  wineMenuUrl: string[] | null;
   websiteUrl: string | null;
 }) {
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<SyncResult | null>(null);
 
-  const sourceUrl = wineMenuUrl ?? websiteUrl;
+  const sourceUrl = (wineMenuUrl && wineMenuUrl.length > 0 ? wineMenuUrl[0] : null) ?? websiteUrl;
 
   function handleSync() {
     setResult(null);

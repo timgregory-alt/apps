@@ -64,8 +64,13 @@ export function PortalDetailsForm({ winery }: { winery: Winery }) {
           <input name="yelp_url" defaultValue={winery.yelp_url ?? ""} className={inputClass} />
         </label>
         <label className={labelClass}>
-          <span className={labelTextClass}>Wine Menu Page</span>
-          <input name="wine_menu_url" defaultValue={winery.wine_menu_url ?? ""} className={inputClass} />
+          <span className={labelTextClass}>Wine Menu Page(s) (one per line)</span>
+          <textarea
+            name="wine_menu_url"
+            rows={3}
+            defaultValue={winery.wine_menu_url?.join("\n") ?? ""}
+            className={`${inputClass} h-auto py-2`}
+          />
         </label>
         <label className={labelClass}>
           <span className={labelTextClass}>Events Page</span>

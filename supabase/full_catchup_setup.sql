@@ -687,14 +687,44 @@ set hours = 'Closed Mon–Wed · Thu 1pm–6pm · Fri 1pm–8pm · Sat 1pm–9pm
 where slug = 'big-creek';
 
 -- ===========================================================================
--- 14. Big Creek Winery — point wine sync at its actual wine list page
+-- 14. Allow a winery's wine-list sync to check multiple pages
+-- ===========================================================================
+-- Some wineries (Beans Creek) split their wine list across several
+-- category pages instead of one consolidated menu page, so a single
+-- wine_menu_url can't capture the whole list. Converts the column from a
+-- single URL to an array of URLs; existing single values (Big Creek's
+-- /wine-names/ page, Woodfeather's /shop/, etc.) become one-element
+-- arrays so nothing already configured changes behavior. Runs before the
+-- array-literal updates below since those need the column already
+-- converted.
+
+alter table public.wineries
+  alter column wine_menu_url type text[]
+  using (case when wine_menu_url is null or wine_menu_url = '' then null else array[wine_menu_url] end);
+
+-- ===========================================================================
+-- 15. Big Creek Winery — point wine sync at its actual wine list page
 -- ===========================================================================
 
 update public.wineries
-set wine_menu_url = 'https://bigcreekwinerytennessee.com/wine-names/'
+set wine_menu_url = array['https://bigcreekwinerytennessee.com/wine-names/']
 where slug = 'big-creek';
 
 -- ===========================================================================
--- 15. One-time: make your own account an admin (edit the email first!)
+-- 16. Beans Creek Winery — point wine sync at its actual category pages
+-- ===========================================================================
+
+update public.wineries
+set wine_menu_url = array[
+  'https://beanscreekwinery.com/dry-red',
+  'https://beanscreekwinery.com/dry-ros%C3%A9',
+  'https://beanscreekwinery.com/off-dry',
+  'https://beanscreekwinery.com/semi-sweet',
+  'https://beanscreekwinery.com/sparkling'
+]
+where slug = 'beans-creek';
+
+-- ===========================================================================
+-- 17. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

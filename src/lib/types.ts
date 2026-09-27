@@ -41,8 +41,10 @@ export interface Winery {
   active: boolean;
   sort_order: number;
   created_at: string;
-  /** Optional page to check for new wines. Falls back to website_url when unset. */
-  wine_menu_url: string | null;
+  /** Optional page(s) to check for new wines — some wineries split their
+   * list across several category pages instead of one. Falls back to
+   * website_url when unset/empty. */
+  wine_menu_url: string[] | null;
   /** Optional page to check for upcoming events. Falls back to website_url when unset. */
   events_page_url: string | null;
   /** Optional link to this winery's Yelp page, for the "Review on Yelp" button. */

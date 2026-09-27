@@ -25,7 +25,10 @@ function parseDetailsForm(formData: FormData) {
     facebook_url: String(formData.get("facebook_url") ?? "").trim() || null,
     yelp_url: String(formData.get("yelp_url") ?? "").trim() || null,
     website_url: String(formData.get("website_url") ?? "").trim() || null,
-    wine_menu_url: String(formData.get("wine_menu_url") ?? "").trim() || null,
+    wine_menu_url: String(formData.get("wine_menu_url") ?? "")
+      .split("\n")
+      .map((u) => u.trim())
+      .filter(Boolean),
     events_page_url: String(formData.get("events_page_url") ?? "").trim() || null,
     wine_club_url: String(formData.get("wine_club_url") ?? "").trim() || null,
     wine_club_title: String(formData.get("wine_club_title") ?? "").trim() || null,

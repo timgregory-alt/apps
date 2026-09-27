@@ -176,13 +176,19 @@ export function WineryForm({
           Automatic Wine List Sync
         </p>
         <p className="mb-3 text-xs text-[var(--color-charcoal)]/55">
-          A scheduled check periodically reads this page and adds any new wines it finds to this
+          A scheduled check periodically reads these pages and adds any new wines it finds to this
           winery&rsquo;s tasting list automatically. Leave blank to use the Website URL above, or
-          point at a more specific wine list / menu page.
+          list one or more specific wine list / menu pages (one per line) — useful when a winery
+          splits its list across several category pages instead of one.
         </p>
         <label className={labelClass}>
-          <span className={labelTextClass}>Wine List / Menu URL (optional)</span>
-          <input name="wine_menu_url" defaultValue={winery?.wine_menu_url ?? ""} className={inputClass} />
+          <span className={labelTextClass}>Wine List / Menu URL(s) (optional, one per line)</span>
+          <textarea
+            name="wine_menu_url"
+            rows={3}
+            defaultValue={winery?.wine_menu_url?.join("\n") ?? ""}
+            className={`${inputClass} h-auto py-2`}
+          />
         </label>
       </div>
 
