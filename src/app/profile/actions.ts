@@ -150,31 +150,45 @@ export async function createCheckoutSessionAction(plan: SubscriptionPlan): Promi
     .eq("id", user.id)
     .maybeSingle();
 
-  const stripe = getStripeClient();
-  let customerId = profile?.stripe_customer_id ?? null;
+  // Stripe's SDK throws on API errors (unlike Supabase's {data, error}
+  // tuples) — this Next.js version redacts an uncaught Server Action
+  // exception into a generic, unhelpful error on the client (see the note
+  // at the top of this file), so those calls need to be caught explicitly
+  // and turned into a real error message. redirect() itself works by
+  // throwing internally, so it stays outside this try/catch — otherwise
+  // this catch block would swallow that as a fake "error" too.
+  let checkoutUrl: string;
+  try {
+    const stripe = getStripeClient();
+    let customerId = profile?.stripe_customer_id ?? null;
 
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email ?? undefined,
-      metadata: { supabase_user_id: user.id },
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = customer.id;
+      await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+    }
+
+    const origin = await siteOrigin();
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      subscription_data: { trial_period_days: 7 },
+      allow_promotion_codes: true,
+      success_url: `${origin}/profile?subscribed=1`,
+      cancel_url: `${origin}/profile`,
     });
-    customerId = customer.id;
-    await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+
+    if (!session.url) return { error: "Could not start checkout. Please try again." };
+    checkoutUrl = session.url;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Could not start checkout. Please try again." };
   }
 
-  const origin = await siteOrigin();
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    subscription_data: { trial_period_days: 7 },
-    allow_promotion_codes: true,
-    success_url: `${origin}/profile?subscribed=1`,
-    cancel_url: `${origin}/profile`,
-  });
-
-  if (!session.url) return { error: "Could not start checkout. Please try again." };
-  redirect(session.url);
+  redirect(checkoutUrl);
 }
 
 /** Sends an existing subscriber to Stripe's hosted Customer Portal to
@@ -196,14 +210,20 @@ export async function createBillingPortalSessionAction(): Promise<{ error: strin
     .maybeSingle();
   if (!profile?.stripe_customer_id) return { error: "No subscription found for this account." };
 
-  const stripe = getStripeClient();
-  const origin = await siteOrigin();
-  const session = await stripe.billingPortal.sessions.create({
-    customer: profile.stripe_customer_id,
-    return_url: `${origin}/profile`,
-  });
+  let portalUrl: string;
+  try {
+    const stripe = getStripeClient();
+    const origin = await siteOrigin();
+    const session = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${origin}/profile`,
+    });
+    portalUrl = session.url;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Could not open billing management. Please try again." };
+  }
 
-  redirect(session.url);
+  redirect(portalUrl);
 }
 
 /** Submits a "something's broken" report from the Profile page. */
