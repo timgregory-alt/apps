@@ -16,6 +16,12 @@ import type { CustomWineTasting, WineStyle, WineWithTasting } from "@/lib/types"
 
 const STYLE_ORDER: WineStyle[] = ["red", "white", "rose", "sparkling", "sweet", "mead"];
 
+/** Wineries with a large flight (Big Creek, Beans Creek) would otherwise
+ * render every wine at once, making the page extremely long. Show a
+ * manageable first batch with a "Show all" button instead — search and
+ * style filtering still work on the full list regardless. */
+const INITIAL_VISIBLE_COUNT = 8;
+
 const NOT_CHECKED_IN_MESSAGE = "Check in at this winery to start rating its wines.";
 
 /** The interactive "rate these wines" list — reused on winery pages and, in
@@ -49,6 +55,7 @@ export function WineTastingList({
   const [showLockedPopup, setShowLockedPopup] = useState(false);
   const [query, setQuery] = useState("");
   const [activeStyle, setActiveStyle] = useState<WineStyle | "all">("all");
+  const [expanded, setExpanded] = useState(false);
 
   const tastedCount = wines.filter((w) => w.tasting != null).length;
 
@@ -74,6 +81,11 @@ export function WineTastingList({
       return true;
     });
   }, [wines, query, activeStyle]);
+
+  const isFiltering = query.trim() !== "" || activeStyle !== "all";
+  const visibleWines =
+    expanded || isFiltering ? filteredWines : filteredWines.slice(0, INITIAL_VISIBLE_COUNT);
+  const hiddenCount = filteredWines.length - visibleWines.length;
 
   function requireLogin() {
     router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
@@ -239,7 +251,7 @@ export function WineTastingList({
             No wines match your search.
           </p>
         )}
-        {filteredWines.map((wine) => (
+        {visibleWines.map((wine) => (
           <WineTastingRow
             key={wine.id}
             wine={wine}
@@ -249,6 +261,11 @@ export function WineTastingList({
             onLockedAttempt={handleLockedAttempt}
           />
         ))}
+        {hiddenCount > 0 && (
+          <Button variant="outline" fullWidth onClick={() => setExpanded(true)}>
+            Show All {filteredWines.length} Wines
+          </Button>
+        )}
         {customTastings.map((tasting) => (
           <CustomWineRow
             key={tasting.id}
