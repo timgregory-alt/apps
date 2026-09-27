@@ -584,6 +584,55 @@ create policy "Winery staff manage their own wines" on public.wines
   for all using (public.is_winery_staff_for(winery_id)) with check (public.is_winery_staff_for(winery_id));
 
 -- ===========================================================================
--- 11. One-time: make your own account an admin (edit the email first!)
+-- 11. Highland Rim Wine Trail — Beans Creek Winery + trail stops
+-- ===========================================================================
+
+insert into public.wineries (
+  name, slug, city, state, address, latitude, longitude, description,
+  hours, phone, website_url, checkin_radius_meters, active, sort_order
+)
+select
+  'Beans Creek Winery',
+  'beans-creek',
+  'Manchester',
+  'Tennessee',
+  '426 Ragsdale Rd, Manchester, TN 37355',
+  35.4872,
+  -86.0695,
+  'A family-run winery near I-24''s Exit 111, pouring award-winning wines ' ||
+    'from local grapes since 2004 — reds, whites, roses, sparkling, and ' ||
+    'fruit wines, served in a cozy tasting room with a full food menu.',
+  null,
+  '(931) 723-2294',
+  'https://beanscreekwinery.com',
+  228,
+  true,
+  (select coalesce(max(sort_order), 0) + 1 from public.wineries)
+where not exists (select 1 from public.wineries where slug = 'beans-creek');
+
+insert into public.trails (name, slug, description, active)
+select
+  'Highland Rim Wine Trail',
+  'highland-rim',
+  'A full-day loop through Marshall and Coffee County wineries, from the rolling hills south of Nashville out to Manchester.',
+  true
+where not exists (select 1 from public.trails where slug = 'highland-rim');
+
+insert into public.trail_wineries (trail_id, winery_id, display_order)
+select t.id, w.id, v.display_order
+from (
+  values
+    ('woodfeather-farm', 1),
+    ('pickers-creek', 2),
+    ('beans-creek', 3)
+) as v(winery_slug, display_order)
+join public.wineries w on w.slug = v.winery_slug
+join public.trails t on t.slug = 'highland-rim'
+where not exists (
+  select 1 from public.trail_wineries tw where tw.trail_id = t.id and tw.winery_id = w.id
+);
+
+-- ===========================================================================
+-- 12. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';
