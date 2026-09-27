@@ -30,6 +30,7 @@ export const SOUTH_NASHVILLE_TRAIL: Trail = {
     "A countryside tour through Middle Tennessee's boutique wineries, just south of Nashville.",
   image: null,
   active: true,
+  sort_order: 1,
   created_at: "2026-01-01T00:00:00.000Z",
 };
 
@@ -43,6 +44,7 @@ export const PLACEHOLDER_TRAILS: Trail[] = [
     description: null,
     image: null,
     active: true,
+    sort_order: 3,
     created_at: "2026-01-01T00:00:00.000Z",
   },
   {
@@ -52,6 +54,7 @@ export const PLACEHOLDER_TRAILS: Trail[] = [
     description: null,
     image: null,
     active: true,
+    sort_order: 4,
     created_at: "2026-01-01T00:00:00.000Z",
   },
   {
@@ -61,6 +64,7 @@ export const PLACEHOLDER_TRAILS: Trail[] = [
     description: null,
     image: null,
     active: true,
+    sort_order: 5,
     created_at: "2026-01-01T00:00:00.000Z",
   },
 ];

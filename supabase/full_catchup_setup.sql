@@ -725,6 +725,21 @@ set wine_menu_url = array[
 where slug = 'beans-creek';
 
 -- ===========================================================================
--- 17. One-time: make your own account an admin (edit the email first!)
+-- 17. Explicit trail display order
+-- ===========================================================================
+-- created_at ordering put the three empty "coming soon" placeholders ahead
+-- of Highland Rim, a real trail with wineries. sort_order fixes the
+-- Explore page's trail picker to show active trails first.
+
+alter table public.trails add column if not exists sort_order integer not null default 0;
+
+update public.trails set sort_order = 1 where slug = 'founding-trail';
+update public.trails set sort_order = 2 where slug = 'highland-rim';
+update public.trails set sort_order = 3 where slug = 'nashville';
+update public.trails set sort_order = 4 where slug = 'upper-cumberland';
+update public.trails set sort_order = 5 where slug = 'east-tennessee';
+
+-- ===========================================================================
+-- 18. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

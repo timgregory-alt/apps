@@ -39,7 +39,7 @@ export async function getAllTrails(): Promise<Trail[]> {
       .from("trails")
       .select("*")
       .eq("active", true)
-      .order("created_at", { ascending: true });
+      .order("sort_order", { ascending: true });
     if (error || !data) throw error;
     return data as Trail[];
   } catch {
