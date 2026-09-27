@@ -1,9 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient, createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { calculateAge } from "@/lib/utils";
 import { LOW_RATING_THRESHOLD } from "@/lib/appRating";
+import { getStripeClient, getPriceId, isStripeConfigured, type SubscriptionPlan } from "@/lib/stripe";
 
 const MIN_AGE = 21;
 
@@ -114,26 +117,93 @@ export async function submitAppRatingAction(
   revalidatePath("/profile");
 }
 
-/** Self-serve toggle for the subscriber preview — no billing exists yet, so
- * this just flips the same is_subscriber flag an admin can also set from
- * the Members page. RLS already allows a user to update their own profile
- * row, so no separate policy is needed for this one. */
-export async function toggleSubscriptionAction(isSubscriber: boolean): Promise<{ error: string } | void> {
+/** Built from the actual request host rather than a hardcoded domain —
+ * same reasoning as the winery invite redirect in admin/wineries/actions.ts:
+ * Stripe just needs a real, reachable URL to bounce back to, and a guessed
+ * domain would send guests to the wrong place. */
+async function siteOrigin(): Promise<string> {
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const proto = headerList.get("x-forwarded-proto") ?? "https";
+  return host ? `${proto}://${host}` : "https://tennesseewinetrails.com";
+}
+
+/** Starts a Stripe Checkout session for a new subscription and redirects
+ * the guest there. Reuses their existing Stripe customer if checkout was
+ * started before (or a subscription already exists) rather than creating a
+ * duplicate customer every time. */
+export async function createCheckoutSessionAction(plan: SubscriptionPlan): Promise<{ error: string } | void> {
+  if (!isStripeConfigured) return { error: "Billing isn't set up yet." };
+
+  const priceId = getPriceId(plan);
+  if (!priceId) return { error: "That plan isn't configured yet." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sign in to subscribe" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("stripe_customer_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const stripe = getStripeClient();
+  let customerId = profile?.stripe_customer_id ?? null;
+
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: user.email ?? undefined,
+      metadata: { supabase_user_id: user.id },
+    });
+    customerId = customer.id;
+    await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+  }
+
+  const origin = await siteOrigin();
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+    subscription_data: { trial_period_days: 7 },
+    allow_promotion_codes: true,
+    success_url: `${origin}/profile?subscribed=1`,
+    cancel_url: `${origin}/profile`,
+  });
+
+  if (!session.url) return { error: "Could not start checkout. Please try again." };
+  redirect(session.url);
+}
+
+/** Sends an existing subscriber to Stripe's hosted Customer Portal to
+ * update their card, switch plans, or cancel — self-service, no admin
+ * needed. */
+export async function createBillingPortalSessionAction(): Promise<{ error: string } | void> {
+  if (!isStripeConfigured) return { error: "Billing isn't set up yet." };
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sign in to manage your subscription" };
 
-  const { error } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
-    .update({ is_subscriber: isSubscriber })
-    .eq("id", user.id);
-  if (error) return { error: error.message };
+    .select("stripe_customer_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!profile?.stripe_customer_id) return { error: "No subscription found for this account." };
 
-  revalidatePath("/profile");
-  revalidatePath("/rewards");
-  revalidatePath("/");
+  const stripe = getStripeClient();
+  const origin = await siteOrigin();
+  const session = await stripe.billingPortal.sessions.create({
+    customer: profile.stripe_customer_id,
+    return_url: `${origin}/profile`,
+  });
+
+  redirect(session.url);
 }
 
 /** Submits a "something's broken" report from the Profile page. */

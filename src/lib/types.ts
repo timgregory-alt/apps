@@ -209,9 +209,15 @@ export interface Profile {
   /** When the guest agreed to the Terms and Conditions at signup — null for
    * accounts created before this requirement existed. */
   agreed_to_terms_at: string | null;
-  /** Manually toggled by an admin for now — stands in for a real subscription
-   * until billing exists. Gates things like early access to new events. */
+  /** Kept in sync by the Stripe webhook based on subscription status
+   * (trialing/active count as subscribed). An admin can still override it
+   * manually from the Members page (e.g. a comp) independent of billing. */
   is_subscriber: boolean;
+  /** Set once a guest starts checkout or the webhook creates one — lets the
+   * webhook find this profile from a Stripe event, and lets "Manage
+   * Subscription" open the right Customer Portal session. Null until then. */
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   trail_start_date: string | null;
   created_at: string;
   /** Set only on winery-staff accounts (created by an admin invite, never by

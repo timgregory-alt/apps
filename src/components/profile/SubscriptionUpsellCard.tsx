@@ -6,7 +6,7 @@ import { Check, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
-import { toggleSubscriptionAction } from "@/app/profile/actions";
+import { createCheckoutSessionAction, createBillingPortalSessionAction } from "@/app/profile/actions";
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
 import type { RewardTier } from "@/lib/types";
 
@@ -23,9 +23,9 @@ export function SubscriptionUpsellCard({
   isSubscriber: boolean;
   tiers: RewardTier[];
 }) {
-  const [subscriber, setSubscriber] = useState(isSubscriber);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pendingPlan, setPendingPlan] = useState<"monthly" | "annual" | "manage" | null>(null);
+  const [, startTransition] = useTransition();
 
   // Whether any tier currently has a subscriber-only boost — checked
   // rather than hardcoded so this stops claiming a perk that isn't
@@ -37,16 +37,25 @@ export function SubscriptionUpsellCard({
     ? [...BASE_BENEFITS, "Access to bigger discounts on food, merch & tastings at select reward tiers"]
     : BASE_BENEFITS;
 
-  function toggle() {
-    const next = !subscriber;
+  function subscribe(plan: "monthly" | "annual") {
     setError(null);
+    setPendingPlan(plan);
     startTransition(async () => {
-      const result = await toggleSubscriptionAction(next);
-      if (result?.error) {
-        setError(result.error);
-        return;
-      }
-      setSubscriber(next);
+      const result = await createCheckoutSessionAction(plan);
+      // A successful call redirects away — reaching this point means it
+      // didn't, so surface the error and let the button re-enable.
+      if (result?.error) setError(result.error);
+      setPendingPlan(null);
+    });
+  }
+
+  function manage() {
+    setError(null);
+    setPendingPlan("manage");
+    startTransition(async () => {
+      const result = await createBillingPortalSessionAction();
+      if (result?.error) setError(result.error);
+      setPendingPlan(null);
     });
   }
 
@@ -60,7 +69,7 @@ export function SubscriptionUpsellCard({
       <div className="relative flex items-center gap-2">
         <Sparkles size={16} className="text-[var(--color-gold-pale)]" />
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-gold-pale)]">
-          {subscriber ? "You're Subscribed" : "Go Premium"}
+          {isSubscriber ? "You're Subscribed" : "Go Premium"}
         </p>
       </div>
 
@@ -82,20 +91,45 @@ export function SubscriptionUpsellCard({
         See VIP Events
       </Link>
 
-      <Button
-        type="button"
-        variant={subscriber ? "ivory" : "gold"}
-        fullWidth
-        onClick={toggle}
-        disabled={pending}
-        className="relative"
-      >
-        {pending ? "Updating…" : subscriber ? "Cancel Subscription" : "Upgrade to Subscriber"}
-      </Button>
+      {isSubscriber ? (
+        <Button
+          type="button"
+          variant="ivory"
+          fullWidth
+          onClick={manage}
+          disabled={pendingPlan !== null}
+          className="relative"
+        >
+          {pendingPlan === "manage" ? "Opening…" : "Manage Subscription"}
+        </Button>
+      ) : (
+        <div className="relative flex flex-col gap-2">
+          <Button
+            type="button"
+            variant="gold"
+            fullWidth
+            onClick={() => subscribe("monthly")}
+            disabled={pendingPlan !== null}
+          >
+            {pendingPlan === "monthly" ? "Starting…" : "Subscribe Monthly"}
+          </Button>
+          <Button
+            type="button"
+            variant="ivory"
+            fullWidth
+            onClick={() => subscribe("annual")}
+            disabled={pendingPlan !== null}
+          >
+            {pendingPlan === "annual" ? "Starting…" : "Subscribe Annual"}
+          </Button>
+        </div>
+      )}
 
-      <p className="relative text-center text-[0.68rem] text-[var(--color-ivory)]/50">
-        Preview only — no payment required yet.
-      </p>
+      {!isSubscriber && (
+        <p className="relative text-center text-[0.68rem] text-[var(--color-ivory)]/50">
+          Starts with a 7-day free trial — cancel anytime.
+        </p>
+      )}
     </Card>
   );
 }

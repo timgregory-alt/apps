@@ -752,6 +752,21 @@ set
 where slug = 'highland-rim';
 
 -- ===========================================================================
--- 19. One-time: make your own account an admin (edit the email first!)
+-- 19. Real Stripe billing for subscriptions
+-- ===========================================================================
+-- is_subscriber itself is unchanged (added in migration 0025) — every
+-- feature already gates on it. This just tracks which Stripe
+-- customer/subscription a profile corresponds to, so the webhook can find
+-- the right row and a guest can reach the Customer Portal.
+
+alter table public.profiles add column if not exists stripe_customer_id text;
+alter table public.profiles add column if not exists stripe_subscription_id text;
+
+create unique index if not exists profiles_stripe_customer_id_idx
+  on public.profiles (stripe_customer_id)
+  where stripe_customer_id is not null;
+
+-- ===========================================================================
+-- 20. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

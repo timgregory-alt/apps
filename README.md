@@ -33,6 +33,10 @@ Copy `.env.example` to `.env.local` and fill in the values below.
 | `SUPABASE_SERVICE_ROLE_KEY` | Optional | Server-only key for privileged admin operations. Keep secret. |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | For the map | A Mapbox public token (`pk.…`) |
 | `NEXT_PUBLIC_MAPBOX_STYLE` | Optional | A custom Mapbox Studio style URL for on-brand map tiles |
+| `STRIPE_SECRET_KEY` | For real subscription billing | Server-only. Keep secret. |
+| `STRIPE_WEBHOOK_SECRET` | For real subscription billing | Signing secret for the `/api/stripe/webhook` endpoint |
+| `STRIPE_PRICE_ID_MONTHLY` | For real subscription billing | The monthly subscription Price's id (`price_…`) |
+| `STRIPE_PRICE_ID_ANNUAL` | For real subscription billing | The annual subscription Price's id (`price_…`) |
 
 Without Supabase configured, the app is still fully browsable (home, passport, map, winery pages) using local seed data, and GPS check-in will run the real distance check but tell you the stamp can't be saved. Without Mapbox, `/map` shows a friendly placeholder instead of failing.
 
@@ -72,14 +76,27 @@ Once a Supabase project has `schema.sql`/`policies.sql`/`seed.sql` applied, re-r
 2. Add it as `NEXT_PUBLIC_MAPBOX_TOKEN`.
 3. Optional: design a custom light, warm-toned style in [Mapbox Studio](https://studio.mapbox.com) to match the app's ivory/burgundy palette, and set its style URL as `NEXT_PUBLIC_MAPBOX_STYLE`. The map defaults to `mapbox://styles/mapbox/light-v11` otherwise.
 
-## 5. Deploy on Vercel
+## 5. Configure Stripe billing
+
+Guest subscriptions (`profiles.is_subscriber`) are billed through Stripe — Checkout for the actual payment, a webhook to flip `is_subscriber` automatically as the subscription changes state, and the Customer Portal for self-service cancel/update-card. Without this configured, the Subscribe card on `/profile` will show a "Billing isn't set up yet" error instead of starting checkout.
+
+1. Create (or use an existing) account at [stripe.com](https://stripe.com).
+2. **Products → Add product**: create one subscription product with two Prices — a monthly recurring price and an annual recurring price. Copy each Price's id (`price_…`, not the Product id) into `STRIPE_PRICE_ID_MONTHLY` / `STRIPE_PRICE_ID_ANNUAL`.
+3. **Developers → API keys**: copy the Secret key into `STRIPE_SECRET_KEY`.
+4. **Developers → Webhooks → Add endpoint**: point it at `<your-domain>/api/stripe/webhook`, and select the `customer.subscription.created`, `customer.subscription.updated`, and `customer.subscription.deleted` events (these three cover trial start, renewals, plan changes, and cancellations — Stripe represents all of them as a subscription status change). Copy the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET`.
+5. New subscriptions start with a 7-day free trial (`subscription_data.trial_period_days` in `createCheckoutSessionAction`, `src/app/profile/actions.ts`) — change the number there if you want a different length, or remove the option entirely to charge immediately.
+6. Test with [Stripe's test card numbers](https://docs.stripe.com/testing) (e.g. `4242 4242 4242 4242`, any future expiry/CVC) while using test-mode keys — no real charge happens.
+7. An admin can still grant/revoke `is_subscriber` manually from `/admin/members` independent of billing (e.g. a comp) — the webhook only updates it going forward from real subscription events.
+
+## 6. Deploy on Vercel
 
 1. Push this repo to GitHub and import it in [Vercel](https://vercel.com/new).
 2. Add the environment variables from step 2 in the Vercel project's **Settings → Environment Variables**.
 3. Add your production domain to Supabase Auth's Redirect URLs allow-list (see step 3.5 above).
 4. Deploy. The app is a standard Next.js App Router project — no special build configuration is required.
+5. Once deployed, update the Stripe webhook endpoint (step 5.4) to point at the real production domain if you set it up against a placeholder/localhost URL earlier.
 
-## 6. Add another winery
+## 7. Add another winery
 
 No code changes are needed:
 
@@ -90,7 +107,7 @@ Every winery page, map pin, passport stamp, and share graphic is built from this
 
 Photography: set `hero_image` to a hosted image URL. Until then, each winery renders an elegant generated placeholder (`src/components/winery/WineryImage.tsx`) so the app never shows a broken image.
 
-## 7. Add another wine trail
+## 8. Add another wine trail
 
 The Founding Trail is not hard-coded — `trails` and `trail_wineries` exist specifically so a location can belong to more than one trail, and a trail can be added without touching the app:
 
@@ -141,7 +158,7 @@ Warm ivory backgrounds, deep burgundy and charcoal, muted gold accents, a serif 
 
 ## What's intentionally not wired up yet
 
-- **Paid subscriptions / sponsorship billing** — the schema (`sponsored`, `featured`, `subscription_status`) is ready; no billing provider is integrated.
+- **Winery sponsorship / featured-placement billing** — the schema (`sponsored`, `featured`, `subscription_status` on `wineries`) is ready; no billing provider is integrated for this side yet. (Guest subscription billing is wired up via Stripe — see step 5.)
 - **Completion rewards** — the `rewards` table supports attaching a reward to a trail completion, but nothing is marked `active` yet, per the brief.
 - **Per-winery partner dashboards** — the admin dashboard aggregates analytics per winery today; scoping a winery owner's login to only their own winery is a natural next step on top of the existing `is_admin` pattern.
 - **Apple/Google sign-in** — see step 3.6 above.
