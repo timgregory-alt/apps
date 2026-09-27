@@ -679,6 +679,14 @@ set description = 'A full-day loop through Marshall, Giles, and Coffee County wi
 where slug = 'highland-rim';
 
 -- ===========================================================================
--- 13. One-time: make your own account an admin (edit the email first!)
+-- 13. Big Creek Winery — owner-confirmed hours
+-- ===========================================================================
+
+update public.wineries
+set hours = 'Closed Mon–Wed · Thu 1pm–6pm · Fri 1pm–8pm · Sat 1pm–9pm · Sun 1pm–6pm'
+where slug = 'big-creek';
+
+-- ===========================================================================
+-- 14. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';
