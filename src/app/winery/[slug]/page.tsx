@@ -9,6 +9,7 @@ import {
   getWinesWithTastings,
   getCustomWineTastings,
   getWineryHours,
+  getPrimaryTrailSlugForWinery,
 } from "@/lib/data";
 import { WineryHero } from "@/components/winery/WineryHero";
 import { WineryDescription, WinerySocialRow } from "@/components/winery/WineryInfo";
@@ -49,9 +50,10 @@ export default async function WineryDetailPage({
   const profile = user ? await getProfile(user.id) : null;
   const isSubscriber = profile?.is_subscriber ?? false;
 
+  const trailSlug = await getPrimaryTrailSlugForWinery(winery.id);
   const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
-    getWineriesWithStatus(user?.id ?? null),
-    getWinesWithTastings(user?.id ?? null),
+    getWineriesWithStatus(user?.id ?? null, trailSlug),
+    getWinesWithTastings(user?.id ?? null, trailSlug),
     user ? getCustomWineTastings(user.id) : Promise.resolve([]),
     getWineryHours(winery.id),
   ]);

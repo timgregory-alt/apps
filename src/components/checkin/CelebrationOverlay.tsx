@@ -37,6 +37,21 @@ export function CelebrationOverlay({
     };
   }, []);
 
+  // Mobile Safari can pin a `position: fixed` element to the wrong vertical
+  // offset when it's inserted while the page is already scrolled (e.g. the
+  // check-in button on a winery with a long wine list) instead of snapping
+  // it to the true top of the viewport. Scrolling to top and locking
+  // background scroll on mount keeps this overlay correctly full-screen
+  // regardless of how far down the underlying page was scrolled.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   if (typeof document === "undefined") return null;
 
   return createPortal(

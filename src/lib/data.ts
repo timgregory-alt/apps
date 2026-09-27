@@ -99,6 +99,34 @@ export async function getTrailWineries(trailSlug: string = DEFAULT_TRAIL_SLUG): 
   }
 }
 
+/** Which trail to use for a winery's own detail page — it needs *a* trail
+ * slug to resolve check-in status and its wine list correctly (both are
+ * trail-scoped queries), but a page reached directly via /winery/[slug]
+ * doesn't already know which trail context the visitor came from. A winery
+ * can belong to more than one trail (e.g. Woodfeather and Picker's Creek
+ * are on both the Founding Trail and Highland Rim), so this prefers the
+ * Founding Trail when the winery is on it — keeping existing behavior
+ * unchanged there — and otherwise falls back to whichever trail it's
+ * actually on, so wineries exclusive to a newer trail (e.g. Big Creek)
+ * don't silently fall through to a trail they were never part of. */
+export async function getPrimaryTrailSlugForWinery(wineryId: string): Promise<string> {
+  if (!isSupabaseConfigured) return DEFAULT_TRAIL_SLUG;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("trail_wineries")
+      .select("trails(slug)")
+      .eq("winery_id", wineryId);
+    const slugs = (data ?? [])
+      .map((row) => (row as unknown as { trails: { slug: string } | null }).trails?.slug)
+      .filter((slug): slug is string => !!slug);
+    if (slugs.length === 0) return DEFAULT_TRAIL_SLUG;
+    return slugs.includes(DEFAULT_TRAIL_SLUG) ? DEFAULT_TRAIL_SLUG : slugs[0];
+  } catch {
+    return DEFAULT_TRAIL_SLUG;
+  }
+}
+
 export async function getWineryBySlug(slug: string): Promise<Winery | null> {
   if (!isSupabaseConfigured) {
     return SEED_WINERIES.find((w) => w.slug === slug) ?? null;
