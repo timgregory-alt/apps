@@ -54,6 +54,7 @@ export default async function PortalDashboardPage() {
           <StatCard label="Upcoming Events" value={upcomingCount ?? 0} />
           <StatCard label="Upcoming VIP Events" value={vipCount ?? 0} />
           <StatCard label="Total Guests" value={guestStats.totalGuests} />
+          <StatCard label="One-Time Guests" value={guestStats.oneVisit} />
           <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
           <StatCard label="Page Views" value={conversionStats.pageViews} />
           <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
