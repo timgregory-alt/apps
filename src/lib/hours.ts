@@ -36,3 +36,26 @@ export function formatMonthRange(startMonth: number, endMonth: number): string {
   const end = MONTH_ABBR[endMonth - 1];
   return start === end ? start : `${start}–${end}`;
 }
+
+export interface HoursLine {
+  days: string;
+  time: string;
+}
+
+/** Splits a free-text hours string like "Closed Mon–Wed · Thu 2pm–8pm ·
+ * Fri–Sat 1pm–9pm · Sun 1pm–6pm" (the convention every winery's `hours`
+ * field follows) into one { days, time } pair per `·`-separated segment, so
+ * each day range can render on its own line instead of one run-on string. */
+export function parseHoursLines(hours: string | null): HoursLine[] {
+  if (!hours) return [];
+  return hours
+    .split("·")
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .map((segment) => {
+      const match = segment.match(/^([^\d]*)(.*)$/);
+      const days = (match?.[1] ?? segment).trim();
+      const time = (match?.[2] ?? "").trim();
+      return { days: days || segment, time };
+    });
+}

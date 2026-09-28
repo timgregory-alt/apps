@@ -2,9 +2,28 @@
 
 import { useState } from "react";
 import { Clock, ChevronDown } from "lucide-react";
-import { getCurrentSeasonHours, formatMonthRange } from "@/lib/hours";
+import { getCurrentSeasonHours, formatMonthRange, parseHoursLines } from "@/lib/hours";
 import type { WineryHours } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+/** Renders a free-text hours string as one line per day range instead of a
+ * single run-on string, falling back to "Hours coming soon" when unset. */
+function HoursLines({ text }: { text: string | null }) {
+  const lines = parseHoursLines(text);
+  if (lines.length === 0) {
+    return <dd className="mt-0.5 text-sm text-[var(--color-charcoal)]/85">Hours coming soon</dd>;
+  }
+  return (
+    <dd className="mt-1 flex flex-col gap-1 text-sm text-[var(--color-charcoal)]/85">
+      {lines.map((line, i) => (
+        <div key={i} className="flex items-baseline justify-between gap-3">
+          <span>{line.days}</span>
+          {line.time && <span className="text-[var(--color-charcoal)]/60">{line.time}</span>}
+        </div>
+      ))}
+    </dd>
+  );
+}
 
 export function WineryHoursRow({
   fallbackHours,
@@ -23,9 +42,7 @@ export function WineryHoursRow({
           <dt className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
             Hours
           </dt>
-          <dd className="mt-0.5 text-sm text-[var(--color-charcoal)]/85">
-            {fallbackHours ?? "Hours coming soon"}
-          </dd>
+          <HoursLines text={fallbackHours} />
         </div>
       </div>
     );
@@ -46,9 +63,7 @@ export function WineryHoursRow({
               </span>
             )}
           </dt>
-          <dd className="mt-0.5 text-sm text-[var(--color-charcoal)]/85">
-            {current?.hours_text ?? fallbackHours ?? "Hours coming soon"}
-          </dd>
+          <HoursLines text={current?.hours_text ?? fallbackHours ?? null} />
 
           {seasons.length > 1 && (
             <button
