@@ -767,6 +767,28 @@ create unique index if not exists profiles_stripe_customer_id_idx
   where stripe_customer_id is not null;
 
 -- ===========================================================================
--- 20. One-time: make your own account an admin (edit the email first!)
+-- 20. Wine club click-through rate — winery conversion stats function
+-- ===========================================================================
+-- winery_page_views was defined in the schema but never actually written
+-- to. This adds the SECURITY DEFINER function winery staff need to read
+-- their own page-view/checkin/wine-club-click counts (same pattern as
+-- winery_repeat_guest_stats) — the raw tables stay admin-only via RLS.
+
+create or replace function public.winery_conversion_stats(target_winery_id uuid)
+returns table (page_views integer, checkins integer, wine_club_clicks integer)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select
+    (select count(*)::integer from public.winery_page_views where winery_id = target_winery_id),
+    (select count(*)::integer from public.checkins where winery_id = target_winery_id),
+    (select count(*)::integer from public.wine_club_clicks where winery_id = target_winery_id)
+  where public.is_admin() or public.is_winery_staff_for(target_winery_id);
+$$;
+
+-- ===========================================================================
+-- 21. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

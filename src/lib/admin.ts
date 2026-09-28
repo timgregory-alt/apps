@@ -34,9 +34,11 @@ export interface AdminStats {
   totalCompletions: number;
   totalWineClubClicks: number;
   totalShareEvents: number;
+  totalPageViews: number;
   checkinsByWinery: Record<string, number>;
   wineClubClicksByWinery: Record<string, number>;
   shareEventsByType: Record<string, number>;
+  pageViewsByWinery: Record<string, number>;
   multiWineryVisitors: number;
 }
 
@@ -46,9 +48,11 @@ const EMPTY_STATS: AdminStats = {
   totalCompletions: 0,
   totalWineClubClicks: 0,
   totalShareEvents: 0,
+  totalPageViews: 0,
   checkinsByWinery: {},
   wineClubClicksByWinery: {},
   shareEventsByType: {},
+  pageViewsByWinery: {},
   multiWineryVisitors: 0,
 };
 
@@ -57,14 +61,21 @@ export async function getAdminStats(): Promise<AdminStats> {
   try {
     const supabase = await createClient();
 
-    const [{ count: totalAccounts }, { data: checkins }, { count: totalCompletions }, { data: clicks }, { data: shares }] =
-      await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("checkins").select("winery_id, user_id"),
-        supabase.from("trail_completions").select("*", { count: "exact", head: true }),
-        supabase.from("wine_club_clicks").select("winery_id"),
-        supabase.from("share_events").select("share_type"),
-      ]);
+    const [
+      { count: totalAccounts },
+      { data: checkins },
+      { count: totalCompletions },
+      { data: clicks },
+      { data: shares },
+      { data: views },
+    ] = await Promise.all([
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase.from("checkins").select("winery_id, user_id"),
+      supabase.from("trail_completions").select("*", { count: "exact", head: true }),
+      supabase.from("wine_club_clicks").select("winery_id"),
+      supabase.from("share_events").select("share_type"),
+      supabase.from("winery_page_views").select("winery_id"),
+    ]);
 
     const checkinsByWinery: Record<string, number> = {};
     // A guest can now check in at the same winery more than once (one per
@@ -88,14 +99,21 @@ export async function getAdminStats(): Promise<AdminStats> {
       shareEventsByType[s.share_type] = (shareEventsByType[s.share_type] ?? 0) + 1;
     });
 
+    const pageViewsByWinery: Record<string, number> = {};
+    (views ?? []).forEach((v) => {
+      pageViewsByWinery[v.winery_id] = (pageViewsByWinery[v.winery_id] ?? 0) + 1;
+    });
+
     return {
       totalAccounts: totalAccounts ?? 0,
       totalCheckins: (checkins ?? []).length,
       totalCompletions: totalCompletions ?? 0,
       totalWineClubClicks: (clicks ?? []).length,
       totalShareEvents: (shares ?? []).length,
+      totalPageViews: (views ?? []).length,
       checkinsByWinery,
       wineClubClicksByWinery,
+      pageViewsByWinery,
       shareEventsByType,
       multiWineryVisitors,
     };

@@ -1,4 +1,4 @@
-import { getWineryStaffContext, getRepeatGuestStats } from "@/lib/portal";
+import { getWineryStaffContext, getRepeatGuestStats, getWineryConversionStats } from "@/lib/portal";
 import { createClient } from "@/lib/supabase/server";
 import { QrCode } from "@/components/ui/QrCode";
 
@@ -17,7 +17,7 @@ export default async function PortalDashboardPage() {
 
   const supabase = await createClient();
   const todayISO = new Date().toISOString().slice(0, 10);
-  const [{ count: upcomingCount }, { count: vipCount }, guestStats] = await Promise.all([
+  const [{ count: upcomingCount }, { count: vipCount }, guestStats, conversionStats] = await Promise.all([
     supabase
       .from("winery_events")
       .select("*", { count: "exact", head: true })
@@ -30,7 +30,13 @@ export default async function PortalDashboardPage() {
       .eq("vip_only", true)
       .gte("event_date", todayISO),
     getRepeatGuestStats(ctx.winery.id),
+    getWineryConversionStats(ctx.winery.id),
   ]);
+
+  const wineClubCTR =
+    conversionStats.pageViews > 0
+      ? `${Math.round((conversionStats.wineClubClicks / conversionStats.pageViews) * 100)}%`
+      : "—";
 
   const qrUrl = `https://winetrailonline.com/winery/${ctx.winery.slug}`;
 
@@ -49,7 +55,14 @@ export default async function PortalDashboardPage() {
           <StatCard label="Upcoming VIP Events" value={vipCount ?? 0} />
           <StatCard label="Total Guests" value={guestStats.totalGuests} />
           <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
+          <StatCard label="Page Views" value={conversionStats.pageViews} />
+          <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
+          <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
         </div>
+        <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
+          Click-through rate is wine club link clicks divided by winery page views. Page-view
+          tracking is newly added, so this rate will read low until traffic accumulates.
+        </p>
       </div>
 
       <div className="w-full max-w-xs shrink-0 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">

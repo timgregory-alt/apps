@@ -92,6 +92,44 @@ export async function getRepeatGuestStats(wineryId: string): Promise<RepeatGuest
   }
 }
 
+export interface WineryConversionStats {
+  pageViews: number;
+  checkins: number;
+  wineClubClicks: number;
+}
+
+const EMPTY_CONVERSION_STATS: WineryConversionStats = {
+  pageViews: 0,
+  checkins: 0,
+  wineClubClicks: 0,
+};
+
+/** Aggregate-only page-view/checkin/wine-club-click counts for one winery,
+ * via the winery_conversion_stats() SECURITY DEFINER function (it
+ * re-checks staff/admin access itself server-side) — same pattern as
+ * getRepeatGuestStats. Lets the portal show a wine club click-through
+ * rate (clicks / views) since the Wine Club section renders regardless of
+ * check-in status. */
+export async function getWineryConversionStats(wineryId: string): Promise<WineryConversionStats> {
+  if (!isSupabaseConfigured) return EMPTY_CONVERSION_STATS;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_conversion_stats", {
+      target_winery_id: wineryId,
+    });
+    if (error || !data || data.length === 0) throw error;
+
+    const row = data[0] as { page_views: number; checkins: number; wine_club_clicks: number };
+    return {
+      pageViews: row.page_views,
+      checkins: row.checkins,
+      wineClubClicks: row.wine_club_clicks,
+    };
+  } catch {
+    return EMPTY_CONVERSION_STATS;
+  }
+}
+
 export interface WineryGuest {
   userId: string;
   name: string | null;

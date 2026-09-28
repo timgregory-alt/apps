@@ -52,6 +52,7 @@ export default async function AdminDashboardPage() {
         <StatCard label="Total Check-ins" value={stats.totalCheckins} />
         <StatCard label="Trail Completions" value={stats.totalCompletions} />
         <StatCard label="Wine Club Clicks" value={stats.totalWineClubClicks} />
+        <StatCard label="Winery Page Views" value={stats.totalPageViews} />
         <StatCard label="Share Events" value={stats.totalShareEvents} />
         <StatCard label="Multi-Winery Visitors" value={stats.multiWineryVisitors} />
         <StatCard
@@ -67,6 +68,14 @@ export default async function AdminDashboardPage() {
           }
         />
         <StatCard
+          label="Wine Club Click-Through Rate"
+          value={
+            stats.totalPageViews > 0
+              ? `${Math.round((stats.totalWineClubClicks / stats.totalPageViews) * 100)}%`
+              : "—"
+          }
+        />
+        <StatCard
           label="Avg App Rating"
           value={appRatingStats.count > 0 ? `${appRatingStats.average.toFixed(1)} ★ (${appRatingStats.count})` : "—"}
         />
@@ -75,6 +84,10 @@ export default async function AdminDashboardPage() {
           value={members.length > 0 ? `${termsAgreedCount} / ${members.length}` : "—"}
         />
       </div>
+      <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
+        Wine Club Click-Through Rate is wine club link clicks divided by winery page views.
+        Page-view tracking is newly added, so this rate will read low until traffic accumulates.
+      </p>
 
       <div>
         <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">By Winery</h2>
@@ -83,17 +96,26 @@ export default async function AdminDashboardPage() {
             <thead className="border-b border-[var(--color-line)] text-xs uppercase tracking-wide text-[var(--color-charcoal)]/50">
               <tr>
                 <th className="px-4 py-3 font-medium">Winery</th>
+                <th className="px-4 py-3 font-medium">Page Views</th>
                 <th className="px-4 py-3 font-medium">Check-ins</th>
                 <th className="px-4 py-3 font-medium">Wine Club Clicks</th>
+                <th className="px-4 py-3 font-medium">Wine Club CTR</th>
                 <th className="px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
-              {wineries.map((w) => (
+              {wineries.map((w) => {
+                const views = stats.pageViewsByWinery[w.id] ?? 0;
+                const clicks = stats.wineClubClicksByWinery[w.id] ?? 0;
+                return (
                 <tr key={w.id} className="border-b border-[var(--color-line)] last:border-0">
                   <td className="px-4 py-3">{w.name}</td>
+                  <td className="px-4 py-3">{views}</td>
                   <td className="px-4 py-3">{stats.checkinsByWinery[w.id] ?? 0}</td>
-                  <td className="px-4 py-3">{stats.wineClubClicksByWinery[w.id] ?? 0}</td>
+                  <td className="px-4 py-3">{clicks}</td>
+                  <td className="px-4 py-3">
+                    {views > 0 ? `${Math.round((clicks / views) * 100)}%` : "—"}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={
@@ -106,7 +128,8 @@ export default async function AdminDashboardPage() {
                     </span>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

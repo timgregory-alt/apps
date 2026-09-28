@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import type { Metadata } from "next";
 import {
   getCurrentUser,
@@ -10,6 +11,7 @@ import {
   getCustomWineTastings,
   getWineryHours,
   getPrimaryTrailSlugForWinery,
+  logWineryPageView,
 } from "@/lib/data";
 import { WineryHero } from "@/components/winery/WineryHero";
 import { WineryDescription, WinerySocialRow } from "@/components/winery/WineryInfo";
@@ -49,6 +51,8 @@ export default async function WineryDetailPage({
   const user = await getCurrentUser();
   const profile = user ? await getProfile(user.id) : null;
   const isSubscriber = profile?.is_subscriber ?? false;
+
+  after(() => logWineryPageView(winery.id, user?.id ?? null));
 
   const trailSlug = await getPrimaryTrailSlugForWinery(winery.id);
   const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([

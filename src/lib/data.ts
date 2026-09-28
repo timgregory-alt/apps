@@ -127,6 +127,22 @@ export async function getPrimaryTrailSlugForWinery(wineryId: string): Promise<st
   }
 }
 
+/** Best-effort page-view ping for a winery's detail page — the only signal
+ * that lets conversion rates (e.g. wine club click-through) be computed
+ * against how many people actually saw the page, not just how many acted.
+ * Called via next/server's after() so it never adds latency to the page
+ * response; failures are swallowed since this is analytics, not a feature
+ * a visitor should ever see break. */
+export async function logWineryPageView(wineryId: string, userId: string | null): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const supabase = await createClient();
+    await supabase.from("winery_page_views").insert({ winery_id: wineryId, user_id: userId });
+  } catch {
+    // Analytics-only — never worth surfacing to the visitor.
+  }
+}
+
 export async function getWineryBySlug(slug: string): Promise<Winery | null> {
   if (!isSupabaseConfigured) {
     return SEED_WINERIES.find((w) => w.slug === slug) ?? null;
