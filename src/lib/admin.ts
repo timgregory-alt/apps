@@ -53,7 +53,15 @@ export interface AdminStats {
    * of it?" */
   singleWineryDayTrips: number;
   multiWineryDayTrips: number;
+  shareEventsByWinery: Record<string, number>;
+  subscriberGuestsByWinery: Record<string, number>;
+  totalSubscriberGuests: number;
+  visitsByDayOfWeek: { label: string; count: number }[];
+  visitsByDaypart: { label: string; count: number }[];
 }
+
+const DAY_OF_WEEK_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYPART_LABELS = ["Morning (6am-12pm)", "Afternoon (12-5pm)", "Evening (5-9pm)", "Night (9pm-6am)"];
 
 const EMPTY_STATS: AdminStats = {
   totalAccounts: 0,
@@ -71,6 +79,11 @@ const EMPTY_STATS: AdminStats = {
   guestAgeGroups: AGE_GROUPS.map((ageGroup) => ({ ageGroup, count: 0 })),
   singleWineryDayTrips: 0,
   multiWineryDayTrips: 0,
+  shareEventsByWinery: {},
+  subscriberGuestsByWinery: {},
+  totalSubscriberGuests: 0,
+  visitsByDayOfWeek: DAY_OF_WEEK_LABELS.map((label) => ({ label, count: 0 })),
+  visitsByDaypart: DAYPART_LABELS.map((label) => ({ label, count: 0 })),
 };
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -86,12 +99,13 @@ export async function getAdminStats(): Promise<AdminStats> {
       { data: shares },
       { data: views },
       { data: guestBirthDates },
+      { data: guestSubscriberFlags },
     ] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase.from("checkins").select("winery_id, user_id, checkin_date"),
       supabase.from("trail_completions").select("*", { count: "exact", head: true }),
       supabase.from("wine_club_clicks").select("winery_id"),
-      supabase.from("share_events").select("share_type"),
+      supabase.from("share_events").select("share_type, winery_id"),
       supabase.from("winery_page_views").select("winery_id"),
       supabase
         .from("profiles")
@@ -99,6 +113,7 @@ export async function getAdminStats(): Promise<AdminStats> {
         .is("winery_id", null)
         .eq("is_admin", false)
         .not("birth_date", "is", null),
+      supabase.from("profiles").select("id, is_subscriber").is("winery_id", null).eq("is_admin", false),
     ]);
 
     const checkinsByWinery: Record<string, number> = {};
@@ -132,13 +147,39 @@ export async function getAdminStats(): Promise<AdminStats> {
     });
 
     const shareEventsByType: Record<string, number> = {};
+    const shareEventsByWinery: Record<string, number> = {};
     (shares ?? []).forEach((s) => {
       shareEventsByType[s.share_type] = (shareEventsByType[s.share_type] ?? 0) + 1;
+      if (s.winery_id) shareEventsByWinery[s.winery_id] = (shareEventsByWinery[s.winery_id] ?? 0) + 1;
     });
 
     const pageViewsByWinery: Record<string, number> = {};
     (views ?? []).forEach((v) => {
       pageViewsByWinery[v.winery_id] = (pageViewsByWinery[v.winery_id] ?? 0) + 1;
+    });
+
+    // Distinct checked-in guests who are current Premium subscribers —
+    // site-wide and per-winery, so a winery can see what share of their
+    // traffic already gets the 2x-points/VIP-access treatment.
+    const subscriberIds = new Set((guestSubscriberFlags ?? []).filter((p) => p.is_subscriber).map((p) => p.id));
+    const subscriberGuestsByWinery: Record<string, number> = {};
+    Object.entries(perUserWineries).forEach(([userId, wineries]) => {
+      if (!subscriberIds.has(userId)) return;
+      wineries.forEach((wineryId) => {
+        subscriberGuestsByWinery[wineryId] = (subscriberGuestsByWinery[wineryId] ?? 0) + 1;
+      });
+    });
+    const totalSubscriberGuests = Object.keys(perUserWineries).filter((id) => subscriberIds.has(id)).length;
+
+    // Peak visit day-of-week and time-of-day, site-wide.
+    const dayOfWeekCounts = DAY_OF_WEEK_LABELS.map((label) => ({ label, count: 0 }));
+    const daypartCounts = DAYPART_LABELS.map((label) => ({ label, count: 0 }));
+    (checkins ?? []).forEach((c) => {
+      const d = new Date(c.checkin_date as string);
+      dayOfWeekCounts[d.getDay()].count++;
+      const hour = d.getHours();
+      const daypartIndex = hour < 6 ? 3 : hour < 12 ? 0 : hour < 17 ? 1 : hour < 21 ? 2 : 3;
+      daypartCounts[daypartIndex].count++;
     });
 
     const ages = (guestBirthDates ?? []).map((g) => calculateAge(g.birth_date as string));
@@ -168,6 +209,11 @@ export async function getAdminStats(): Promise<AdminStats> {
       guestAgeGroups,
       singleWineryDayTrips,
       multiWineryDayTrips,
+      shareEventsByWinery,
+      subscriberGuestsByWinery,
+      totalSubscriberGuests,
+      visitsByDayOfWeek: dayOfWeekCounts,
+      visitsByDaypart: daypartCounts,
     };
   } catch {
     return EMPTY_STATS;

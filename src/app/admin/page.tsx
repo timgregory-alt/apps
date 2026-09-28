@@ -7,7 +7,7 @@ import {
   LIKED_RATING_THRESHOLD,
 } from "@/lib/admin";
 import { formatCheckinDate } from "@/lib/utils";
-import { AgeGroupBars } from "@/components/analytics/AgeGroupBars";
+import { LabeledBars } from "@/components/analytics/LabeledBars";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -100,6 +100,7 @@ export default async function AdminDashboardPage() {
               : "—"
           }
         />
+        <StatCard label="Subscriber Guests" value={stats.totalSubscriberGuests} />
       </div>
       <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
         Wine Club Click-Through Rate is wine club link clicks divided by winery page views.
@@ -109,7 +110,22 @@ export default async function AdminDashboardPage() {
       <div>
         <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Guest Age Groups</h2>
         <div className="mt-3 rounded-2xl border border-[var(--color-line)] bg-white p-5">
-          <AgeGroupBars groups={stats.guestAgeGroups} />
+          <LabeledBars bars={stats.guestAgeGroups.map((g) => ({ label: g.ageGroup, count: g.count }))} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Peak Visit Day</h2>
+          <div className="mt-3 rounded-2xl border border-[var(--color-line)] bg-white p-5">
+            <LabeledBars bars={stats.visitsByDayOfWeek} />
+          </div>
+        </div>
+        <div>
+          <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Peak Visit Time</h2>
+          <div className="mt-3 rounded-2xl border border-[var(--color-line)] bg-white p-5">
+            <LabeledBars bars={stats.visitsByDaypart} />
+          </div>
         </div>
       </div>
 
@@ -124,6 +140,8 @@ export default async function AdminDashboardPage() {
                 <th className="px-4 py-3 font-medium">Check-ins</th>
                 <th className="px-4 py-3 font-medium">Wine Club Clicks</th>
                 <th className="px-4 py-3 font-medium">Wine Club CTR</th>
+                <th className="px-4 py-3 font-medium">Shares</th>
+                <th className="px-4 py-3 font-medium">Subscriber Guests</th>
                 <th className="px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>
@@ -140,6 +158,8 @@ export default async function AdminDashboardPage() {
                   <td className="px-4 py-3">
                     {views > 0 ? `${Math.round((clicks / views) * 100)}%` : "—"}
                   </td>
+                  <td className="px-4 py-3">{stats.shareEventsByWinery[w.id] ?? 0}</td>
+                  <td className="px-4 py-3">{stats.subscriberGuestsByWinery[w.id] ?? 0}</td>
                   <td className="px-4 py-3">
                     <span
                       className={

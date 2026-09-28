@@ -1,6 +1,8 @@
 import "server-only";
+import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { AGE_GROUPS, type AgeGroup } from "@/lib/utils";
+import { haversineMeters, metersToMiles } from "@/lib/geo";
 import type { Winery } from "@/lib/types";
 
 export interface WineryStaffContext {
@@ -101,6 +103,9 @@ export interface WineryConversionStats {
    * date collected at signup — null until at least one checked-in guest
    * has one on file. */
   avgVisitorAge: number | null;
+  shareEvents: number;
+  /** Distinct checked-in guests who are current Premium subscribers. */
+  subscriberGuests: number;
 }
 
 const EMPTY_CONVERSION_STATS: WineryConversionStats = {
@@ -108,6 +113,8 @@ const EMPTY_CONVERSION_STATS: WineryConversionStats = {
   checkins: 0,
   wineClubClicks: 0,
   avgVisitorAge: null,
+  shareEvents: 0,
+  subscriberGuests: 0,
 };
 
 /** Aggregate-only page-view/checkin/wine-club-click counts for one winery,
@@ -130,15 +137,138 @@ export async function getWineryConversionStats(wineryId: string): Promise<Winery
       checkins: number;
       wine_club_clicks: number;
       avg_visitor_age: number | null;
+      share_events: number;
+      subscriber_guests: number;
     };
     return {
       pageViews: row.page_views,
       checkins: row.checkins,
       wineClubClicks: row.wine_club_clicks,
       avgVisitorAge: row.avg_visitor_age,
+      shareEvents: row.share_events,
+      subscriberGuests: row.subscriber_guests,
     };
   } catch {
     return EMPTY_CONVERSION_STATS;
+  }
+}
+
+const DAY_OF_WEEK_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYPART_LABELS = ["Morning (6am-12pm)", "Afternoon (12-5pm)", "Evening (5-9pm)", "Night (9pm-6am)"];
+
+/** Check-in counts by day of week, always all 7 in Sun..Sat order. */
+export async function getWineryVisitsByDayOfWeek(wineryId: string): Promise<{ label: string; count: number }[]> {
+  const empty = DAY_OF_WEEK_LABELS.map((label) => ({ label, count: 0 }));
+  if (!isSupabaseConfigured) return empty;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_visits_by_day_of_week", {
+      target_winery_id: wineryId,
+    });
+    if (error || !data) throw error;
+    const rows = data as { day_label: string; visit_count: number }[];
+    return DAY_OF_WEEK_LABELS.map((label) => ({
+      label,
+      count: rows.find((r) => r.day_label === label)?.visit_count ?? 0,
+    }));
+  } catch {
+    return empty;
+  }
+}
+
+/** Check-in counts by time of day, always all 4 dayparts in order. */
+export async function getWineryVisitsByDaypart(wineryId: string): Promise<{ label: string; count: number }[]> {
+  const empty = DAYPART_LABELS.map((label) => ({ label, count: 0 }));
+  if (!isSupabaseConfigured) return empty;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_visits_by_daypart", {
+      target_winery_id: wineryId,
+    });
+    if (error || !data) throw error;
+    const rows = data as { daypart: string; visit_count: number }[];
+    return DAYPART_LABELS.map((label) => ({
+      label,
+      count: rows.find((r) => r.daypart === label)?.visit_count ?? 0,
+    }));
+  } catch {
+    return empty;
+  }
+}
+
+export interface WineryTopWine {
+  wineName: string;
+  likedCount: number;
+}
+
+/** Top 5 wines by "liked" (4-5 star) ratings at this winery. */
+export async function getWineryTopWines(wineryId: string): Promise<WineryTopWine[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_top_wines", { target_winery_id: wineryId });
+    if (error || !data) throw error;
+    return (data as { wine_name: string; liked_count: number }[]).map((r) => ({
+      wineName: r.wine_name,
+      likedCount: r.liked_count,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface WineryGuestOrigins {
+  /** Average distance in miles from this winery to guests' home zip
+   * codes — null until at least one guest's zip resolves to a known
+   * location. */
+  avgDistanceMiles: number | null;
+  /** Top 5 zip codes by guest count, with the nearest city/state name
+   * where the zipcodes package recognizes it. */
+  topZips: { zipCode: string; guestCount: number; place: string | null }[];
+}
+
+/** Distance/origin insight from guest home zip codes (collected at
+ * signup) — geocoded and measured client-side via the zipcodes package
+ * and the same haversine math used for check-in geofencing, since the
+ * database only needs to hand back raw zip codes. */
+export async function getWineryGuestOrigins(winery: Winery): Promise<WineryGuestOrigins> {
+  const empty: WineryGuestOrigins = { avgDistanceMiles: null, topZips: [] };
+  if (!isSupabaseConfigured) return empty;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_guest_zip_codes", {
+      target_winery_id: winery.id,
+    });
+    if (error || !data) throw error;
+
+    const rows = data as { zip_code: string; guest_count: number }[];
+    const distances: number[] = [];
+    const topZips = rows.slice(0, 5).map((r) => {
+      const location = zipcodes.lookup(r.zip_code.trim().slice(0, 5));
+      return {
+        zipCode: r.zip_code,
+        guestCount: r.guest_count,
+        place: location ? `${location.city}, ${location.state}` : null,
+      };
+    });
+
+    rows.forEach((r) => {
+      const location = zipcodes.lookup(r.zip_code.trim().slice(0, 5));
+      if (!location) return;
+      const miles = metersToMiles(
+        haversineMeters(winery.latitude, winery.longitude, location.latitude, location.longitude)
+      );
+      for (let i = 0; i < r.guest_count; i++) distances.push(miles);
+    });
+
+    const avgDistanceMiles =
+      distances.length > 0
+        ? Math.round((distances.reduce((sum, d) => sum + d, 0) / distances.length) * 10) / 10
+        : null;
+
+    return { avgDistanceMiles, topZips };
+  } catch {
+    return empty;
   }
 }
 
