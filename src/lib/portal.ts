@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { AGE_GROUPS, type AgeGroup } from "@/lib/utils";
 import type { Winery } from "@/lib/types";
 
 export interface WineryStaffContext {
@@ -138,6 +139,28 @@ export async function getWineryConversionStats(wineryId: string): Promise<Winery
     };
   } catch {
     return EMPTY_CONVERSION_STATS;
+  }
+}
+
+/** One row per AGE_GROUPS bucket, in that fixed display order, filling in
+ * 0 for a bucket with no guests yet rather than omitting it. */
+export async function getWineryAgeGroups(wineryId: string): Promise<{ ageGroup: AgeGroup; count: number }[]> {
+  const empty = AGE_GROUPS.map((ageGroup) => ({ ageGroup, count: 0 }));
+  if (!isSupabaseConfigured) return empty;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_age_group_stats", {
+      target_winery_id: wineryId,
+    });
+    if (error || !data) throw error;
+
+    const rows = data as { age_group: string; guest_count: number }[];
+    return AGE_GROUPS.map((ageGroup) => ({
+      ageGroup,
+      count: rows.find((r) => r.age_group === ageGroup)?.guest_count ?? 0,
+    }));
+  } catch {
+    return empty;
   }
 }
 

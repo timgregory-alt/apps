@@ -1,6 +1,7 @@
-import { getWineryStaffContext, getRepeatGuestStats, getWineryConversionStats } from "@/lib/portal";
+import { getWineryStaffContext, getRepeatGuestStats, getWineryConversionStats, getWineryAgeGroups } from "@/lib/portal";
 import { createClient } from "@/lib/supabase/server";
 import { QrCode } from "@/components/ui/QrCode";
+import { AgeGroupBars } from "@/components/analytics/AgeGroupBars";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -17,7 +18,7 @@ export default async function PortalDashboardPage() {
 
   const supabase = await createClient();
   const todayISO = new Date().toISOString().slice(0, 10);
-  const [{ count: upcomingCount }, { count: vipCount }, guestStats, conversionStats] = await Promise.all([
+  const [{ count: upcomingCount }, { count: vipCount }, guestStats, conversionStats, ageGroups] = await Promise.all([
     supabase
       .from("winery_events")
       .select("*", { count: "exact", head: true })
@@ -31,6 +32,7 @@ export default async function PortalDashboardPage() {
       .gte("event_date", todayISO),
     getRepeatGuestStats(ctx.winery.id),
     getWineryConversionStats(ctx.winery.id),
+    getWineryAgeGroups(ctx.winery.id),
   ]);
 
   const wineClubCTR =
@@ -68,6 +70,14 @@ export default async function PortalDashboardPage() {
           Click-through rate is wine club link clicks divided by winery page views. Page-view
           tracking is newly added, so this rate will read low until traffic accumulates.
         </p>
+
+        <div>
+          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Guest Age Groups</h2>
+          <p className="mt-1 mb-3 text-xs text-[var(--color-charcoal)]/55">
+            From birth dates collected at signup — guests without one on file aren&rsquo;t counted.
+          </p>
+          <AgeGroupBars groups={ageGroups.map((g) => ({ ageGroup: g.ageGroup, count: g.count }))} />
+        </div>
       </div>
 
       <div className="w-full max-w-xs shrink-0 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">

@@ -2,7 +2,7 @@ import "server-only";
 import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
-import { calculateAge } from "@/lib/utils";
+import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
 import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
@@ -45,6 +45,8 @@ export interface AdminStats {
    * (collected at signup for 21+ verification) — excludes winery-staff and
    * admin accounts, and null until at least one guest has one. */
   averageGuestAge: number | null;
+  /** Same buckets as AGE_GROUPS, in that fixed order. */
+  guestAgeGroups: { ageGroup: string; count: number }[];
   /** A "visit day" is one guest's calendar day of check-ins — split by
    * whether they hit exactly one winery that day or hopped between
    * several, answering "do people day-trip to one winery or make a loop
@@ -66,6 +68,7 @@ const EMPTY_STATS: AdminStats = {
   pageViewsByWinery: {},
   multiWineryVisitors: 0,
   averageGuestAge: null,
+  guestAgeGroups: AGE_GROUPS.map((ageGroup) => ({ ageGroup, count: 0 })),
   singleWineryDayTrips: 0,
   multiWineryDayTrips: 0,
 };
@@ -142,6 +145,13 @@ export async function getAdminStats(): Promise<AdminStats> {
     const averageGuestAge =
       ages.length > 0 ? Math.round((ages.reduce((sum, a) => sum + a, 0) / ages.length) * 10) / 10 : null;
 
+    const ageGroupCounts: Record<string, number> = {};
+    ages.forEach((a) => {
+      const group = ageGroupFor(a);
+      ageGroupCounts[group] = (ageGroupCounts[group] ?? 0) + 1;
+    });
+    const guestAgeGroups = AGE_GROUPS.map((ageGroup) => ({ ageGroup, count: ageGroupCounts[ageGroup] ?? 0 }));
+
     return {
       totalAccounts: totalAccounts ?? 0,
       totalCheckins: (checkins ?? []).length,
@@ -155,6 +165,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       shareEventsByType,
       multiWineryVisitors,
       averageGuestAge,
+      guestAgeGroups,
       singleWineryDayTrips,
       multiWineryDayTrips,
     };

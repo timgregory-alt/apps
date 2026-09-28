@@ -7,6 +7,7 @@ import {
   LIKED_RATING_THRESHOLD,
 } from "@/lib/admin";
 import { formatCheckinDate } from "@/lib/utils";
+import { AgeGroupBars } from "@/components/analytics/AgeGroupBars";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -104,6 +105,16 @@ export default async function AdminDashboardPage() {
         Wine Club Click-Through Rate is wine club link clicks divided by winery page views.
         Page-view tracking is newly added, so this rate will read low until traffic accumulates.
       </p>
+
+      <div>
+        <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Guest Age Groups</h2>
+        <p className="mt-1 mb-3 text-sm text-[var(--color-charcoal)]/55">
+          From birth dates collected at signup — guests without one on file aren&rsquo;t counted.
+        </p>
+        <div className="rounded-2xl border border-[var(--color-line)] bg-white p-5">
+          <AgeGroupBars groups={stats.guestAgeGroups} />
+        </div>
+      </div>
 
       <div>
         <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">By Winery</h2>
