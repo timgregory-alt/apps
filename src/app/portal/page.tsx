@@ -58,6 +58,10 @@ export default async function PortalDashboardPage() {
           <StatCard label="Page Views" value={conversionStats.pageViews} />
           <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
           <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
+          <StatCard
+            label="Avg Visitor Age"
+            value={conversionStats.avgVisitorAge != null ? conversionStats.avgVisitorAge : "—"}
+          />
         </div>
         <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
           Click-through rate is wine club link clicks divided by winery page views. Page-view

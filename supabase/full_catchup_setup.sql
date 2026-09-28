@@ -789,6 +789,39 @@ as $$
 $$;
 
 -- ===========================================================================
--- 21. One-time: make your own account an admin (edit the email first!)
+-- 21. Average visitor age, using the birth date collected at signup
+-- ===========================================================================
+-- Extends winery_conversion_stats() with avg_visitor_age — the average
+-- current age of guests who have checked in at that winery. Guests who
+-- skipped birth date at signup (older accounts, before it was required)
+-- are excluded rather than skewing the average.
+
+create or replace function public.winery_conversion_stats(target_winery_id uuid)
+returns table (
+  page_views integer,
+  checkins integer,
+  wine_club_clicks integer,
+  avg_visitor_age numeric
+)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select
+    (select count(*)::integer from public.winery_page_views where winery_id = target_winery_id),
+    (select count(*)::integer from public.checkins where winery_id = target_winery_id),
+    (select count(*)::integer from public.wine_club_clicks where winery_id = target_winery_id),
+    (
+      select round(avg(extract(year from age(current_date, p.birth_date))), 1)
+      from (select distinct user_id from public.checkins where winery_id = target_winery_id) c
+      join public.profiles p on p.id = c.user_id
+      where p.birth_date is not null
+    )
+  where public.is_admin() or public.is_winery_staff_for(target_winery_id);
+$$;
+
+-- ===========================================================================
+-- 22. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

@@ -83,6 +83,10 @@ export default async function AdminDashboardPage() {
           label="Terms Agreed"
           value={members.length > 0 ? `${termsAgreedCount} / ${members.length}` : "—"}
         />
+        <StatCard
+          label="Average Guest Age"
+          value={stats.averageGuestAge != null ? stats.averageGuestAge : "—"}
+        />
       </div>
       <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
         Wine Club Click-Through Rate is wine club link clicks divided by winery page views.

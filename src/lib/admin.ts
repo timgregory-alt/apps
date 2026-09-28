@@ -2,6 +2,7 @@ import "server-only";
 import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
+import { calculateAge } from "@/lib/utils";
 import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
@@ -40,6 +41,10 @@ export interface AdminStats {
   shareEventsByType: Record<string, number>;
   pageViewsByWinery: Record<string, number>;
   multiWineryVisitors: number;
+  /** Average current age of guest accounts with a birth date on file
+   * (collected at signup for 21+ verification) — excludes winery-staff and
+   * admin accounts, and null until at least one guest has one. */
+  averageGuestAge: number | null;
 }
 
 const EMPTY_STATS: AdminStats = {
@@ -54,6 +59,7 @@ const EMPTY_STATS: AdminStats = {
   shareEventsByType: {},
   pageViewsByWinery: {},
   multiWineryVisitors: 0,
+  averageGuestAge: null,
 };
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -68,6 +74,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       { data: clicks },
       { data: shares },
       { data: views },
+      { data: guestBirthDates },
     ] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase.from("checkins").select("winery_id, user_id"),
@@ -75,6 +82,12 @@ export async function getAdminStats(): Promise<AdminStats> {
       supabase.from("wine_club_clicks").select("winery_id"),
       supabase.from("share_events").select("share_type"),
       supabase.from("winery_page_views").select("winery_id"),
+      supabase
+        .from("profiles")
+        .select("birth_date")
+        .is("winery_id", null)
+        .eq("is_admin", false)
+        .not("birth_date", "is", null),
     ]);
 
     const checkinsByWinery: Record<string, number> = {};
@@ -104,6 +117,10 @@ export async function getAdminStats(): Promise<AdminStats> {
       pageViewsByWinery[v.winery_id] = (pageViewsByWinery[v.winery_id] ?? 0) + 1;
     });
 
+    const ages = (guestBirthDates ?? []).map((g) => calculateAge(g.birth_date as string));
+    const averageGuestAge =
+      ages.length > 0 ? Math.round((ages.reduce((sum, a) => sum + a, 0) / ages.length) * 10) / 10 : null;
+
     return {
       totalAccounts: totalAccounts ?? 0,
       totalCheckins: (checkins ?? []).length,
@@ -116,6 +133,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       pageViewsByWinery,
       shareEventsByType,
       multiWineryVisitors,
+      averageGuestAge,
     };
   } catch {
     return EMPTY_STATS;

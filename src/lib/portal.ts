@@ -96,12 +96,17 @@ export interface WineryConversionStats {
   pageViews: number;
   checkins: number;
   wineClubClicks: number;
+  /** Average current age of guests who've checked in here, from the birth
+   * date collected at signup — null until at least one checked-in guest
+   * has one on file. */
+  avgVisitorAge: number | null;
 }
 
 const EMPTY_CONVERSION_STATS: WineryConversionStats = {
   pageViews: 0,
   checkins: 0,
   wineClubClicks: 0,
+  avgVisitorAge: null,
 };
 
 /** Aggregate-only page-view/checkin/wine-club-click counts for one winery,
@@ -119,11 +124,17 @@ export async function getWineryConversionStats(wineryId: string): Promise<Winery
     });
     if (error || !data || data.length === 0) throw error;
 
-    const row = data[0] as { page_views: number; checkins: number; wine_club_clicks: number };
+    const row = data[0] as {
+      page_views: number;
+      checkins: number;
+      wine_club_clicks: number;
+      avg_visitor_age: number | null;
+    };
     return {
       pageViews: row.page_views,
       checkins: row.checkins,
       wineClubClicks: row.wine_club_clicks,
+      avgVisitorAge: row.avg_visitor_age,
     };
   } catch {
     return EMPTY_CONVERSION_STATS;
