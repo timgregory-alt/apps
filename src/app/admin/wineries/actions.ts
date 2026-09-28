@@ -222,7 +222,7 @@ async function portalPasswordRedirect(): Promise<string> {
   const headerList = await headers();
   const host = headerList.get("host");
   const proto = headerList.get("x-forwarded-proto") ?? "https";
-  const origin = host ? `${proto}://${host}` : "https://tennesseewinetrails.com";
+  const origin = host ? `${proto}://${host}` : "https://winetrailonline.com";
   return `${origin}/update-password?next=${encodeURIComponent("/portal")}`;
 }
 

@@ -190,7 +190,7 @@ export function CheckInFlow({
         tagline="Where should I go next?"
         visited={visited}
         total={updatedWineries.length}
-        shareUrl={`https://tennesseewinetrails.com/winery/${winery.slug}`}
+        shareUrl={`https://winetrailonline.com/winery/${winery.slug}`}
       />
 
       {stage === "wineclub" && (

@@ -163,7 +163,7 @@ export function GlobalTierCelebration() {
           checklist={[`${newTier.points_required} Lifetime Points`]}
           visited={0}
           total={0}
-          shareUrl="https://tennesseewinetrails.com"
+          shareUrl="https://winetrailonline.com"
         />
       )}
     </>

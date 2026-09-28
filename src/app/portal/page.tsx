@@ -32,7 +32,7 @@ export default async function PortalDashboardPage() {
     getRepeatGuestStats(ctx.winery.id),
   ]);
 
-  const qrUrl = `https://tennesseewinetrails.com/winery/${ctx.winery.slug}`;
+  const qrUrl = `https://winetrailonline.com/winery/${ctx.winery.slug}`;
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">

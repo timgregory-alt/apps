@@ -45,7 +45,7 @@ const WINE_LIST_SCHEMA = {
 
 async function fetchMenuText(url: string): Promise<string> {
   const res = await fetch(url, {
-    headers: { "User-Agent": "TennesseeWineTrailsBot/1.0 (+https://tennesseewinetrails.com)" },
+    headers: { "User-Agent": "TennesseeWineTrailsBot/1.0 (+https://winetrailonline.com)" },
     signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);

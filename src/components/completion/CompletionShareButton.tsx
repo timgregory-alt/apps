@@ -23,7 +23,7 @@ export function CompletionShareButton({ wineryNames }: { wineryNames: string[] }
         checklist={wineryNames}
         visited={wineryNames.length}
         total={wineryNames.length}
-        shareUrl="https://tennesseewinetrails.com"
+        shareUrl="https://winetrailonline.com"
       />
     </>
   );

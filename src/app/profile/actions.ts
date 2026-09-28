@@ -125,7 +125,7 @@ async function siteOrigin(): Promise<string> {
   const headerList = await headers();
   const host = headerList.get("host");
   const proto = headerList.get("x-forwarded-proto") ?? "https";
-  return host ? `${proto}://${host}` : "https://tennesseewinetrails.com";
+  return host ? `${proto}://${host}` : "https://winetrailonline.com";
 }
 
 /** Starts a Stripe Checkout session for a new subscription and redirects
