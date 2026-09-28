@@ -73,10 +73,9 @@ export default async function PortalDashboardPage() {
 
         <div>
           <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Guest Age Groups</h2>
-          <p className="mt-1 mb-3 text-xs text-[var(--color-charcoal)]/55">
-            From birth dates collected at signup — guests without one on file aren&rsquo;t counted.
-          </p>
-          <AgeGroupBars groups={ageGroups.map((g) => ({ ageGroup: g.ageGroup, count: g.count }))} />
+          <div className="mt-3">
+            <AgeGroupBars groups={ageGroups.map((g) => ({ ageGroup: g.ageGroup, count: g.count }))} />
+          </div>
         </div>
       </div>
 

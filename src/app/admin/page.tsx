@@ -108,10 +108,7 @@ export default async function AdminDashboardPage() {
 
       <div>
         <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Guest Age Groups</h2>
-        <p className="mt-1 mb-3 text-sm text-[var(--color-charcoal)]/55">
-          From birth dates collected at signup — guests without one on file aren&rsquo;t counted.
-        </p>
-        <div className="rounded-2xl border border-[var(--color-line)] bg-white p-5">
+        <div className="mt-3 rounded-2xl border border-[var(--color-line)] bg-white p-5">
           <AgeGroupBars groups={stats.guestAgeGroups} />
         </div>
       </div>
