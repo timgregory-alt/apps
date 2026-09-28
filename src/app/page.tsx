@@ -9,6 +9,7 @@ import {
   getWineriesWithStatus,
   getWinesWithTastings,
   getUpcomingEventsByWinery,
+  getVipEvents,
 } from "@/lib/data";
 import { DEFAULT_TRAIL_SLUG } from "@/lib/seed-data";
 import { visitedCount } from "@/lib/trail";
@@ -36,11 +37,12 @@ export default async function HomePage({
   const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
   const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;
 
-  const [trailWineryLists, wineries, wines, eventGroups] = await Promise.all([
+  const [trailWineryLists, wineries, wines, eventGroups, vipEvents] = await Promise.all([
     Promise.all(trails.map((t) => getTrailWineries(t.slug))),
     getWineriesWithStatus(user?.id ?? null, selectedSlug),
     getWinesWithTastings(user?.id ?? null, selectedSlug),
     getUpcomingEventsByWinery(profile?.is_subscriber ?? false, selectedSlug),
+    getVipEvents(profile?.is_subscriber ?? false),
   ]);
   const stopCountBySlug = new Map(trails.map((t, i) => [t.slug, trailWineryLists[i].length]));
   const visited = visitedCount(wineries);
@@ -122,7 +124,11 @@ export default async function HomePage({
         >
           <div>
             <p className="text-sm font-medium text-[var(--color-charcoal)]">VIP Events</p>
-            <p className="text-xs text-[var(--color-charcoal)]/55">Premium members get early access</p>
+            <p className="text-xs text-[var(--color-charcoal)]/55">
+              {vipEvents.length > 0
+                ? `${vipEvents.length} upcoming event${vipEvents.length === 1 ? "" : "s"}`
+                : "Premium members get early access"}
+            </p>
           </div>
           <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/40" />
         </Link>
