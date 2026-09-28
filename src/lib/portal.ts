@@ -2,7 +2,6 @@ import "server-only";
 import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { AGE_GROUPS, type AgeGroup } from "@/lib/utils";
-import { haversineMeters, metersToMiles } from "@/lib/geo";
 import type { Winery } from "@/lib/types";
 
 export interface WineryStaffContext {
@@ -218,31 +217,25 @@ export async function getWineryTopWines(wineryId: string): Promise<WineryTopWine
 }
 
 export interface WineryGuestOrigins {
-  /** Average distance in miles from this winery to guests' home zip
-   * codes — null until at least one guest's zip resolves to a known
-   * location. */
-  avgDistanceMiles: number | null;
   /** Top 5 zip codes by guest count, with the nearest city/state name
    * where the zipcodes package recognizes it. */
   topZips: { zipCode: string; guestCount: number; place: string | null }[];
 }
 
-/** Distance/origin insight from guest home zip codes (collected at
- * signup) — geocoded and measured client-side via the zipcodes package
- * and the same haversine math used for check-in geofencing, since the
- * database only needs to hand back raw zip codes. */
-export async function getWineryGuestOrigins(winery: Winery): Promise<WineryGuestOrigins> {
-  const empty: WineryGuestOrigins = { avgDistanceMiles: null, topZips: [] };
+/** Where guests are coming from, from the zip codes collected at signup —
+ * resolved to a city/state client-side via the zipcodes package, since the
+ * database only needs to hand back raw zip codes and counts. */
+export async function getWineryGuestOrigins(wineryId: string): Promise<WineryGuestOrigins> {
+  const empty: WineryGuestOrigins = { topZips: [] };
   if (!isSupabaseConfigured) return empty;
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("winery_guest_zip_codes", {
-      target_winery_id: winery.id,
+      target_winery_id: wineryId,
     });
     if (error || !data) throw error;
 
     const rows = data as { zip_code: string; guest_count: number }[];
-    const distances: number[] = [];
     const topZips = rows.slice(0, 5).map((r) => {
       const location = zipcodes.lookup(r.zip_code.trim().slice(0, 5));
       return {
@@ -252,21 +245,7 @@ export async function getWineryGuestOrigins(winery: Winery): Promise<WineryGuest
       };
     });
 
-    rows.forEach((r) => {
-      const location = zipcodes.lookup(r.zip_code.trim().slice(0, 5));
-      if (!location) return;
-      const miles = metersToMiles(
-        haversineMeters(winery.latitude, winery.longitude, location.latitude, location.longitude)
-      );
-      for (let i = 0; i < r.guest_count; i++) distances.push(miles);
-    });
-
-    const avgDistanceMiles =
-      distances.length > 0
-        ? Math.round((distances.reduce((sum, d) => sum + d, 0) / distances.length) * 10) / 10
-        : null;
-
-    return { avgDistanceMiles, topZips };
+    return { topZips };
   } catch {
     return empty;
   }

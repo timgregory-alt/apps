@@ -55,7 +55,7 @@ export default async function PortalDashboardPage() {
     getWineryVisitsByDayOfWeek(ctx.winery.id),
     getWineryVisitsByDaypart(ctx.winery.id),
     getWineryTopWines(ctx.winery.id),
-    getWineryGuestOrigins(ctx.winery),
+    getWineryGuestOrigins(ctx.winery.id),
   ]);
 
   const wineClubCTR =
@@ -91,8 +91,12 @@ export default async function PortalDashboardPage() {
           <StatCard label="Social Shares" value={conversionStats.shareEvents} />
           <StatCard label="Subscriber Guests" value={conversionStats.subscriberGuests} />
           <StatCard
-            label="Avg Guest Distance"
-            value={guestOrigins.avgDistanceMiles != null ? `${guestOrigins.avgDistanceMiles} mi` : "—"}
+            label={
+              guestOrigins.topZips[0]
+                ? `Top Guest City · ${guestOrigins.topZips[0].guestCount} guest${guestOrigins.topZips[0].guestCount === 1 ? "" : "s"}`
+                : "Top Guest City"
+            }
+            value={guestOrigins.topZips[0]?.place ?? guestOrigins.topZips[0]?.zipCode ?? "—"}
           />
         </div>
         <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
