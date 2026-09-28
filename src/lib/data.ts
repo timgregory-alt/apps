@@ -432,19 +432,14 @@ async function getAllWineryEvents(): Promise<WineryEvent[]> {
   }
 }
 
-/** New events stay subscriber-only for this long after being added, before
- * becoming visible to everyone. */
-const EARLY_ACCESS_HOURS = 72;
-
-/** VIP events get a much longer subscriber-exclusive window than regular
- * events — that's the "early access" a Premium membership buys — before
- * opening up to everyone. */
+/** VIP events stay subscriber-only for this long after being added — that's
+ * the "early access" a Premium membership buys — before opening up to
+ * everyone. Regular events are never locked; only VIP events use this. */
 const VIP_EARLY_ACCESS_HOURS = 240;
 
 function isLocked(e: WineryEvent, isSubscriber: boolean): boolean {
-  if (isSubscriber) return false;
-  const windowHours = e.vip_only ? VIP_EARLY_ACCESS_HOURS : EARLY_ACCESS_HOURS;
-  const cutoff = Date.now() - windowHours * 60 * 60 * 1000;
+  if (isSubscriber || !e.vip_only) return false;
+  const cutoff = Date.now() - VIP_EARLY_ACCESS_HOURS * 60 * 60 * 1000;
   return new Date(e.created_at).getTime() > cutoff;
 }
 
@@ -452,12 +447,8 @@ function isLocked(e: WineryEvent, isSubscriber: boolean): boolean {
  * wineries with none scheduled) — public, so it's fine to show a logged-out
  * Explore visitor too. Grouped rather than a single soonest-first list so a
  * winery with lots of upcoming events can't crowd the others out. VIP events
- * don't appear here — they're exclusive to the /vip page instead.
- *
- * Non-subscribers still see that an event exists during its early-access
- * window (date shown, details locked) rather than it being invisible —
- * a hidden event just looks like a bug, a locked one reads as a real
- * feature and doubles as an upsell. */
+ * don't appear here at all — they're exclusive to the /vip page instead,
+ * which is also the only place isLocked() ever returns true. */
 export async function getUpcomingEventsByWinery(
   isSubscriber = false,
   trailSlug: string = DEFAULT_TRAIL_SLUG

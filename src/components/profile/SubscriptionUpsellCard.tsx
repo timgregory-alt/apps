@@ -10,14 +10,13 @@ import { createCheckoutSessionAction, createBillingPortalSessionAction } from "@
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
 import type { RewardTier } from "@/lib/types";
 
-// VIP events get a 10-day subscriber-only early-access window (vs. 3 days
-// for regular events — see VIP_EARLY_ACCESS_HOURS in src/lib/data.ts).
-// Keep this line honest about "first access," not permanent exclusivity —
-// non-subscribers do eventually see VIP events too, just later.
+// VIP events get a 10-day subscriber-only early-access window (see
+// VIP_EARLY_ACCESS_HOURS in src/lib/data.ts) — regular events are never
+// locked. Keep this line honest about "first access," not permanent
+// exclusivity — non-subscribers do eventually see VIP events too, just later.
 const BASE_BENEFITS = [
   "First access to VIP events — harvest dinners, member-only tastings — up to 10 days before anyone else",
   `Earn ${SUBSCRIBER_MULTIPLIER}x points on every check-in, wine rating, and referral`,
-  "Early access to regular winery events too, before anyone else sees them",
   "Unlock extra perks, like winery review links",
 ];
 
