@@ -87,6 +87,18 @@ export default async function AdminDashboardPage() {
           label="Average Guest Age"
           value={stats.averageGuestAge != null ? stats.averageGuestAge : "—"}
         />
+        <StatCard label="Single-Winery Day Trips" value={stats.singleWineryDayTrips} />
+        <StatCard label="Multi-Winery Day Trips" value={stats.multiWineryDayTrips} />
+        <StatCard
+          label="Multi-Winery Trip Rate"
+          value={
+            stats.singleWineryDayTrips + stats.multiWineryDayTrips > 0
+              ? `${Math.round(
+                  (stats.multiWineryDayTrips / (stats.singleWineryDayTrips + stats.multiWineryDayTrips)) * 100
+                )}%`
+              : "—"
+          }
+        />
       </div>
       <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
         Wine Club Click-Through Rate is wine club link clicks divided by winery page views.

@@ -45,6 +45,12 @@ export interface AdminStats {
    * (collected at signup for 21+ verification) — excludes winery-staff and
    * admin accounts, and null until at least one guest has one. */
   averageGuestAge: number | null;
+  /** A "visit day" is one guest's calendar day of check-ins — split by
+   * whether they hit exactly one winery that day or hopped between
+   * several, answering "do people day-trip to one winery or make a loop
+   * of it?" */
+  singleWineryDayTrips: number;
+  multiWineryDayTrips: number;
 }
 
 const EMPTY_STATS: AdminStats = {
@@ -60,6 +66,8 @@ const EMPTY_STATS: AdminStats = {
   pageViewsByWinery: {},
   multiWineryVisitors: 0,
   averageGuestAge: null,
+  singleWineryDayTrips: 0,
+  multiWineryDayTrips: 0,
 };
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -77,7 +85,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       { data: guestBirthDates },
     ] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase.from("checkins").select("winery_id, user_id"),
+      supabase.from("checkins").select("winery_id, user_id, checkin_date"),
       supabase.from("trail_completions").select("*", { count: "exact", head: true }),
       supabase.from("wine_club_clicks").select("winery_id"),
       supabase.from("share_events").select("share_type"),
@@ -101,6 +109,19 @@ export async function getAdminStats(): Promise<AdminStats> {
       (perUserWineries[c.user_id] ??= new Set()).add(c.winery_id);
     });
     const multiWineryVisitors = Object.values(perUserWineries).filter((s) => s.size > 1).length;
+
+    // Whether a "day at the trail" means one winery or several — grouped
+    // by the guest's local calendar day (checkin_date's date portion) so a
+    // late-night stop and an early one the next morning don't get merged
+    // by a UTC day boundary.
+    const wineriesPerVisitDay: Record<string, Set<string>> = {};
+    (checkins ?? []).forEach((c) => {
+      const day = new Date(c.checkin_date as string).toDateString();
+      const key = `${c.user_id}|${day}`;
+      (wineriesPerVisitDay[key] ??= new Set()).add(c.winery_id);
+    });
+    const singleWineryDayTrips = Object.values(wineriesPerVisitDay).filter((s) => s.size === 1).length;
+    const multiWineryDayTrips = Object.values(wineriesPerVisitDay).filter((s) => s.size > 1).length;
 
     const wineClubClicksByWinery: Record<string, number> = {};
     (clicks ?? []).forEach((c) => {
@@ -134,6 +155,8 @@ export async function getAdminStats(): Promise<AdminStats> {
       shareEventsByType,
       multiWineryVisitors,
       averageGuestAge,
+      singleWineryDayTrips,
+      multiWineryDayTrips,
     };
   } catch {
     return EMPTY_STATS;

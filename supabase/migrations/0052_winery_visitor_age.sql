@@ -7,7 +7,12 @@
 -- signup (older accounts, before it was required) are simply excluded
 -- rather than skewing the average.
 
-create or replace function public.winery_conversion_stats(target_winery_id uuid)
+-- Postgres won't let CREATE OR REPLACE change a function's output columns
+-- (adding avg_visitor_age counts as changing the return type) — drop it
+-- first.
+drop function if exists public.winery_conversion_stats(uuid);
+
+create function public.winery_conversion_stats(target_winery_id uuid)
 returns table (
   page_views integer,
   checkins integer,
