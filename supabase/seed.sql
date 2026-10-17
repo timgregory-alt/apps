@@ -30,7 +30,7 @@ insert into public.wineries (
   ),
   (
     'Woodfeather Farm Vineyard & Winery', 'woodfeather-farm', 'Chapel Hill', 'Tennessee',
-    '106 N Horton Pkwy, Chapel Hill, TN 37034', 35.6337, -86.6903,
+    '106 N Horton Pkwy, Chapel Hill, TN 37034', 35.62684, -86.69302,
     'A working family farm turned vineyard, pouring estate wines with a warm, unhurried farmhouse welcome.',
     null, null, 'Woodfeather Wine Club', 'Take a little of Woodfeather home with you, season after season.',
     array['Exclusive releases', 'Member events', 'Member pricing', 'Bottle discounts'],

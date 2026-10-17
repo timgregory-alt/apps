@@ -996,6 +996,22 @@ set checkin_radius_meters = round(1500 * 0.3048)::integer
 where slug = 'woodfeather-farm';
 
 -- ===========================================================================
--- 25. One-time: make your own account an admin (edit the email first!)
+-- 25. Fix Woodfeather's check-in coordinates
+-- ===========================================================================
+-- The address-geocoded lat/lon stored since the project's early seed data
+-- was 801m (0.5mi) off from the tasting room's actual GPS position —
+-- confirmed by a real guest standing at the building. Corrects the
+-- coordinates and dials the radius back down to the normal 750ft default
+-- now that the root cause is fixed.
+
+update public.wineries
+set
+  latitude = 35.62684,
+  longitude = -86.69302,
+  checkin_radius_meters = round(750 * 0.3048)::integer
+where slug = 'woodfeather-farm';
+
+-- ===========================================================================
+-- 26. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

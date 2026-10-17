@@ -114,8 +114,8 @@ export const SEED_WINERIES: Winery[] = [
     city: "Chapel Hill",
     state: "Tennessee",
     address: "106 N Horton Pkwy, Chapel Hill, TN 37034",
-    latitude: 35.6337,
-    longitude: -86.6903,
+    latitude: 35.62684,
+    longitude: -86.69302,
     description:
       "A working family farm turned vineyard, pouring estate wines with a warm, unhurried farmhouse welcome.",
     hero_image: "",
