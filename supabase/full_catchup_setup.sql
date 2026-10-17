@@ -984,6 +984,18 @@ as $$
 $$;
 
 -- ===========================================================================
--- 24. One-time: make your own account an admin (edit the email first!)
+-- 24. Widen Woodfeather's check-in radius as a stop-gap
+-- ===========================================================================
+-- A real guest (not a test/admin account) was blocked from checking in
+-- while physically in the tasting room. Widening from 750ft to 1500ft
+-- buys headroom while we get the tasting room's actual GPS coordinates
+-- to correct latitude/longitude directly.
+
+update public.wineries
+set checkin_radius_meters = round(1500 * 0.3048)::integer
+where slug = 'woodfeather-farm';
+
+-- ===========================================================================
+-- 25. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';
