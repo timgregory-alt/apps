@@ -10,11 +10,20 @@ import { NextStopSheet } from "@/components/checkin/NextStopSheet";
 import { ShareSheet } from "@/components/share/ShareSheet";
 import { WineClubModal } from "@/components/wineclub/WineClubModal";
 import { recommendNextStop } from "@/lib/trail";
+import { metersToFeet, metersToMiles } from "@/lib/geo";
 import { formatCheckinDate } from "@/lib/utils";
 import { notifyPointsChanged } from "@/lib/pointsEvents";
 import type { Winery, WineryWithStatus } from "@/lib/types";
 
 type Stage = "idle" | "celebrating" | "wineclub" | "nextstop" | "sharing";
+
+/** Feet for a near-miss (most useful next to a few-hundred-foot geofence),
+ * miles once it's far enough that feet stops being meaningful. */
+function formatNearMissDistance(meters: number): string {
+  const miles = metersToMiles(meters);
+  if (miles >= 1) return `${miles.toFixed(1)} mi`;
+  return `${metersToFeet(meters).toLocaleString()} ft`;
+}
 
 export function CheckInFlow({
   winery,
@@ -65,10 +74,14 @@ export function CheckInFlow({
       const data = await res.json();
 
       if (!res.ok || !data.verified) {
-        setBlockedMessage(
+        const base =
           data.message ??
-            "It looks like you're not quite at the winery yet. Visit the tasting room to collect your trail stamp."
-        );
+          "It looks like you're not quite at the winery yet. Visit the tasting room to collect your trail stamp.";
+        const distanceSuffix =
+          typeof data.distanceMeters === "number"
+            ? ` (you're about ${formatNearMissDistance(data.distanceMeters)} away)`
+            : "";
+        setBlockedMessage(`${base}${distanceSuffix}`);
         return;
       }
 
