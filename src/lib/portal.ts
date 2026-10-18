@@ -1,5 +1,7 @@
 import "server-only";
+import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { AGE_GROUPS, type AgeGroup } from "@/lib/utils";
 import type { Winery } from "@/lib/types";
 
 export interface WineryStaffContext {
@@ -211,6 +213,63 @@ export async function getWineryTopWines(wineryId: string): Promise<WineryTopWine
     }));
   } catch {
     return [];
+  }
+}
+
+export interface WineryGuestOrigins {
+  /** Top 5 zip codes by guest count, with the nearest city/state name
+   * where the zipcodes package recognizes it. */
+  topZips: { zipCode: string; guestCount: number; place: string | null }[];
+}
+
+/** Where guests are coming from, from the zip codes collected at signup —
+ * resolved to a city/state client-side via the zipcodes package, since the
+ * database only needs to hand back raw zip codes and counts. */
+export async function getWineryGuestOrigins(wineryId: string): Promise<WineryGuestOrigins> {
+  const empty: WineryGuestOrigins = { topZips: [] };
+  if (!isSupabaseConfigured) return empty;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_guest_zip_codes", {
+      target_winery_id: wineryId,
+    });
+    if (error || !data) throw error;
+
+    const rows = data as { zip_code: string; guest_count: number }[];
+    const topZips = rows.slice(0, 5).map((r) => {
+      const location = zipcodes.lookup(r.zip_code.trim().slice(0, 5));
+      return {
+        zipCode: r.zip_code,
+        guestCount: r.guest_count,
+        place: location ? `${location.city}, ${location.state}` : null,
+      };
+    });
+
+    return { topZips };
+  } catch {
+    return empty;
+  }
+}
+
+/** One row per AGE_GROUPS bucket, in that fixed display order, filling in
+ * 0 for a bucket with no guests yet rather than omitting it. */
+export async function getWineryAgeGroups(wineryId: string): Promise<{ ageGroup: AgeGroup; count: number }[]> {
+  const empty = AGE_GROUPS.map((ageGroup) => ({ ageGroup, count: 0 }));
+  if (!isSupabaseConfigured) return empty;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_age_group_stats", {
+      target_winery_id: wineryId,
+    });
+    if (error || !data) throw error;
+
+    const rows = data as { age_group: string; guest_count: number }[];
+    return AGE_GROUPS.map((ageGroup) => ({
+      ageGroup,
+      count: rows.find((r) => r.age_group === ageGroup)?.guest_count ?? 0,
+    }));
+  } catch {
+    return empty;
   }
 }
 
