@@ -255,6 +255,9 @@ export interface WineTasting {
   wine_id: UUID;
   /** 1-5 stars. */
   rating: number;
+  /** The guest's own tasting notes — separate from the winery's
+   * tasting_notes copy on the wine itself. */
+  notes: string | null;
   created_at: string;
 }
 

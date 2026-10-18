@@ -115,6 +115,7 @@ export function WineTastingList({
                 user_id: "",
                 wine_id: wineId,
                 rating,
+                notes: w.tasting?.notes ?? null,
                 created_at: new Date().toISOString(),
               },
             }
@@ -138,6 +139,54 @@ export function WineTastingList({
     } catch {
       setError("Could not save your rating. Please try again.");
       setWines((prev) => prev.map((w) => (w.id === wineId ? { ...w, tasting: previousTasting } : w)));
+    } finally {
+      setPendingId(null);
+    }
+  }
+
+  /** Only enabled once a wine's already been rated (same gating as the
+   * stars) — the API requires a rating on every upsert, so notes always
+   * ride along with the existing rating rather than needing their own
+   * row-creation path. */
+  async function handleSaveNotes(wineId: string, notes: string) {
+    if (!isLoggedIn) return requireLogin();
+    if (!isCheckedIn) {
+      handleLockedAttempt();
+      return;
+    }
+
+    const wine = wines.find((w) => w.id === wineId);
+    if (!wine?.tasting) return;
+
+    setError(null);
+    const previousNotes = wine.tasting.notes;
+    setPendingId(wineId);
+    setWines((prev) =>
+      prev.map((w) => (w.id === wineId && w.tasting ? { ...w, tasting: { ...w.tasting, notes } } : w))
+    );
+
+    try {
+      const res = await fetch("/api/wine-tasting", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wineId, rating: wine.tasting.rating, notes }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "Could not save your notes.");
+        setWines((prev) =>
+          prev.map((w) =>
+            w.id === wineId && w.tasting ? { ...w, tasting: { ...w.tasting, notes: previousNotes } } : w
+          )
+        );
+      }
+    } catch {
+      setError("Could not save your notes. Please try again.");
+      setWines((prev) =>
+        prev.map((w) =>
+          w.id === wineId && w.tasting ? { ...w, tasting: { ...w.tasting, notes: previousNotes } } : w
+        )
+      );
     } finally {
       setPendingId(null);
     }
@@ -258,6 +307,7 @@ export function WineTastingList({
             pending={pendingId === wine.id}
             locked={isLoggedIn && !isCheckedIn}
             onRate={(rating) => handleRate(wine.id, rating)}
+            onSaveNotes={(notes) => handleSaveNotes(wine.id, notes)}
             onLockedAttempt={handleLockedAttempt}
           />
         ))}

@@ -17,12 +17,16 @@ import { cn, isRecentlyAdded } from "@/lib/utils";
 export function WineTastingRow({
   wine,
   onRate,
+  onSaveNotes,
   pending,
   locked = false,
   onLockedAttempt,
 }: {
   wine: WineWithTasting;
   onRate: (rating: number) => void;
+  /** Saves the guest's own tasting notes — only called once a rating
+   * already exists (see the gating in the notes field below). */
+  onSaveNotes?: (notes: string) => void;
   pending: boolean;
   /** True when the guest hasn't checked in at this winery yet — the flight
    * is still browsable, but rating is disabled. */
@@ -33,9 +37,11 @@ export function WineTastingRow({
 }) {
   const [open, setOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const [notesDraft, setNotesDraft] = useState(wine.tasting?.notes ?? "");
   const rated = wine.tasting != null;
   const isNew = isRecentlyAdded(wine.created_at);
   const soldOut = wine.sold_out;
+  const notesDirty = notesDraft !== (wine.tasting?.notes ?? "");
 
   function close() {
     setOpen(false);
@@ -44,7 +50,7 @@ export function WineTastingRow({
 
   return (
     <motion.div
-      animate={{ height: open ? "18rem" : "4.75rem" }}
+      animate={{ height: open ? "23rem" : "4.75rem" }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="overflow-hidden [perspective:1200px]"
     >
@@ -203,6 +209,31 @@ export function WineTastingRow({
                   onRate={locked ? () => onLockedAttempt?.() : onRate}
                   disabled={pending}
                 />
+              </div>
+
+              <div className="mt-1 flex w-full flex-col gap-1">
+                <textarea
+                  value={notesDraft}
+                  onChange={(e) => setNotesDraft(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  disabled={locked || !rated || pending}
+                  placeholder={rated ? "Add your own tasting notes…" : "Rate this wine to add your own notes"}
+                  rows={2}
+                  className="w-full resize-none rounded-xl border border-[var(--color-line)] bg-white/70 px-2.5 py-2 text-xs text-[var(--color-charcoal)] outline-none focus:border-[var(--color-gold)] disabled:opacity-50"
+                />
+                {notesDirty && !locked && rated && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSaveNotes?.(notesDraft);
+                    }}
+                    disabled={pending}
+                    className="self-end rounded-full bg-[var(--color-burgundy)] px-3 py-1 text-xs font-medium text-white disabled:opacity-60"
+                  >
+                    {pending ? "Saving…" : "Save Note"}
+                  </button>
+                )}
               </div>
             </div>
           </div>

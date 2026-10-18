@@ -3,9 +3,10 @@ import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const { wineId, rating } = (await request.json().catch(() => ({}))) as {
+  const { wineId, rating, notes } = (await request.json().catch(() => ({}))) as {
     wineId?: string;
     rating?: number;
+    notes?: string;
   };
 
   if (!wineId || !Number.isInteger(rating) || (rating as number) < 1 || (rating as number) > 5) {
@@ -43,9 +44,21 @@ export async function POST(request: Request) {
     );
   }
 
+  // notes is only included in the upsert when the request actually sent
+  // one — a star-only rating (no notes key) must leave any existing notes
+  // untouched rather than overwriting them with null.
+  const payload: { user_id: string; wine_id: string; rating: number; notes?: string | null } = {
+    user_id: user.id,
+    wine_id: wineId,
+    rating: rating as number,
+  };
+  if (notes !== undefined) {
+    payload.notes = notes.trim() || null;
+  }
+
   const { error } = await supabase
     .from("wine_tastings")
-    .upsert({ user_id: user.id, wine_id: wineId, rating }, { onConflict: "user_id,wine_id" });
+    .upsert(payload, { onConflict: "user_id,wine_id" });
 
   if (error) {
     return NextResponse.json({ error: "Could not save your rating. Please try again." }, { status: 500 });

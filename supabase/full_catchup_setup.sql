@@ -1036,6 +1036,15 @@ create policy "Admins manage app ratings" on public.app_ratings
 alter table public.profiles add column if not exists subscription_status text;
 
 -- ===========================================================================
--- 28. One-time: make your own account an admin (edit the email first!)
+-- 28. Personal tasting notes on the curated wine flight
+-- ===========================================================================
+-- wine_tastings only ever recorded a 1-5 star rating — nowhere for a guest
+-- to jot down their own impression, the way custom_wine_tastings already
+-- lets them for wines they add themselves.
+
+alter table public.wine_tastings add column if not exists notes text;
+
+-- ===========================================================================
+-- 29. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';
