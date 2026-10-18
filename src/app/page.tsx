@@ -120,7 +120,7 @@ export default async function HomePage({
       <div className="px-6">
         <Link
           href="/vip"
-          className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-gold)]/30 bg-[var(--color-gold-pale)]/20 px-5 py-3.5"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-gold)]/50 bg-[var(--color-gold-pale)]/80 px-5 py-3.5 shadow-[0_1px_2px_rgba(36,33,29,0.04),0_12px_32px_-16px_rgba(36,33,29,0.18)] backdrop-blur-sm"
         >
           <div>
             <p className="text-sm font-medium text-[var(--color-charcoal)]">VIP Events</p>
