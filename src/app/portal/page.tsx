@@ -61,9 +61,13 @@ export default async function PortalDashboardPage() {
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
       <div className="flex flex-1 flex-col gap-8">
         <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+            Welcome{ctx.name ? `, ${ctx.name}` : ""}
+          </p>
           <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">{ctx.winery.name}</h1>
           <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
-            Manage your events, wines, hours, links, and see how guests are returning.
+            {ctx.email ? `Signed in as ${ctx.email} — manage` : "Manage"} your events, wines, hours,
+            links, and see how guests are returning.
           </p>
         </div>
 

@@ -6,13 +6,15 @@ import type { Winery } from "@/lib/types";
 
 export interface WineryStaffContext {
   userId: string;
+  name: string | null;
+  email: string | null;
   winery: Winery;
 }
 
 /** Resolves the signed-in user's winery-portal context (their linked
- * winery), or null if they're not a winery-staff account. Every /portal
- * page and Server Action gates on this the same way admin pages gate on
- * isCurrentUserAdmin(). */
+ * winery, plus their own name/email for a "Welcome" greeting), or null if
+ * they're not a winery-staff account. Every /portal page and Server Action
+ * gates on this the same way admin pages gate on isCurrentUserAdmin(). */
 export async function getWineryStaffContext(): Promise<WineryStaffContext | null> {
   if (!isSupabaseConfigured) return null;
   try {
@@ -24,7 +26,7 @@ export async function getWineryStaffContext(): Promise<WineryStaffContext | null
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("winery_id")
+      .select("winery_id, name, email")
       .eq("id", user.id)
       .maybeSingle();
     if (!profile?.winery_id) return null;
@@ -36,7 +38,7 @@ export async function getWineryStaffContext(): Promise<WineryStaffContext | null
       .maybeSingle();
     if (!winery) return null;
 
-    return { userId: user.id, winery: winery as Winery };
+    return { userId: user.id, name: profile.name, email: profile.email, winery: winery as Winery };
   } catch {
     return null;
   }
