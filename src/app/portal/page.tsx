@@ -83,12 +83,13 @@ export default async function PortalDashboardPage() {
           <StatCard label="Social Shares" value={conversionStats.shareEvents} />
           <StatCard label="Subscriber Guests" value={conversionStats.subscriberGuests} />
           <StatCard
-            label={
-              guestOrigins.topZips[0]
-                ? `Top Guest City · ${guestOrigins.topZips[0].guestCount} guest${guestOrigins.topZips[0].guestCount === 1 ? "" : "s"}`
-                : "Top Guest City"
-            }
+            label="Top Guest City"
             value={guestOrigins.topZips[0]?.place ?? guestOrigins.topZips[0]?.zipCode ?? "—"}
+            caption={
+              guestOrigins.topZips[0]
+                ? `${guestOrigins.topZips[0].guestCount} guest${guestOrigins.topZips[0].guestCount === 1 ? "" : "s"}`
+                : undefined
+            }
           />
         </div>
         <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
