@@ -9,6 +9,7 @@ import {
 import { formatCheckinDate } from "@/lib/utils";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
+import { AppFeedbackActions } from "@/components/admin/AppFeedbackActions";
 
 export default async function AdminDashboardPage() {
   const [stats, wineries, wineLikeStats, appRatingStats, members] = await Promise.all([
@@ -238,16 +239,22 @@ export default async function AdminDashboardPage() {
 
         {appRatingStats.recentFeedback.length > 0 && (
           <div className="mt-3 flex flex-col gap-3">
-            {appRatingStats.recentFeedback.map((f, i) => (
+            {appRatingStats.recentFeedback.map((f) => (
               <div
-                key={i}
+                key={f.id}
                 className="rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 text-sm"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[var(--color-gold)]">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
-                  <span className="text-xs text-[var(--color-charcoal)]/45">
-                    {formatCheckinDate(f.created_at)}
-                  </span>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-[var(--color-gold)]">
+                      {"★".repeat(f.rating)}
+                      {"☆".repeat(5 - f.rating)}
+                    </span>
+                    <span className="ml-2 text-xs text-[var(--color-charcoal)]/45">
+                      {formatCheckinDate(f.created_at)}
+                    </span>
+                  </div>
+                  <AppFeedbackActions id={f.id} />
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-[var(--color-charcoal)]/60">
                   {f.memberName}

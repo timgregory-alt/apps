@@ -1012,6 +1012,20 @@ set
 where slug = 'woodfeather-farm';
 
 -- ===========================================================================
--- 26. One-time: make your own account an admin (edit the email first!)
+-- 26. Let admins delete/archive app feedback
+-- ===========================================================================
+-- app_ratings only had user-scoped select/insert/update policies — no
+-- delete, and no admin-write access at all. Adds an `archived` flag
+-- (soft-hide, keeps the row) and an admin-wide policy covering every
+-- operation.
+
+alter table public.app_ratings add column if not exists archived boolean not null default false;
+
+drop policy if exists "Admins manage app ratings" on public.app_ratings;
+create policy "Admins manage app ratings" on public.app_ratings
+  for all using (public.is_admin()) with check (public.is_admin());
+
+-- ===========================================================================
+-- 27. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

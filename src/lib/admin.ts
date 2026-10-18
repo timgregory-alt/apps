@@ -378,6 +378,7 @@ export async function getWineLikeStats(): Promise<WineLikeStats> {
 }
 
 export interface AppFeedbackEntry {
+  id: string;
   rating: number;
   feedback: string | null;
   created_at: string;
@@ -406,10 +407,12 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
     const supabase = await createClient();
     const { data } = await supabase
       .from("app_ratings")
-      .select("user_id, rating, feedback, created_at")
+      .select("id, user_id, rating, feedback, created_at, archived")
       .order("created_at", { ascending: false });
     if (!data || data.length === 0) return EMPTY_APP_RATING_STATS;
 
+    // Archiving only hides a card from the dashboard list below — it's
+    // still a real rating, so it stays in the average/count/distribution.
     const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<1 | 2 | 3 | 4 | 5, number>;
     let total = 0;
     for (const row of data) {
@@ -417,9 +420,9 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
       total += row.rating;
     }
 
-    // Show every rating, not just ones with written feedback — a star-only
-    // submission is still a submission.
-    const feedbackRows = data.slice(0, 10);
+    // Show every non-archived rating, not just ones with written feedback —
+    // a star-only submission is still a submission.
+    const feedbackRows = data.filter((r) => !r.archived).slice(0, 10);
 
     // app_ratings.user_id references auth.users, not public.profiles, so there's
     // no FK PostgREST can embed through — look member names up separately.
@@ -438,6 +441,7 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
     const recentFeedback = feedbackRows.map((r) => {
       const member = memberById.get(r.user_id);
       return {
+        id: r.id,
         rating: r.rating,
         feedback: r.feedback,
         created_at: r.created_at,
