@@ -327,6 +327,23 @@ export async function restoreWineryAction(wineryId: string): Promise<WineryActio
   if (winery) revalidatePath(`/winery/${winery.slug}`);
 }
 
+/** Permanently deletes a winery — unlike removeWineryAction (which just
+ * deactivates it), this is unrecoverable: check-ins, wine ratings, events,
+ * and every other row referencing this winery cascade-delete with it.
+ * Only offered in the UI for a winery that's already inactive, as a second,
+ * deliberate step past the reversible "Remove". */
+export async function deleteWineryPermanentlyAction(wineryId: string): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("wineries").delete().eq("id", wineryId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/wineries");
+  revalidatePath("/");
+  revalidatePath("/my-trail");
+}
+
 /** Removes portal access without deleting the account — they stay a
  * regular signed-in user, just no longer linked to this winery. */
 export async function revokeWineryStaffAction(wineryId: string, profileId: string): Promise<WineryActionResult> {
