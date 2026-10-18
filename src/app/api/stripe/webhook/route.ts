@@ -19,6 +19,7 @@ async function syncSubscriptionStatus(subscription: Stripe.Subscription) {
     .from("profiles")
     .update({
       is_subscriber: isActiveSubscriptionStatus(subscription.status),
+      subscription_status: subscription.status,
       stripe_subscription_id: subscription.id,
     })
     .eq("stripe_customer_id", customerId);

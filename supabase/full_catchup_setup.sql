@@ -1026,6 +1026,16 @@ create policy "Admins manage app ratings" on public.app_ratings
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- ===========================================================================
--- 27. One-time: make your own account an admin (edit the email first!)
+-- 27. Store the real Stripe subscription status
+-- ===========================================================================
+-- profiles.is_subscriber is just a boolean (trialing and active both count
+-- as "subscribed"), so the admin Members list had no way to show "Trial"
+-- vs. "Subscribed" distinctly. Adds the raw Stripe status string alongside
+-- it — the webhook sets it from subscription.status on every sync.
+
+alter table public.profiles add column if not exists subscription_status text;
+
+-- ===========================================================================
+-- 28. One-time: make your own account an admin (edit the email first!)
 -- ===========================================================================
 -- update public.profiles set is_admin = true where email = 'you@example.com';

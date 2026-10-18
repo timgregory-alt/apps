@@ -44,7 +44,11 @@ export default async function AdminMembersPage() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <SubscriberToggle userId={m.id} initialIsSubscriber={m.is_subscriber} />
+                <SubscriberToggle
+                  userId={m.id}
+                  initialIsSubscriber={m.is_subscriber}
+                  subscriptionStatus={m.subscription_status}
+                />
                 <RemoveMemberButton userId={m.id} name={m.name || m.email || "this member"} />
               </div>
             </div>
