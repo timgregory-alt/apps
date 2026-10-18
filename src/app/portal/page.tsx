@@ -9,15 +9,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { QrCode } from "@/components/ui/QrCode";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-2xl border border-[var(--color-line)] bg-white px-5 py-4">
-      <p className="font-serif-display text-3xl text-[var(--color-burgundy)]">{value}</p>
-      <p className="mt-1 text-xs uppercase tracking-wide text-[var(--color-charcoal)]/50">{label}</p>
-    </div>
-  );
-}
+import { StatCard } from "@/components/analytics/StatCard";
 
 export default async function PortalDashboardPage() {
   const ctx = await getWineryStaffContext();
