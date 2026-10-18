@@ -2,11 +2,9 @@ import {
   getWineryStaffContext,
   getRepeatGuestStats,
   getWineryConversionStats,
-  getWineryAgeGroups,
   getWineryVisitsByDayOfWeek,
   getWineryVisitsByDaypart,
   getWineryTopWines,
-  getWineryGuestOrigins,
 } from "@/lib/portal";
 import { createClient } from "@/lib/supabase/server";
 import { QrCode } from "@/components/ui/QrCode";
@@ -32,11 +30,9 @@ export default async function PortalDashboardPage() {
     { count: vipCount },
     guestStats,
     conversionStats,
-    ageGroups,
     visitsByDayOfWeek,
     visitsByDaypart,
     topWines,
-    guestOrigins,
   ] = await Promise.all([
     supabase
       .from("winery_events")
@@ -51,11 +47,9 @@ export default async function PortalDashboardPage() {
       .gte("event_date", todayISO),
     getRepeatGuestStats(ctx.winery.id),
     getWineryConversionStats(ctx.winery.id),
-    getWineryAgeGroups(ctx.winery.id),
     getWineryVisitsByDayOfWeek(ctx.winery.id),
     getWineryVisitsByDaypart(ctx.winery.id),
     getWineryTopWines(ctx.winery.id),
-    getWineryGuestOrigins(ctx.winery.id),
   ]);
 
   const wineClubCTR =
@@ -84,32 +78,13 @@ export default async function PortalDashboardPage() {
           <StatCard label="Page Views" value={conversionStats.pageViews} />
           <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
           <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
-          <StatCard
-            label="Avg Visitor Age"
-            value={conversionStats.avgVisitorAge != null ? conversionStats.avgVisitorAge : "—"}
-          />
           <StatCard label="Social Shares" value={conversionStats.shareEvents} />
           <StatCard label="Subscriber Guests" value={conversionStats.subscriberGuests} />
-          <StatCard
-            label={
-              guestOrigins.topZips[0]
-                ? `Top Guest City · ${guestOrigins.topZips[0].guestCount} guest${guestOrigins.topZips[0].guestCount === 1 ? "" : "s"}`
-                : "Top Guest City"
-            }
-            value={guestOrigins.topZips[0]?.place ?? guestOrigins.topZips[0]?.zipCode ?? "—"}
-          />
         </div>
         <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
           Click-through rate is wine club link clicks divided by winery page views. Page-view
           tracking is newly added, so this rate will read low until traffic accumulates.
         </p>
-
-        <div>
-          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Guest Age Groups</h2>
-          <div className="mt-3">
-            <LabeledBars bars={ageGroups.map((g) => ({ label: g.ageGroup, count: g.count }))} />
-          </div>
-        </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
@@ -133,26 +108,6 @@ export default async function PortalDashboardPage() {
             <p className="text-sm text-[var(--color-charcoal)]/45">No wine ratings yet.</p>
           ) : (
             <LabeledBars bars={topWines.map((w) => ({ label: w.wineName, count: w.likedCount }))} />
-          )}
-        </div>
-
-        <div>
-          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Where Guests Come From</h2>
-          {guestOrigins.topZips.length === 0 ? (
-            <p className="mt-1 text-sm text-[var(--color-charcoal)]/45">No guest zip codes on file yet.</p>
-          ) : (
-            <div className="mt-3 flex flex-col gap-1.5">
-              {guestOrigins.topZips.map((z) => (
-                <div key={z.zipCode} className="flex items-center justify-between text-sm">
-                  <span className="text-[var(--color-charcoal)]/70">
-                    {z.place ?? z.zipCode} <span className="text-[var(--color-charcoal)]/40">({z.zipCode})</span>
-                  </span>
-                  <span className="text-[var(--color-charcoal)]/50">
-                    {z.guestCount} guest{z.guestCount === 1 ? "" : "s"}
-                  </span>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       </div>
