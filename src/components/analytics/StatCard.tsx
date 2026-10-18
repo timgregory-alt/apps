@@ -20,10 +20,10 @@ export function StatCard({
   const isLong = String(value).length > 14;
 
   return (
-    <div className="rounded-2xl border border-[var(--color-line)] bg-white px-5 py-4">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-white px-5 py-4">
       <p
         className={cn(
-          "font-serif-display text-[var(--color-burgundy)]",
+          "break-words font-serif-display text-[var(--color-burgundy)]",
           isLong ? "text-lg leading-snug" : "text-3xl"
         )}
       >
