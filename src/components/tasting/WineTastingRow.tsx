@@ -50,7 +50,7 @@ export function WineTastingRow({
 
   return (
     <motion.div
-      animate={{ height: open ? "23rem" : "4.75rem" }}
+      animate={{ height: open ? "20rem" : "4.75rem" }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="overflow-hidden [perspective:1200px]"
     >
@@ -159,7 +159,7 @@ export function WineTastingRow({
 
           {/* Back */}
           <div
-            className="absolute inset-0 flex flex-col rounded-3xl border border-[var(--color-line)] bg-white/70 p-4 backdrop-blur-sm [backface-visibility:hidden] [transform:rotateY(180deg)]"
+            className="absolute inset-0 flex flex-col overflow-y-auto rounded-3xl border border-[var(--color-line)] bg-white/70 p-4 backdrop-blur-sm [backface-visibility:hidden] [transform:rotateY(180deg)]"
           >
             <button
               type="button"
@@ -199,7 +199,7 @@ export function WineTastingRow({
               </p>
             )}
 
-            <div className="mt-auto flex flex-col items-center gap-1.5 pt-3">
+            <div className="mt-4 flex flex-col items-center gap-1.5">
               <p className="text-xs text-[var(--color-charcoal)]/50">
                 {locked ? "Check in to rate" : wine.tasting ? "Your rating" : "How was it?"}
               </p>
