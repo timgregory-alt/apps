@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Mail } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { AuthField } from "@/components/auth/AuthShell";
@@ -93,6 +93,7 @@ export function AuthModal() {
 }
 
 function SigninFields({ onDone }: { onDone: () => void }) {
+  const pathname = usePathname();
   const [subMode, setSubMode] = useState<"password" | "magic">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -186,6 +187,14 @@ function SigninFields({ onDone }: { onDone: () => void }) {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+      <div className="-mt-2 text-right">
+        <Link
+          href={`/reset-password?next=${encodeURIComponent(pathname)}`}
+          className="text-xs text-[var(--color-charcoal)]/55 hover:text-[var(--color-burgundy)]"
+        >
+          Forgot password?
+        </Link>
+      </div>
       {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
       <Button type="submit" size="lg" fullWidth disabled={loading}>
         {loading ? "Signing in…" : "Sign In"}
