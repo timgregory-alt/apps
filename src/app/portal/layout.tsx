@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getWineryStaffContext } from "@/lib/portal";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getWineryStaffContext();
@@ -55,6 +56,10 @@ export default async function PortalLayout({ children }: { children: React.React
             <Link href="/" className="text-[var(--color-ivory)]/60 hover:text-[var(--color-gold)]">
               Exit Portal
             </Link>
+            <SignOutButton
+              variant="link"
+              className="text-[var(--color-ivory)]/60 hover:text-[var(--color-gold)]"
+            />
           </nav>
         </div>
       </header>
