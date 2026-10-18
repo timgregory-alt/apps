@@ -51,7 +51,8 @@ export function ResetPasswordForm() {
       )}
       {sent ? (
         <p className="rounded-xl bg-[var(--color-gold-pale)]/50 px-4 py-4 text-center text-sm text-[var(--color-charcoal)]/75">
-          Check {email} for a password reset link.
+          Check {email} for a password reset link. Don&rsquo;t see it? Check your spam or junk
+          folder.
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
