@@ -11,6 +11,9 @@ export async function GET() {
   if (!ctx) {
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
+  if (!ctx.winery.analytics_subscribed) {
+    return NextResponse.json({ error: "Guest list export requires a Winery Analytics subscription." }, { status: 403 });
+  }
 
   const guests = await getWineryGuestList(ctx.winery.id);
 
