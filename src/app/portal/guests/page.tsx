@@ -10,6 +10,7 @@ export default async function PortalGuestsPage() {
 
   const guests = await getWineryGuestList(ctx.winery.id);
   const isSubscribed = ctx.winery.analytics_subscribed;
+  const repeatGuests = guests.filter((g) => g.visitCount > 1).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,6 +44,12 @@ export default async function PortalGuestsPage() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Total Guests" value={guests.length} />
+        {isSubscribed && (
+          <>
+            <StatCard label="One-Time Guests" value={guests.length - repeatGuests} />
+            <StatCard label="Repeat Guests" value={repeatGuests} />
+          </>
+        )}
       </div>
 
       {guests.length === 0 ? (

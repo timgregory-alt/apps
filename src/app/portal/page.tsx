@@ -88,6 +88,8 @@ export default async function PortalDashboardPage() {
         {isSubscribed && (
           <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <StatCard label="One-Time Guests" value={guestStats.oneVisit} />
+              <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
               <StatCard label="Page Views" value={conversionStats.pageViews} />
               <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
               <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
