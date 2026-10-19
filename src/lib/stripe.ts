@@ -27,10 +27,13 @@ export function getPriceId(plan: SubscriptionPlan): string | null {
   return process.env[key] || null;
 }
 
-/** The winery portal's analytics dashboard add-on — a single $50/mo plan,
- * billed to the winery itself rather than any one staff account. */
-export function getWineryAnalyticsPriceId(): string | null {
-  return process.env.STRIPE_PRICE_ID_WINERY_ANALYTICS || null;
+/** The winery portal's analytics dashboard add-on — $50/mo or $500/yr (2
+ * months free), billed to the winery itself rather than any one staff
+ * account. */
+export function getWineryAnalyticsPriceId(plan: SubscriptionPlan): string | null {
+  const key =
+    plan === "monthly" ? "STRIPE_PRICE_ID_WINERY_ANALYTICS_MONTHLY" : "STRIPE_PRICE_ID_WINERY_ANALYTICS_ANNUAL";
+  return process.env[key] || null;
 }
 
 /** Statuses that count as "has an active subscription" for gating premium

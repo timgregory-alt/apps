@@ -21,21 +21,28 @@ const BENEFITS = [
  * subscribed, offers a quiet way to manage/cancel it. */
 export function WineryAnalyticsUpsellCard({ isSubscribed }: { isSubscribed: boolean }) {
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pendingPlan, setPendingPlan] = useState<"monthly" | "annual" | "manage" | null>(null);
+  const [, startTransition] = useTransition();
 
-  function subscribe() {
+  function subscribe(plan: "monthly" | "annual") {
     setError(null);
+    setPendingPlan(plan);
     startTransition(async () => {
-      const result = await createWineryAnalyticsCheckoutAction();
+      const result = await createWineryAnalyticsCheckoutAction(plan);
+      // A successful call redirects away — reaching this point means it
+      // didn't, so surface the error and let the buttons re-enable.
       if (result?.error) setError(result.error);
+      setPendingPlan(null);
     });
   }
 
   function manage() {
     setError(null);
+    setPendingPlan("manage");
     startTransition(async () => {
       const result = await createWineryAnalyticsBillingPortalAction();
       if (result?.error) setError(result.error);
+      setPendingPlan(null);
     });
   }
 
@@ -47,10 +54,10 @@ export function WineryAnalyticsUpsellCard({ isSubscribed }: { isSubscribed: bool
           <button
             type="button"
             onClick={manage}
-            disabled={pending}
+            disabled={pendingPlan !== null}
             className="shrink-0 text-xs font-medium text-[var(--color-burgundy)] hover:underline disabled:opacity-60"
           >
-            {pending ? "Opening…" : "Manage Billing"}
+            {pendingPlan === "manage" ? "Opening…" : "Manage Billing"}
           </button>
         </div>
         {error && <p className="text-xs text-[var(--color-burgundy)]">{error}</p>}
@@ -75,18 +82,28 @@ export function WineryAnalyticsUpsellCard({ isSubscribed }: { isSubscribed: bool
         ))}
       </ul>
       {error && <p className="mt-3 text-sm text-[var(--color-burgundy)]">{error}</p>}
-      <Button
-        type="button"
-        variant="primary"
-        fullWidth
-        onClick={subscribe}
-        disabled={pending}
-        className="mt-4"
-      >
-        {pending ? "Starting…" : "Subscribe — $50/mo"}
-      </Button>
+      <div className="mt-4 flex flex-col gap-2">
+        <Button
+          type="button"
+          variant="primary"
+          fullWidth
+          onClick={() => subscribe("monthly")}
+          disabled={pendingPlan !== null}
+        >
+          {pendingPlan === "monthly" ? "Starting…" : "Subscribe Monthly — $50/mo"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          fullWidth
+          onClick={() => subscribe("annual")}
+          disabled={pendingPlan !== null}
+        >
+          {pendingPlan === "annual" ? "Starting…" : "Subscribe Annual — $500/yr"}
+        </Button>
+      </div>
       <p className="mt-2 text-center text-xs text-[var(--color-charcoal)]/50">
-        Starts with a 7-day free trial — cancel anytime.
+        Annual saves 2 months. Starts with a 7-day free trial — cancel anytime.
       </p>
     </div>
   );

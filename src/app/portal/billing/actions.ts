@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getWineryStaffContext } from "@/lib/portal";
-import { getStripeClient, getWineryAnalyticsPriceId, isStripeConfigured } from "@/lib/stripe";
+import {
+  getStripeClient,
+  getWineryAnalyticsPriceId,
+  isStripeConfigured,
+  type SubscriptionPlan,
+} from "@/lib/stripe";
 
 async function siteOrigin(): Promise<string> {
   const headerList = await headers();
@@ -18,11 +23,13 @@ async function siteOrigin(): Promise<string> {
  * customer), not the signed-in staff member — any staff account can start
  * or manage it, same as everyone with portal access shares the winery's
  * other settings. */
-export async function createWineryAnalyticsCheckoutAction(): Promise<{ error: string } | void> {
+export async function createWineryAnalyticsCheckoutAction(
+  plan: SubscriptionPlan
+): Promise<{ error: string } | void> {
   if (!isStripeConfigured) return { error: "Billing isn't set up yet." };
 
-  const priceId = getWineryAnalyticsPriceId();
-  if (!priceId) return { error: "Analytics billing isn't configured yet." };
+  const priceId = getWineryAnalyticsPriceId(plan);
+  if (!priceId) return { error: "That plan isn't configured yet." };
 
   const ctx = await getWineryStaffContext();
   if (!ctx) return { error: "Sign in to a winery account to subscribe." };

@@ -37,7 +37,8 @@ Copy `.env.example` to `.env.local` and fill in the values below.
 | `STRIPE_WEBHOOK_SECRET` | For real subscription billing | Signing secret for the `/api/stripe/webhook` endpoint |
 | `STRIPE_PRICE_ID_MONTHLY` | For real subscription billing | The monthly subscription Price's id (`price_…`) |
 | `STRIPE_PRICE_ID_ANNUAL` | For real subscription billing | The annual subscription Price's id (`price_…`) |
-| `STRIPE_PRICE_ID_WINERY_ANALYTICS` | For the winery analytics add-on | The $50/mo winery-portal analytics Price's id (`price_…`) |
+| `STRIPE_PRICE_ID_WINERY_ANALYTICS_MONTHLY` | For the winery analytics add-on | The $50/mo winery-portal analytics Price's id (`price_…`) |
+| `STRIPE_PRICE_ID_WINERY_ANALYTICS_ANNUAL` | For the winery analytics add-on | The $500/yr winery-portal analytics Price's id (`price_…`) |
 
 Without Supabase configured, the app is still fully browsable (home, passport, map, winery pages) using local seed data, and GPS check-in will run the real distance check but tell you the stamp can't be saved. Without Mapbox, `/map` shows a friendly placeholder instead of failing.
 
@@ -89,11 +90,11 @@ Guest subscriptions (`profiles.is_subscriber`) are billed through Stripe — Che
 6. Test with [Stripe's test card numbers](https://docs.stripe.com/testing) (e.g. `4242 4242 4242 4242`, any future expiry/CVC) while using test-mode keys — no real charge happens.
 7. An admin can still grant/revoke `is_subscriber` manually from `/admin/members` independent of billing (e.g. a comp) — the webhook only updates it going forward from real subscription events.
 
-### Winery analytics add-on ($50/mo)
+### Winery analytics add-on ($50/mo or $500/yr)
 
-The deep-analytics section of the winery portal dashboard (page views, wine club click-through rate, guest demographics, peak visit times, favorite wines) is a separate paid add-on, billed to the winery itself rather than any one staff account — basic counts (upcoming events, total/repeat guests) and the QR code stay free. It reuses the same webhook as guest billing (`src/app/api/stripe/webhook/route.ts` now syncs both `profiles` and `wineries` by `stripe_customer_id`).
+The deep-analytics section of the winery portal dashboard (page views, wine club click-through rate, guest demographics, peak visit times, favorite wines) plus the guest-list CSV export are a separate paid add-on, billed to the winery itself rather than any one staff account — basic counts (upcoming events, total/repeat guests), the on-screen guest list, and the QR code stay free. It reuses the same webhook as guest billing (`src/app/api/stripe/webhook/route.ts` now syncs both `profiles` and `wineries` by `stripe_customer_id`).
 
-1. **Products → Add product**: create a separate subscription product with one recurring Price at $50/mo. Copy its Price id into `STRIPE_PRICE_ID_WINERY_ANALYTICS`.
+1. **Products → Add product**: create a separate subscription product ("Wine Trail Vintner's Dashboard") with two recurring Prices — $50/mo and $500/yr (2 months free). Copy each Price id into `STRIPE_PRICE_ID_WINERY_ANALYTICS_MONTHLY` / `STRIPE_PRICE_ID_WINERY_ANALYTICS_ANNUAL`.
 2. No separate webhook endpoint is needed — the existing one already listens for the right events and figures out whether a given customer is a guest or a winery.
 3. New subscriptions start with a 7-day free trial (`subscription_data.trial_period_days` in `createWineryAnalyticsCheckoutAction`, `src/app/portal/billing/actions.ts`) — same place to change or remove it as the guest plan.
 
