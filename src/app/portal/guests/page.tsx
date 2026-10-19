@@ -10,7 +10,7 @@ export default async function PortalGuestsPage() {
 
   const guests = await getWineryGuestList(ctx.winery.id);
   const repeatGuests = guests.filter((g) => g.visitCount > 1).length;
-  const canExport = ctx.winery.analytics_subscribed;
+  const isSubscribed = ctx.winery.analytics_subscribed;
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,7 +24,7 @@ export default async function PortalGuestsPage() {
           </p>
         </div>
         {guests.length > 0 &&
-          (canExport ? (
+          (isSubscribed ? (
             <a
               href="/api/portal/export-guests"
               className="shrink-0 rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-burgundy-deep)]"
@@ -49,6 +49,23 @@ export default async function PortalGuestsPage() {
 
       {guests.length === 0 ? (
         <p className="text-sm text-[var(--color-charcoal)]/50">No check-ins yet.</p>
+      ) : !isSubscribed ? (
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-gold-pale)]/20 px-5 py-8 text-center">
+          <Lock size={18} className="text-[var(--color-burgundy)]" strokeWidth={1.75} />
+          <p className="text-sm font-medium text-[var(--color-charcoal)]">
+            Guest names and emails require Winery Analytics
+          </p>
+          <p className="max-w-sm text-xs text-[var(--color-charcoal)]/60">
+            Subscribe to see who&rsquo;s been checking in — names, emails, and visit history — not just
+            the totals above.
+          </p>
+          <Link
+            href="/portal"
+            className="mt-2 rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-xs font-medium text-white hover:bg-[var(--color-burgundy-deep)]"
+          >
+            Subscribe — $50/mo
+          </Link>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[var(--color-line)] bg-white">
           <table className="w-full text-left text-sm">
