@@ -92,11 +92,11 @@ Guest subscriptions (`profiles.is_subscriber`) are billed through Stripe — Che
 
 ### Winery analytics add-on ($50/mo or $500/yr)
 
-The deep-analytics section of the winery portal dashboard (page views, wine club click-through rate, guest demographics, peak visit times, favorite wines) plus the guest-list CSV export are a separate paid add-on, billed to the winery itself rather than any one staff account — basic counts (upcoming events, total/repeat guests), the on-screen guest list, and the QR code stay free. It reuses the same webhook as guest billing (`src/app/api/stripe/webhook/route.ts` now syncs both `profiles` and `wineries` by `stripe_customer_id`).
+The deep-analytics section of the winery portal dashboard (page views, wine club click-through rate, guest demographics, peak visit times, favorite wines), the guest name/email table, and the CSV export are a separate paid add-on, billed to the winery itself rather than any one staff account — basic counts (upcoming events, total/repeat guests) and the QR code stay free. It reuses the same webhook as guest billing (`src/app/api/stripe/webhook/route.ts` now syncs both `profiles` and `wineries` by `stripe_customer_id`).
 
 1. **Products → Add product**: create a separate subscription product ("Wine Trail Vintner's Dashboard") with two recurring Prices — $50/mo and $500/yr (2 months free). Copy each Price id into `STRIPE_PRICE_ID_WINERY_ANALYTICS_MONTHLY` / `STRIPE_PRICE_ID_WINERY_ANALYTICS_ANNUAL`.
 2. No separate webhook endpoint is needed — the existing one already listens for the right events and figures out whether a given customer is a guest or a winery.
-3. New subscriptions start with a 7-day free trial (`subscription_data.trial_period_days` in `createWineryAnalyticsCheckoutAction`, `src/app/portal/billing/actions.ts`) — same place to change or remove it as the guest plan.
+3. Unlike the guest plan, winery subscriptions charge immediately — no free trial (`createWineryAnalyticsCheckoutAction` in `src/app/portal/billing/actions.ts` omits `subscription_data.trial_period_days`; add it back there if you want to offer one later).
 
 ## 6. Deploy on Vercel
 

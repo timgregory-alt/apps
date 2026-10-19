@@ -103,7 +103,7 @@ export function WineryAnalyticsUpsellCard({ isSubscribed }: { isSubscribed: bool
         </Button>
       </div>
       <p className="mt-2 text-center text-xs text-[var(--color-charcoal)]/50">
-        Annual saves 2 months. Starts with a 7-day free trial — cancel anytime.
+        Annual saves 2 months. Cancel anytime.
       </p>
     </div>
   );

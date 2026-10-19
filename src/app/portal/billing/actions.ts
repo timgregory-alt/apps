@@ -62,7 +62,6 @@ export async function createWineryAnalyticsCheckoutAction(
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { trial_period_days: 7 },
       success_url: `${origin}/portal?subscribed=1`,
       cancel_url: `${origin}/portal`,
     });
