@@ -109,7 +109,7 @@ export interface WineryConversionStats {
   subscriberGuests: number;
 }
 
-const EMPTY_CONVERSION_STATS: WineryConversionStats = {
+export const EMPTY_CONVERSION_STATS: WineryConversionStats = {
   pageViews: 0,
   checkins: 0,
   wineClubClicks: 0,

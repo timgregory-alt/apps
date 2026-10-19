@@ -7,16 +7,19 @@ import {
   getWineryVisitsByDaypart,
   getWineryTopWines,
   getWineryGuestOrigins,
+  EMPTY_CONVERSION_STATS,
 } from "@/lib/portal";
 import { createClient } from "@/lib/supabase/server";
 import { QrCode } from "@/components/ui/QrCode";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
+import { WineryAnalyticsUpsellCard } from "@/components/portal/WineryAnalyticsUpsellCard";
 
 export default async function PortalDashboardPage() {
   const ctx = await getWineryStaffContext();
   if (!ctx) return null;
 
+  const isSubscribed = ctx.winery.analytics_subscribed;
   const supabase = await createClient();
   const todayISO = new Date().toISOString().slice(0, 10);
   const [
@@ -42,12 +45,15 @@ export default async function PortalDashboardPage() {
       .eq("vip_only", true)
       .gte("event_date", todayISO),
     getRepeatGuestStats(ctx.winery.id),
-    getWineryConversionStats(ctx.winery.id),
-    getWineryAgeGroups(ctx.winery.id),
-    getWineryVisitsByDayOfWeek(ctx.winery.id),
-    getWineryVisitsByDaypart(ctx.winery.id),
-    getWineryTopWines(ctx.winery.id),
-    getWineryGuestOrigins(ctx.winery.id),
+    // Everything below is the paid analytics bundle — skip the RPCs
+    // entirely for a non-subscribed winery rather than fetching data
+    // that's just going to be hidden behind the upsell card.
+    isSubscribed ? getWineryConversionStats(ctx.winery.id) : Promise.resolve(EMPTY_CONVERSION_STATS),
+    isSubscribed ? getWineryAgeGroups(ctx.winery.id) : Promise.resolve([]),
+    isSubscribed ? getWineryVisitsByDayOfWeek(ctx.winery.id) : Promise.resolve([]),
+    isSubscribed ? getWineryVisitsByDaypart(ctx.winery.id) : Promise.resolve([]),
+    isSubscribed ? getWineryTopWines(ctx.winery.id) : Promise.resolve([]),
+    isSubscribed ? getWineryGuestOrigins(ctx.winery.id) : Promise.resolve({ topZips: [] }),
   ]);
 
   const wineClubCTR =
@@ -77,81 +83,93 @@ export default async function PortalDashboardPage() {
           <StatCard label="Total Guests" value={guestStats.totalGuests} />
           <StatCard label="One-Time Guests" value={guestStats.oneVisit} />
           <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
-          <StatCard label="Page Views" value={conversionStats.pageViews} />
-          <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
-          <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
-          <StatCard
-            label="Avg Visitor Age"
-            value={conversionStats.avgVisitorAge != null ? conversionStats.avgVisitorAge : "—"}
-          />
-          <StatCard label="Social Shares" value={conversionStats.shareEvents} />
-          <StatCard label="Subscriber Guests" value={conversionStats.subscriberGuests} />
-          <StatCard
-            label="Top Guest City"
-            value={guestOrigins.topZips[0]?.place ?? guestOrigins.topZips[0]?.zipCode ?? "—"}
-            caption={
-              guestOrigins.topZips[0]
-                ? `${guestOrigins.topZips[0].guestCount} guest${guestOrigins.topZips[0].guestCount === 1 ? "" : "s"}`
-                : undefined
-            }
-          />
-        </div>
-        <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
-          Click-through rate is wine club link clicks divided by winery page views. Page-view
-          tracking is newly added, so this rate will read low until traffic accumulates.
-        </p>
-
-        <div>
-          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Guest Age Groups</h2>
-          <div className="mt-3">
-            <LabeledBars bars={ageGroups.map((g) => ({ label: g.ageGroup, count: g.count }))} />
-          </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Peak Visit Day</h2>
-            <div className="mt-3">
-              <LabeledBars bars={visitsByDayOfWeek} />
+        <WineryAnalyticsUpsellCard isSubscribed={isSubscribed} />
+
+        {isSubscribed && (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <StatCard label="Page Views" value={conversionStats.pageViews} />
+              <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
+              <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
+              <StatCard
+                label="Avg Visitor Age"
+                value={conversionStats.avgVisitorAge != null ? conversionStats.avgVisitorAge : "—"}
+              />
+              <StatCard label="Social Shares" value={conversionStats.shareEvents} />
+              <StatCard label="Subscriber Guests" value={conversionStats.subscriberGuests} />
+              <StatCard
+                label="Top Guest City"
+                value={guestOrigins.topZips[0]?.place ?? guestOrigins.topZips[0]?.zipCode ?? "—"}
+                caption={
+                  guestOrigins.topZips[0]
+                    ? `${guestOrigins.topZips[0].guestCount} guest${guestOrigins.topZips[0].guestCount === 1 ? "" : "s"}`
+                    : undefined
+                }
+              />
             </div>
-          </div>
-          <div>
-            <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Peak Visit Time</h2>
-            <div className="mt-3">
-              <LabeledBars bars={visitsByDaypart} />
+            <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
+              Click-through rate is wine club link clicks divided by winery page views. Page-view
+              tracking is newly added, so this rate will read low until traffic accumulates.
+            </p>
+
+            <div>
+              <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Guest Age Groups</h2>
+              <div className="mt-3">
+                <LabeledBars bars={ageGroups.map((g) => ({ label: g.ageGroup, count: g.count }))} />
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div>
-          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Favorite Wines</h2>
-          <p className="mt-1 mb-3 text-xs text-[var(--color-charcoal)]/55">Wines rated 4-5 stars by guests.</p>
-          {topWines.length === 0 ? (
-            <p className="text-sm text-[var(--color-charcoal)]/45">No wine ratings yet.</p>
-          ) : (
-            <LabeledBars bars={topWines.map((w) => ({ label: w.wineName, count: w.likedCount }))} />
-          )}
-        </div>
-
-        <div>
-          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Where Guests Come From</h2>
-          {guestOrigins.topZips.length === 0 ? (
-            <p className="mt-1 text-sm text-[var(--color-charcoal)]/45">No guest zip codes on file yet.</p>
-          ) : (
-            <div className="mt-3 flex flex-col gap-1.5">
-              {guestOrigins.topZips.map((z) => (
-                <div key={z.zipCode} className="flex items-center justify-between text-sm">
-                  <span className="text-[var(--color-charcoal)]/70">
-                    {z.place ?? z.zipCode} <span className="text-[var(--color-charcoal)]/40">({z.zipCode})</span>
-                  </span>
-                  <span className="text-[var(--color-charcoal)]/50">
-                    {z.guestCount} guest{z.guestCount === 1 ? "" : "s"}
-                  </span>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Peak Visit Day</h2>
+                <div className="mt-3">
+                  <LabeledBars bars={visitsByDayOfWeek} />
                 </div>
-              ))}
+              </div>
+              <div>
+                <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Peak Visit Time</h2>
+                <div className="mt-3">
+                  <LabeledBars bars={visitsByDaypart} />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+
+            <div>
+              <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Favorite Wines</h2>
+              <p className="mt-1 mb-3 text-xs text-[var(--color-charcoal)]/55">
+                Wines rated 4-5 stars by guests.
+              </p>
+              {topWines.length === 0 ? (
+                <p className="text-sm text-[var(--color-charcoal)]/45">No wine ratings yet.</p>
+              ) : (
+                <LabeledBars bars={topWines.map((w) => ({ label: w.wineName, count: w.likedCount }))} />
+              )}
+            </div>
+
+            <div>
+              <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Where Guests Come From</h2>
+              {guestOrigins.topZips.length === 0 ? (
+                <p className="mt-1 text-sm text-[var(--color-charcoal)]/45">No guest zip codes on file yet.</p>
+              ) : (
+                <div className="mt-3 flex flex-col gap-1.5">
+                  {guestOrigins.topZips.map((z) => (
+                    <div key={z.zipCode} className="flex items-center justify-between text-sm">
+                      <span className="text-[var(--color-charcoal)]/70">
+                        {z.place ?? z.zipCode}{" "}
+                        <span className="text-[var(--color-charcoal)]/40">({z.zipCode})</span>
+                      </span>
+                      <span className="text-[var(--color-charcoal)]/50">
+                        {z.guestCount} guest{z.guestCount === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="w-full max-w-xs shrink-0 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">

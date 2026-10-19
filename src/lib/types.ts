@@ -50,6 +50,12 @@ export interface Winery {
   events_page_url: string | null;
   /** Optional link to this winery's Yelp page, for the "Review on Yelp" button. */
   yelp_url: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  /** Whether this winery currently pays for the portal's analytics
+   * dashboard — trialing counts as subscribed, same as profiles.is_subscriber. */
+  analytics_subscribed: boolean;
+  analytics_subscription_status: string | null;
 }
 
 export interface WineSyncLogEntry {

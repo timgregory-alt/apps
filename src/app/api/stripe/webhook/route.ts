@@ -5,27 +5,44 @@ import { getStripeClient, isActiveSubscriptionStatus, isStripeConfigured } from 
 
 export const runtime = "nodejs";
 
-/** Stripe sends events for a customer/subscription — profiles are looked up
- * by stripe_customer_id, which is set when checkout starts. An event for a
- * customer we don't recognize (e.g. a duplicate/retried delivery after the
- * profile was deleted) is logged and skipped rather than erroring, since
- * there's nothing to update. */
+/** Stripe sends events for a customer/subscription — a customer could be
+ * either a guest (profiles) or a winery (wineries, for the analytics
+ * add-on), and the event itself doesn't say which, so both updates are
+ * attempted; whichever table doesn't have a matching stripe_customer_id
+ * just affects zero rows, a harmless no-op. An event for a customer we
+ * don't recognize at all (e.g. a duplicate/retried delivery after the row
+ * was deleted) is logged and skipped rather than erroring, since there's
+ * nothing to update. */
 async function syncSubscriptionStatus(subscription: Stripe.Subscription) {
   const supabase = await createAdminClient();
   const customerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
+  const isActive = isActiveSubscriptionStatus(subscription.status);
 
-  const { error } = await supabase
+  const { error: profileError } = await supabase
     .from("profiles")
     .update({
-      is_subscriber: isActiveSubscriptionStatus(subscription.status),
+      is_subscriber: isActive,
       subscription_status: subscription.status,
       stripe_subscription_id: subscription.id,
     })
     .eq("stripe_customer_id", customerId);
 
-  if (error) {
-    console.error(`Stripe webhook: failed to sync profile for customer ${customerId}:`, error.message);
+  if (profileError) {
+    console.error(`Stripe webhook: failed to sync profile for customer ${customerId}:`, profileError.message);
+  }
+
+  const { error: wineryError } = await supabase
+    .from("wineries")
+    .update({
+      analytics_subscribed: isActive,
+      analytics_subscription_status: subscription.status,
+      stripe_subscription_id: subscription.id,
+    })
+    .eq("stripe_customer_id", customerId);
+
+  if (wineryError) {
+    console.error(`Stripe webhook: failed to sync winery for customer ${customerId}:`, wineryError.message);
   }
 }
 
