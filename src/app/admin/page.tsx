@@ -3,20 +3,28 @@ import {
   getAllWineriesAdmin,
   getWineLikeStats,
   getAppRatingStats,
+  getWineryFeedbackAdmin,
   getAllMembersAdmin,
   LIKED_RATING_THRESHOLD,
 } from "@/lib/admin";
+import {
+  archiveAppFeedbackAction,
+  deleteAppFeedbackAction,
+  archiveWineryFeedbackAction,
+  deleteWineryFeedbackAction,
+} from "@/app/admin/actions";
 import { formatCheckinDate } from "@/lib/utils";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
-import { AppFeedbackActions } from "@/components/admin/AppFeedbackActions";
+import { FeedbackActions } from "@/components/admin/FeedbackActions";
 
 export default async function AdminDashboardPage() {
-  const [stats, wineries, wineLikeStats, appRatingStats, members] = await Promise.all([
+  const [stats, wineries, wineLikeStats, appRatingStats, wineryFeedback, members] = await Promise.all([
     getAdminStats(),
     getAllWineriesAdmin(),
     getWineLikeStats(),
     getAppRatingStats(),
+    getWineryFeedbackAdmin(),
     getAllMembersAdmin(),
   ]);
 
@@ -254,7 +262,10 @@ export default async function AdminDashboardPage() {
                       {formatCheckinDate(f.created_at)}
                     </span>
                   </div>
-                  <AppFeedbackActions id={f.id} />
+                  <FeedbackActions
+                    onArchive={() => archiveAppFeedbackAction(f.id)}
+                    onDelete={() => deleteAppFeedbackAction(f.id)}
+                  />
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-[var(--color-charcoal)]/60">
                   {f.memberName}
@@ -264,6 +275,38 @@ export default async function AdminDashboardPage() {
                 {f.feedback && (
                   <p className="mt-0.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
                 )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Winery Feedback</h2>
+        <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
+          Feedback about the platform itself, sent by winery staff from their portal.
+        </p>
+
+        {wineryFeedback.length === 0 ? (
+          <p className="mt-3 text-sm text-[var(--color-charcoal)]/45">No feedback yet.</p>
+        ) : (
+          <div className="mt-3 flex flex-col gap-3">
+            {wineryFeedback.map((f) => (
+              <div
+                key={f.id}
+                className="rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 text-sm"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-medium text-[var(--color-charcoal)]/60">{f.wineryName}</p>
+                    <p className="text-xs text-[var(--color-charcoal)]/45">{formatCheckinDate(f.created_at)}</p>
+                  </div>
+                  <FeedbackActions
+                    onArchive={() => archiveWineryFeedbackAction(f.id)}
+                    onDelete={() => deleteWineryFeedbackAction(f.id)}
+                  />
+                </div>
+                <p className="mt-1.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
               </div>
             ))}
           </div>

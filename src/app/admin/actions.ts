@@ -30,3 +30,26 @@ export async function deleteAppFeedbackAction(id: string): Promise<AdminActionRe
 
   revalidatePath("/admin");
 }
+
+/** Soft-hides a piece of winery feedback from the dashboard without
+ * deleting it. */
+export async function archiveWineryFeedbackAction(id: string): Promise<AdminActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("winery_feedback").update({ archived: true }).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+}
+
+/** Permanently removes a piece of winery feedback. */
+export async function deleteWineryFeedbackAction(id: string): Promise<AdminActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("winery_feedback").delete().eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+}

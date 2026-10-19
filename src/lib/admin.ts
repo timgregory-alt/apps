@@ -462,6 +462,46 @@ export async function getAppRatingStats(): Promise<AppRatingStats> {
   }
 }
 
+export interface WineryFeedbackEntry {
+  id: string;
+  wineryName: string;
+  feedback: string;
+  created_at: string;
+}
+
+/** Recent, non-archived winery feedback across every winery, newest
+ * first — shown on the admin dashboard's "Winery Feedback" section. RLS on
+ * winery_feedback already lets an admin read every row. */
+export async function getWineryFeedbackAdmin(): Promise<WineryFeedbackEntry[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("winery_feedback")
+      .select("id, winery_id, feedback, created_at")
+      .eq("archived", false)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (error || !data) throw error;
+
+    const wineryIds = [...new Set(data.map((r) => r.winery_id))];
+    const nameById = new Map<string, string>();
+    if (wineryIds.length > 0) {
+      const { data: wineries } = await supabase.from("wineries").select("id, name").in("id", wineryIds);
+      (wineries ?? []).forEach((w) => nameById.set(w.id, w.name));
+    }
+
+    return data.map((r) => ({
+      id: r.id,
+      wineryName: nameById.get(r.winery_id) ?? "Unknown winery",
+      feedback: r.feedback,
+      created_at: r.created_at,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export interface MemberRow {
   id: UUID;
   name: string | null;

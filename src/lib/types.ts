@@ -186,6 +186,17 @@ export interface AppRating {
   updated_at: string;
 }
 
+/** Feedback about the platform itself, submitted by winery staff from the
+ * portal — distinct from AppRating, which is guest feedback about the app. */
+export interface WineryFeedback {
+  id: UUID;
+  winery_id: UUID;
+  submitted_by: UUID | null;
+  feedback: string;
+  archived: boolean;
+  created_at: string;
+}
+
 export type BugReportStatus = "open" | "resolved";
 
 /** A guest-submitted "something's broken" report from the Profile page. */

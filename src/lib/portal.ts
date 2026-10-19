@@ -2,7 +2,7 @@ import "server-only";
 import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { AGE_GROUPS, type AgeGroup } from "@/lib/utils";
-import type { Winery } from "@/lib/types";
+import type { Winery, WineryFeedback } from "@/lib/types";
 
 export interface WineryStaffContext {
   userId: string;
@@ -306,6 +306,24 @@ export async function getWineryGuestList(wineryId: string): Promise<WineryGuest[
       firstVisit: r.first_visit,
       lastVisit: r.last_visit,
     }));
+  } catch {
+    return [];
+  }
+}
+
+/** A winery's own feedback submissions, newest first — RLS already scopes
+ * this to the signed-in staff member's own winery (or admin). */
+export async function getWineryFeedback(wineryId: string): Promise<WineryFeedback[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("winery_feedback")
+      .select("*")
+      .eq("winery_id", wineryId)
+      .order("created_at", { ascending: false });
+    if (error || !data) throw error;
+    return data as WineryFeedback[];
   } catch {
     return [];
   }

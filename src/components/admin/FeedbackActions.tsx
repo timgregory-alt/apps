@@ -2,9 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { Archive, Trash2 } from "lucide-react";
-import { archiveAppFeedbackAction, deleteAppFeedbackAction } from "@/app/admin/actions";
 
-export function AppFeedbackActions({ id }: { id: string }) {
+type ActionResult = { error: string } | void;
+
+/** Shared archive/delete controls for a feedback card — used by both App
+ * Feedback (guest ratings) and Winery Feedback on the admin dashboard.
+ * Takes the already-bound server actions as props so this component
+ * doesn't need to know which feedback table it's acting on. */
+export function FeedbackActions({
+  onArchive,
+  onDelete,
+}: {
+  onArchive: () => Promise<ActionResult>;
+  onDelete: () => Promise<ActionResult>;
+}) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -12,7 +23,7 @@ export function AppFeedbackActions({ id }: { id: string }) {
   function archive() {
     setError(null);
     startTransition(async () => {
-      const result = await archiveAppFeedbackAction(id);
+      const result = await onArchive();
       if (result?.error) setError(result.error);
     });
   }
@@ -20,7 +31,7 @@ export function AppFeedbackActions({ id }: { id: string }) {
   function remove() {
     setError(null);
     startTransition(async () => {
-      const result = await deleteAppFeedbackAction(id);
+      const result = await onDelete();
       if (result?.error) {
         setError(result.error);
         setConfirmingDelete(false);
