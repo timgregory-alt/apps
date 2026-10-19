@@ -7,6 +7,7 @@ import {
   getWineryVisitsByDaypart,
   getWineryTopWines,
   getWineryGuestOrigins,
+  getWineryFeedback,
   EMPTY_CONVERSION_STATS,
 } from "@/lib/portal";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +15,8 @@ import { QrCode } from "@/components/ui/QrCode";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
 import { WineryAnalyticsUpsellCard } from "@/components/portal/WineryAnalyticsUpsellCard";
+import { WineryFeedbackForm } from "@/components/portal/WineryFeedbackForm";
+import { formatCheckinDate } from "@/lib/utils";
 
 export default async function PortalDashboardPage() {
   const ctx = await getWineryStaffContext();
@@ -32,6 +35,7 @@ export default async function PortalDashboardPage() {
     visitsByDaypart,
     topWines,
     guestOrigins,
+    feedback,
   ] = await Promise.all([
     supabase
       .from("winery_events")
@@ -54,6 +58,7 @@ export default async function PortalDashboardPage() {
     isSubscribed ? getWineryVisitsByDaypart(ctx.winery.id) : Promise.resolve([]),
     isSubscribed ? getWineryTopWines(ctx.winery.id) : Promise.resolve([]),
     isSubscribed ? getWineryGuestOrigins(ctx.winery.id) : Promise.resolve({ topZips: [] }),
+    getWineryFeedback(ctx.winery.id),
   ]);
 
   const wineClubCTR =
@@ -84,6 +89,27 @@ export default async function PortalDashboardPage() {
         </div>
 
         <WineryAnalyticsUpsellCard isSubscribed={isSubscribed} />
+
+        <div className="rounded-2xl border border-[var(--color-line)] bg-white p-5">
+          <h2 className="font-serif-display text-lg text-[var(--color-charcoal)]">Feedback</h2>
+          <p className="mt-1 text-xs text-[var(--color-charcoal)]/55">
+            Tell us what&rsquo;s working, what&rsquo;s not, or what you&rsquo;d like to see next on the
+            platform.
+          </p>
+          <div className="mt-3">
+            <WineryFeedbackForm />
+          </div>
+          {feedback.length > 0 && (
+            <div className="mt-4 flex flex-col gap-2 border-t border-[var(--color-line)] pt-4">
+              {feedback.slice(0, 3).map((f) => (
+                <div key={f.id} className="text-xs">
+                  <p className="text-[var(--color-charcoal)]/40">{formatCheckinDate(f.created_at)}</p>
+                  <p className="mt-0.5 text-[var(--color-charcoal)]/75">{f.feedback}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {isSubscribed && (
           <>

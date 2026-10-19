@@ -262,10 +262,7 @@ export default async function AdminDashboardPage() {
                       {formatCheckinDate(f.created_at)}
                     </span>
                   </div>
-                  <FeedbackActions
-                    onArchive={() => archiveAppFeedbackAction(f.id)}
-                    onDelete={() => deleteAppFeedbackAction(f.id)}
-                  />
+                  <FeedbackActions id={f.id} archiveAction={archiveAppFeedbackAction} deleteAction={deleteAppFeedbackAction} />
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-[var(--color-charcoal)]/60">
                   {f.memberName}
@@ -301,10 +298,7 @@ export default async function AdminDashboardPage() {
                     <p className="text-xs font-medium text-[var(--color-charcoal)]/60">{f.wineryName}</p>
                     <p className="text-xs text-[var(--color-charcoal)]/45">{formatCheckinDate(f.created_at)}</p>
                   </div>
-                  <FeedbackActions
-                    onArchive={() => archiveWineryFeedbackAction(f.id)}
-                    onDelete={() => deleteWineryFeedbackAction(f.id)}
-                  />
+                  <FeedbackActions id={f.id} archiveAction={archiveWineryFeedbackAction} deleteAction={deleteWineryFeedbackAction} />
                 </div>
                 <p className="mt-1.5 text-[var(--color-charcoal)]/80">{f.feedback}</p>
               </div>

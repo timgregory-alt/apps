@@ -10,11 +10,13 @@ type ActionResult = { error: string } | void;
  * Takes the already-bound server actions as props so this component
  * doesn't need to know which feedback table it's acting on. */
 export function FeedbackActions({
-  onArchive,
-  onDelete,
+  id,
+  archiveAction,
+  deleteAction,
 }: {
-  onArchive: () => Promise<ActionResult>;
-  onDelete: () => Promise<ActionResult>;
+  id: string;
+  archiveAction: (id: string) => Promise<ActionResult>;
+  deleteAction: (id: string) => Promise<ActionResult>;
 }) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function FeedbackActions({
   function archive() {
     setError(null);
     startTransition(async () => {
-      const result = await onArchive();
+      const result = await archiveAction(id);
       if (result?.error) setError(result.error);
     });
   }
@@ -31,7 +33,7 @@ export function FeedbackActions({
   function remove() {
     setError(null);
     startTransition(async () => {
-      const result = await onDelete();
+      const result = await deleteAction(id);
       if (result?.error) {
         setError(result.error);
         setConfirmingDelete(false);
