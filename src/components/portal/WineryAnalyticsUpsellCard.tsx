@@ -11,6 +11,7 @@ import {
 const BENEFITS = [
   "Page views and wine club click-through rate",
   "Guest age groups and where guests are coming from",
+  "How many guests are one-time vs. repeat visitors",
   "Peak visit day and time, so you know when to staff up",
   "Your most-loved wines, ranked by guest ratings",
 ];
