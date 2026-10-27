@@ -41,6 +41,7 @@ export function CheckInFlow({
   const [submitting, setSubmitting] = useState(false);
   const [checkinDate, setCheckinDate] = useState<string>(winery.checkin?.checkin_date ?? "");
   const [trailComplete, setTrailComplete] = useState(false);
+  const [canRedeemReward, setCanRedeemReward] = useState(false);
   const [alreadyVisited, setAlreadyVisited] = useState(winery.status !== "not_visited");
 
   const updatedWineries = useMemo<WineryWithStatus[]>(
@@ -88,6 +89,7 @@ export function CheckInFlow({
       setCheckinDate(data.checkin?.checkin_date ?? new Date().toISOString());
       setAlreadyVisited(true);
       setTrailComplete(Boolean(data.trailComplete));
+      setCanRedeemReward(Boolean(data.canRedeemReward));
       setStage("celebrating");
       notifyPointsChanged();
       // The winery page's other server-rendered sections (like wine tasting,
@@ -189,6 +191,7 @@ export function CheckInFlow({
           checkinDateISO={checkinDate}
           visited={visited}
           total={updatedWineries.length}
+          canRedeemReward={canRedeemReward}
           onShare={() => setStage("sharing")}
           onNext={handleCelebrationNext}
         />

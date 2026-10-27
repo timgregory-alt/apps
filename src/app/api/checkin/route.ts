@@ -3,6 +3,15 @@ import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SOUTH_NASHVILLE_TRAIL } from "@/lib/seed-data";
 import { evaluateDistance } from "@/lib/geo";
+import {
+  getWineriesWithStatus,
+  getWinesWithTastings,
+  getActiveRewardTiers,
+  getUserRewardRedemptions,
+  getQualifyingReferralCount,
+  getUserCheckins,
+} from "@/lib/data";
+import { computeRewardsPoints, totalPointsSpent } from "@/lib/rewards";
 import type { Winery } from "@/lib/types";
 
 interface CheckinBody {
@@ -86,7 +95,11 @@ export async function POST(request: Request) {
 
   // Admins can check in from anywhere, so they can test check-in-gated
   // features (ratings, rewards) without driving to every winery.
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin, is_subscriber")
+    .eq("id", user.id)
+    .maybeSingle();
   const isAdmin = !!profile?.is_admin;
 
   const distance = evaluateDistance(
@@ -196,5 +209,33 @@ export async function POST(request: Request) {
     completion = completion ?? data;
   }
 
-  return NextResponse.json({ verified: true, checkin, trailComplete, completion });
+  // Only nudge the guest to redeem a reward when this winery actually
+  // accepts redemptions — an earn-points-only winery (like Arrington)
+  // still earns points on check-in, but shouldn't prompt a guest to
+  // redeem on-site since staff there won't honor the code.
+  let canRedeemReward = false;
+  if (winery.redeems_rewards) {
+    const [wineries, wines, tiers, redemptions, referralCount, rewardCheckins] = await Promise.all([
+      getWineriesWithStatus(user.id),
+      getWinesWithTastings(user.id),
+      getActiveRewardTiers(),
+      getUserRewardRedemptions(user.id),
+      getQualifyingReferralCount(),
+      getUserCheckins(user.id),
+    ]);
+    const points = computeRewardsPoints(
+      wineries,
+      wines,
+      rewardCheckins.length,
+      referralCount,
+      profile?.is_subscriber ?? false
+    );
+    const balance = points.total - totalPointsSpent(redemptions);
+    const cheapestTierPoints = tiers
+      .filter((t) => !t.birthday_only)
+      .reduce((min, t) => Math.min(min, t.points_required), Infinity);
+    canRedeemReward = balance >= cheapestTierPoints;
+  }
+
+  return NextResponse.json({ verified: true, checkin, trailComplete, completion, canRedeemReward });
 }

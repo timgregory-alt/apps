@@ -121,8 +121,8 @@ export default async function WineryDetailPage({
           <div className="rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-gold-pale)]/20 px-4 py-3 text-center">
             <p className="text-sm font-medium text-[var(--color-charcoal)]">Earn Points Only</p>
             <p className="mt-0.5 text-xs text-[var(--color-charcoal)]/60">
-              You&rsquo;ll earn trail points for checking in here, but this winery doesn&rsquo;t
-              redeem reward codes on-site.
+              You&rsquo;ll earn trail points for checking in here, but this winery isn&rsquo;t
+              redeeming reward codes at this time.
             </p>
           </div>
         )}

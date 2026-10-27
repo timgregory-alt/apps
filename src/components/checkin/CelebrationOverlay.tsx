@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Share2, ArrowRight } from "lucide-react";
+import { Share2, ArrowRight, Gift } from "lucide-react";
 import { createPortal } from "react-dom";
 import { TrailStamp } from "@/components/my-trail/TrailStamp";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Button } from "@/components/ui/Button";
+import { Button, LinkButton } from "@/components/ui/Button";
 import { formatCheckinDate } from "@/lib/utils";
 
 export function CelebrationOverlay({
@@ -15,6 +15,7 @@ export function CelebrationOverlay({
   checkinDateISO,
   visited,
   total,
+  canRedeemReward,
   onShare,
   onNext,
 }: {
@@ -23,6 +24,11 @@ export function CelebrationOverlay({
   checkinDateISO: string;
   visited: number;
   total: number;
+  /** True when the guest has enough points for a reward tier AND this
+   * winery actually honors redemptions — a winery that's earn-points-only
+   * never sets this, so the nudge below only ever shows somewhere that'll
+   * accept the code. */
+  canRedeemReward: boolean;
   onShare: () => void;
   onNext: () => void;
 }) {
@@ -128,8 +134,15 @@ export function CelebrationOverlay({
               <ProgressBar value={visited} max={total} />
             </div>
 
+            {canRedeemReward && (
+              <LinkButton href="/rewards" variant="gold" fullWidth>
+                <Gift size={16} strokeWidth={2} />
+                You Have a Reward Ready — Redeem Now
+              </LinkButton>
+            )}
+
             <div className="mt-2 flex w-full flex-col gap-2.5">
-              <Button variant="gold" fullWidth onClick={onShare}>
+              <Button variant={canRedeemReward ? "ivory" : "gold"} fullWidth onClick={onShare}>
                 <Share2 size={16} strokeWidth={2} />
                 Share Your Visit
               </Button>
