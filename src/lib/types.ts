@@ -56,6 +56,10 @@ export interface Winery {
    * dashboard — trialing counts as subscribed, same as profiles.is_subscriber. */
   analytics_subscribed: boolean;
   analytics_subscription_status: string | null;
+  /** When false, this winery doesn't accept reward redemptions — guests
+   * still earn points for checking in and rating wines here, but can't
+   * redeem a reward tier's discount on-site. */
+  redeems_rewards: boolean;
 }
 
 export interface WineSyncLogEntry {

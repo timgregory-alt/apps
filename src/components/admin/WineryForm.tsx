@@ -215,6 +215,16 @@ export function WineryForm({
         Active (visible to guests)
       </label>
 
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          name="redeems_rewards"
+          defaultChecked={winery?.redeems_rewards ?? true}
+          className="h-4 w-4"
+        />
+        Redeems rewards (uncheck for an earn-points-only winery)
+      </label>
+
       {error && <p className="text-sm text-[var(--color-burgundy)]">{error}</p>}
 
       <button

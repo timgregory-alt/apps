@@ -40,6 +40,7 @@ function parseWineryForm(formData: FormData) {
     yelp_url: String(formData.get("yelp_url") ?? "").trim() || null,
     checkin_radius_meters: Math.round(feetToMeters(radiusFeet)),
     active: formData.get("active") === "on",
+    redeems_rewards: formData.get("redeems_rewards") === "on",
     wine_menu_url: String(formData.get("wine_menu_url") ?? "")
       .split("\n")
       .map((u) => u.trim())
