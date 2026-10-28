@@ -55,7 +55,12 @@ export default async function AdminDashboardPage() {
           General App QR Code
         </p>
         <div className="mt-3 flex justify-center">
-          <QrCode value="https://winetrailonline.com" size={160} />
+          <QrCode
+            value="https://winetrailonline.com"
+            size={160}
+            downloadable
+            filename="winetrailonline-qr"
+          />
         </div>
         <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">https://winetrailonline.com</p>
         <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
