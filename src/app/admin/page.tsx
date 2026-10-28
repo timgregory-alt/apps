@@ -17,6 +17,7 @@ import { formatCheckinDate } from "@/lib/utils";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
 import { FeedbackActions } from "@/components/admin/FeedbackActions";
+import { QrCode } from "@/components/ui/QrCode";
 
 export default async function AdminDashboardPage() {
   const [stats, wineries, wineLikeStats, appRatingStats, wineryFeedback, members] = await Promise.all([
@@ -47,6 +48,20 @@ export default async function AdminDashboardPage() {
         >
           Export Member List (CSV)
         </a>
+      </div>
+
+      <div className="w-full max-w-xs rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
+        <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+          General App QR Code
+        </p>
+        <div className="mt-3 flex justify-center">
+          <QrCode value="https://winetrailonline.com" size={160} />
+        </div>
+        <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">https://winetrailonline.com</p>
+        <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
+          Not tied to any winery — use this on banners, cards, or signage you might move between
+          locations.
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
