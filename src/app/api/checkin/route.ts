@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SOUTH_NASHVILLE_TRAIL } from "@/lib/seed-data";
-import { evaluateDistance } from "@/lib/geo";
+import { evaluateDistance, haversineMeters, metersToMiles } from "@/lib/geo";
 import {
   getWineriesWithStatus,
   getWinesWithTastings,
@@ -23,9 +23,23 @@ interface CheckinBody {
 const NOT_CLOSE_MESSAGE =
   "It looks like you're not quite at the winery yet. Visit the tasting room to collect your trail stamp.";
 
+const IMPLAUSIBLE_TRAVEL_MESSAGE =
+  "That doesn't look possible — your last check-in was too far away for the time between them. If you're really here, please try again in a bit.";
+
 /** A guest can check in at the same winery again after this cooldown —
  * rewards repeat visits instead of a single one-time stamp. */
 const CHECKIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+/** Generous highway speed, in mph — anything faster than this between two
+ * check-ins is physically impossible by car, so it's a reliable signal
+ * someone faked their GPS rather than actually driving the trail. Padded
+ * well above real speed limits so a genuine guest on a real road trip
+ * never gets a false block. */
+const MAX_PLAUSIBLE_MPH = 85;
+/** Flat buffer added on top of the speed-based distance, to absorb GPS
+ * imprecision and the first minute or two of a short hop between two
+ * nearby wineries. */
+const VELOCITY_GRACE_MILES = 8;
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as CheckinBody;
@@ -119,6 +133,39 @@ export async function POST(request: Request) {
       },
       { status: 403 }
     );
+  }
+
+  // Reject a check-in that's physically impossible to have reached from
+  // the guest's last check-in anywhere else — catches someone faking GPS
+  // to "check in" at every winery in one sitting without actually driving
+  // between them. A genuine guest doing several stops in one real day
+  // always has real drive time between them, so this only ever blocks an
+  // implausible jump. Admins are exempt for the same reason they skip the
+  // geofence — testing from one spot shouldn't require faking a trip.
+  if (!isAdmin) {
+    const { data: priorCheckin } = await supabase
+      .from("checkins")
+      .select("winery_id, checkin_date, latitude, longitude")
+      .eq("user_id", user.id)
+      .neq("winery_id", wineryId)
+      .order("checkin_date", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (priorCheckin && priorCheckin.latitude != null && priorCheckin.longitude != null) {
+      const elapsedHours = Math.max(
+        (Date.now() - new Date(priorCheckin.checkin_date).getTime()) / (60 * 60 * 1000),
+        0
+      );
+      const traveledMiles = metersToMiles(
+        haversineMeters(priorCheckin.latitude, priorCheckin.longitude, latitude, longitude)
+      );
+      const maxPlausibleMiles = elapsedHours * MAX_PLAUSIBLE_MPH + VELOCITY_GRACE_MILES;
+
+      if (traveledMiles > maxPlausibleMiles) {
+        return NextResponse.json({ verified: false, message: IMPLAUSIBLE_TRAVEL_MESSAGE }, { status: 403 });
+      }
+    }
   }
 
   const { data: lastCheckin } = await supabase
