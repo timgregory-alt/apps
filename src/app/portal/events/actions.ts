@@ -35,7 +35,7 @@ export async function createWineryEventAction(wineryId: string, input: EventInpu
   if (error) return { error: error.message };
 
   revalidatePath("/portal/events");
-  revalidatePath("/portal/details");
+  revalidatePath("/portal");
   revalidatePath("/vip");
   revalidatePath("/");
 }
@@ -69,7 +69,7 @@ export async function deleteWineryEventAction(wineryId: string, eventId: string)
   if (error) return { error: error.message };
 
   revalidatePath("/portal/events");
-  revalidatePath("/portal/details");
+  revalidatePath("/portal");
   revalidatePath("/vip");
   revalidatePath("/");
 }

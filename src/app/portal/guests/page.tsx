@@ -33,7 +33,7 @@ export default async function PortalGuestsPage() {
             </a>
           ) : (
             <Link
-              href="/portal/details"
+              href="/portal"
               className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-charcoal)]/60 hover:border-[var(--color-gold)] hover:text-[var(--color-burgundy)]"
             >
               <Lock size={13} strokeWidth={2} />
@@ -65,7 +65,7 @@ export default async function PortalGuestsPage() {
             the totals above.
           </p>
           <Link
-            href="/portal/details"
+            href="/portal"
             className="mt-2 rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-xs font-medium text-white hover:bg-[var(--color-burgundy-deep)]"
           >
             Subscribe — $50/mo

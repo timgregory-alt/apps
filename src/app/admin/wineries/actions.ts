@@ -224,7 +224,7 @@ async function portalPasswordRedirect(): Promise<string> {
   const host = headerList.get("host");
   const proto = headerList.get("x-forwarded-proto") ?? "https";
   const origin = host ? `${proto}://${host}` : "https://winetrailonline.com";
-  return `${origin}/update-password?next=${encodeURIComponent("/portal/details")}`;
+  return `${origin}/update-password?next=${encodeURIComponent("/portal")}`;
 }
 
 /** Grants portal access for a winery contact by email. If that email

@@ -62,8 +62,8 @@ export async function createWineryAnalyticsCheckoutAction(
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/portal/details?subscribed=1`,
-      cancel_url: `${origin}/portal/details`,
+      success_url: `${origin}/portal?subscribed=1`,
+      cancel_url: `${origin}/portal`,
     });
 
     if (!session.url) return { error: "Could not start checkout. Please try again." };
@@ -90,7 +90,7 @@ export async function createWineryAnalyticsBillingPortalAction(): Promise<{ erro
     const origin = await siteOrigin();
     const session = await stripe.billingPortal.sessions.create({
       customer: ctx.winery.stripe_customer_id,
-      return_url: `${origin}/portal/details`,
+      return_url: `${origin}/portal`,
     });
     portalUrl = session.url;
   } catch (err) {
