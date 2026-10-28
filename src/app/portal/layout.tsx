@@ -16,11 +16,11 @@ export default async function PortalLayout({ children }: { children: React.React
             : "Connect Supabase and link your profile to a winery to access the portal."}
         </p>
         <div className="mt-2 flex items-center gap-4">
-          <Link href="/login?redirectTo=/portal" className="text-sm font-medium text-[var(--color-burgundy)] hover:underline">
+          <Link href="/login?redirectTo=/portal/details" className="text-sm font-medium text-[var(--color-burgundy)] hover:underline">
             Sign in
           </Link>
           <Link
-            href={`/reset-password?next=${encodeURIComponent("/portal")}`}
+            href={`/reset-password?next=${encodeURIComponent("/portal/details")}`}
             className="text-sm text-[var(--color-charcoal)]/55 hover:text-[var(--color-burgundy)]"
           >
             Forgot password?
@@ -34,13 +34,10 @@ export default async function PortalLayout({ children }: { children: React.React
     <div className="min-h-dvh bg-[var(--color-ivory-deep)]">
       <header className="border-b border-[var(--color-line)] bg-[var(--color-charcoal)] px-6 py-4 text-[var(--color-ivory)]">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Link href="/portal" className="font-serif-display text-lg">
+          <Link href="/portal/details" className="font-serif-display text-lg">
             {ctx.winery.name} · Portal
           </Link>
           <nav className="flex items-center gap-5 text-sm">
-            <Link href="/portal" className="hover:text-[var(--color-gold)]">
-              Dashboard
-            </Link>
             <Link href="/portal/events" className="hover:text-[var(--color-gold)]">
               Events
             </Link>

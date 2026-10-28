@@ -96,7 +96,7 @@ export default async function ProfilePage() {
       {profile?.winery_id && (
         <div className="px-6">
           <Link
-            href="/portal"
+            href="/portal/details"
             className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--color-line)] bg-white px-5 py-3.5 text-sm font-medium text-[var(--color-charcoal)]"
           >
             Go to Winery Portal

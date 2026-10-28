@@ -19,5 +19,5 @@ export async function submitWineryFeedbackAction(feedback: string): Promise<{ er
   });
   if (error) return { error: error.message };
 
-  revalidatePath("/portal");
+  revalidatePath("/portal/details");
 }
