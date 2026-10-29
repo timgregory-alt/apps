@@ -73,13 +73,18 @@ export async function getTrailWineries(trailSlug: string = DEFAULT_TRAIL_SLUG): 
     const supabase = await createClient();
     const { data: trail } = await supabase
       .from("trails")
-      .select("id")
+      .select("id, coming_soon")
       .eq("slug", trailSlug)
       .maybeSingle();
 
     if (!trail) return trailSlug === DEFAULT_TRAIL_SLUG
       ? [...SEED_WINERIES].sort((a, b) => a.sort_order - b.sort_order)
       : [];
+
+    // Marked "coming soon" even though it already has wineries mapped —
+    // keep the real trail_wineries rows untouched (so it can be switched
+    // back on later) but don't surface them to guests yet.
+    if (trail.coming_soon) return [];
 
     const { data, error } = await supabase
       .from("trail_wineries")

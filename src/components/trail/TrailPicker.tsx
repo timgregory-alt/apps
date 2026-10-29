@@ -23,19 +23,6 @@ export function TrailPicker({
         const stops = stopCountBySlug.get(t.slug) ?? 0;
         const active = t.slug === selectedSlug;
 
-        if (t.coming_soon) {
-          return (
-            <div
-              key={t.slug}
-              aria-disabled="true"
-              className="flex h-20 w-40 shrink-0 cursor-not-allowed flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-[var(--color-line)] bg-black/[0.03] px-3 text-center text-[var(--color-charcoal)]/40 grayscale"
-            >
-              <span className="text-xs font-medium">{t.name}</span>
-              <span className="text-[0.65rem]">Coming Soon</span>
-            </div>
-          );
-        }
-
         return (
           <Link
             key={t.slug}
