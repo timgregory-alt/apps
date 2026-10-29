@@ -11,11 +11,13 @@ export default async function TrailPlanPage({
   searchParams: Promise<{ trail?: string }>;
 }) {
   const { trail: trailParam } = await searchParams;
-  const trailSlug = trailParam ?? DEFAULT_TRAIL_SLUG;
+  const requestedSlug = trailParam ?? DEFAULT_TRAIL_SLUG;
+  const requestedTrail = await getTrailBySlug(requestedSlug);
+  const trailSlug = requestedTrail && !requestedTrail.coming_soon ? requestedSlug : DEFAULT_TRAIL_SLUG;
   const user = await getCurrentUser();
   const [wineries, trail] = await Promise.all([
     getWineriesWithStatus(user?.id ?? null, trailSlug),
-    getTrailBySlug(trailSlug),
+    trailSlug === requestedSlug ? Promise.resolve(requestedTrail) : getTrailBySlug(trailSlug),
   ]);
 
   return (

@@ -27,7 +27,9 @@ export default async function MyTrailPage({
   const { trail: trailParam } = await searchParams;
   const user = await getCurrentUser();
   const trails = await getAllTrails();
-  const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
+  const selectedTrail =
+    trails.find((t) => t.slug === trailParam && !t.coming_soon) ??
+    trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
   const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;
 
   const [trailWineryLists, wineries, wines, customTastings] = await Promise.all([

@@ -13,6 +13,10 @@ export interface Trail {
   description: string | null;
   image: string | null;
   active: boolean;
+  /** Manually marked unselectable and shown as "Coming soon" even though
+   * it already has wineries mapped — distinct from a trail with zero
+   * wineries, which gets the same treatment automatically. */
+  coming_soon: boolean;
   sort_order: number;
   created_at: string;
 }
