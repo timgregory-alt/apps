@@ -13,8 +13,8 @@ import type { RewardTier } from "@/lib/types";
 // via STRIPE_PRICE_ID_MONTHLY / STRIPE_PRICE_ID_ANNUAL, since neither is
 // fetched live from Stripe.
 const MONTHLY_PRICE = "6.99";
-const ANNUAL_PRICE = "59.99";
-const ANNUAL_SAVINGS_PERCENT = 28;
+const ANNUAL_PRICE = "59.88";
+const ANNUAL_SAVINGS_PERCENT = 29;
 
 // VIP events get a 10-day subscriber-only early-access window (see
 // VIP_EARLY_ACCESS_HOURS in src/lib/data.ts) — regular events are never
