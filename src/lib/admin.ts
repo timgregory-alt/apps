@@ -15,6 +15,24 @@ export function cityFromZip(zip: string | null): string | null {
   return match ? `${match.city}, ${match.state}` : null;
 }
 
+/** Monthly revenue per winery implied by the Moderate scenario of the
+ * 70-winery revenue model (guest subscriptions + Travel Pass + Winery
+ * Analytics, modeled with realistic signup/conversion/churn rates):
+ * $47,240/yr at 70 wineries. Scaling by today's actual winery count keeps
+ * the admin dashboard's revenue target honest while the trail is still
+ * growing toward 70, rather than holding it to the full-scale number from
+ * day one. */
+const MODERATE_SCENARIO_ANNUAL_REVENUE_AT_70_WINERIES = 47_240;
+const MODERATE_SCENARIO_WINERY_COUNT = 70;
+
+/** This month's revenue target, scaled to the trail's current winery
+ * count — admin-dashboard only. */
+export function getMonthlyRevenueTarget(wineryCount: number): number {
+  const perWineryPerMonth =
+    MODERATE_SCENARIO_ANNUAL_REVENUE_AT_70_WINERIES / MODERATE_SCENARIO_WINERY_COUNT / 12;
+  return wineryCount * perWineryPerMonth;
+}
+
 export async function isCurrentUserAdmin(): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
   try {

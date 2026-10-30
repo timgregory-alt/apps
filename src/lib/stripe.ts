@@ -46,6 +46,31 @@ export function getWineryAnalyticsPriceId(plan: SubscriptionPlan): string | null
   return process.env[key] || null;
 }
 
+/** Sums succeeded charges, minus any refunds, since the 1st of the current
+ * calendar month — covers one-time Travel Pass purchases and subscription
+ * invoice payments alike, since Stripe backs both with a charge. Returns
+ * null when billing isn't configured, so the caller can show "—" instead
+ * of a misleading $0. Used only by the admin dashboard's actual-vs-target
+ * revenue card. */
+export async function getActualRevenueThisMonth(): Promise<number | null> {
+  if (!isStripeConfigured) return null;
+
+  const stripe = getStripeClient();
+  const startOfMonth = new Date();
+  startOfMonth.setUTCDate(1);
+  startOfMonth.setUTCHours(0, 0, 0, 0);
+
+  let totalCents = 0;
+  for await (const charge of stripe.charges.list({
+    created: { gte: Math.floor(startOfMonth.getTime() / 1000) },
+    limit: 100,
+  })) {
+    if (charge.paid) totalCents += charge.amount - charge.amount_refunded;
+  }
+
+  return totalCents / 100;
+}
+
 /** Statuses that count as "has an active subscription" for gating premium
  * features. Checkout no longer offers a free trial, but "trialing" still
  * counts here in case a subscription is ever manually trialed from the

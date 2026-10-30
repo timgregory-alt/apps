@@ -6,31 +6,39 @@ import {
   getAppRatingStats,
   getWineryFeedbackAdmin,
   getAllMembersAdmin,
+  getMonthlyRevenueTarget,
   LIKED_RATING_THRESHOLD,
 } from "@/lib/admin";
+import { getActualRevenueThisMonth } from "@/lib/stripe";
 import {
   archiveAppFeedbackAction,
   deleteAppFeedbackAction,
   archiveWineryFeedbackAction,
   deleteWineryFeedbackAction,
 } from "@/app/admin/actions";
-import { formatCheckinDate } from "@/lib/utils";
+import { cn, formatCheckinDate } from "@/lib/utils";
 import { computeTrend, computeTrend30 } from "@/lib/trends";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
 import { FeedbackActions } from "@/components/admin/FeedbackActions";
 import { QrCode } from "@/components/ui/QrCode";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 export default async function AdminDashboardPage() {
-  const [stats, trends, wineries, wineLikeStats, appRatingStats, wineryFeedback, members] = await Promise.all([
-    getAdminStats(),
-    getAdminPeriodTrends(),
-    getAllWineriesAdmin(),
-    getWineLikeStats(),
-    getAppRatingStats(),
-    getWineryFeedbackAdmin(),
-    getAllMembersAdmin(),
-  ]);
+  const [stats, trends, wineries, wineLikeStats, appRatingStats, wineryFeedback, members, actualRevenueThisMonth] =
+    await Promise.all([
+      getAdminStats(),
+      getAdminPeriodTrends(),
+      getAllWineriesAdmin(),
+      getWineLikeStats(),
+      getAppRatingStats(),
+      getWineryFeedbackAdmin(),
+      getAllMembersAdmin(),
+      getActualRevenueThisMonth(),
+    ]);
+
+  const revenueTarget = getMonthlyRevenueTarget(wineries.length);
+  const revenuePct = revenueTarget > 0 ? Math.round(((actualRevenueThisMonth ?? 0) / revenueTarget) * 100) : 0;
 
   const mostPopular = Object.entries(stats.checkinsByWinery).sort((a, b) => b[1] - a[1])[0];
   const mostPopularWinery = wineries.find((w) => w.id === mostPopular?.[0]);
@@ -114,6 +122,43 @@ export default async function AdminDashboardPage() {
             Export Member List (CSV)
           </a>
         </div>
+      </div>
+
+      <div className="w-full max-w-sm rounded-2xl border border-[var(--color-line)] bg-white p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+            Monthly Revenue vs. Target
+          </p>
+          {actualRevenueThisMonth != null && (
+            <p
+              className={cn(
+                "text-xs font-medium",
+                revenuePct >= 100 ? "text-[var(--color-gold)]" : "text-[var(--color-charcoal)]/55"
+              )}
+            >
+              {revenuePct}% of target
+            </p>
+          )}
+        </div>
+        <div className="mt-2 flex items-baseline gap-2">
+          <p className="font-serif-display text-3xl text-[var(--color-burgundy)]">
+            {actualRevenueThisMonth != null ? `$${Math.round(actualRevenueThisMonth).toLocaleString()}` : "—"}
+          </p>
+          <p className="text-sm text-[var(--color-charcoal)]/45">
+            of ${Math.round(revenueTarget).toLocaleString()} target
+          </p>
+        </div>
+        <ProgressBar
+          value={Math.round(actualRevenueThisMonth ?? 0)}
+          max={Math.max(Math.round(revenueTarget), 1)}
+          label="Monthly revenue vs. target"
+          className="mt-3"
+        />
+        <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
+          {actualRevenueThisMonth == null
+            ? "Billing isn't configured yet, so actual revenue can't be shown."
+            : `Target scaled from the Moderate scenario of the revenue model, at ${wineries.length} wineries.`}
+        </p>
       </div>
 
       <div className="w-full max-w-xs rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
