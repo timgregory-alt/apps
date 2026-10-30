@@ -186,7 +186,7 @@ export function SubscriptionUpsellCard({
           type="button"
           onClick={() => subscribe("monthly")}
           disabled={pending !== null}
-          className="w-full rounded-full border border-[var(--color-ivory)]/25 px-5 py-2.5 text-sm font-medium text-[var(--color-ivory)] transition-colors hover:border-[var(--color-gold-pale)] hover:text-[var(--color-gold-pale)] disabled:opacity-60"
+          className="w-full rounded-full border border-[var(--color-gold-pale)]/35 px-5 py-2.5 text-sm font-medium text-[var(--color-gold-pale)] transition-colors hover:border-[var(--color-gold-pale)] hover:bg-[var(--color-gold-pale)]/10 disabled:opacity-60"
         >
           {pending === "monthly" ? "Starting…" : "Visiting often? Subscribe for ongoing access"}
         </button>
@@ -272,7 +272,7 @@ export function SubscriptionUpsellCard({
           type="button"
           onClick={buyTravelPass}
           disabled={pending !== null}
-          className="mt-2.5 w-full rounded-full border border-[var(--color-ivory)]/25 px-5 py-2.5 text-sm font-medium text-[var(--color-ivory)] transition-colors hover:border-[var(--color-gold-pale)] hover:text-[var(--color-gold-pale)] disabled:opacity-60"
+          className="mt-2.5 w-full rounded-full border border-[var(--color-gold-pale)]/35 px-5 py-2.5 text-sm font-medium text-[var(--color-gold-pale)] transition-colors hover:border-[var(--color-gold-pale)] hover:bg-[var(--color-gold-pale)]/10 disabled:opacity-60"
         >
           {pending === "travel_pass"
             ? "Starting…"
