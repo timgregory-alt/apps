@@ -111,26 +111,35 @@ export async function getWineryQrScanCount(wineryId: string): Promise<number> {
   }
 }
 
-export interface WeeklyTrendPoint {
+export interface PeriodTrendPoint {
   thisWeek: number | null;
   lastWeek: number | null;
+  last30: number | null;
+  prev30: number | null;
 }
 
-/** Last-7-days vs the 7 days before that, per metric — keyed the same way
- * as the metric name winery_weekly_trends() returns, e.g. "qr_scans",
- * "page_views", "total_guests". avg_visitor_age can be null when a window
- * has no checked-in guest with a birth date on file. */
-export async function getWineryWeeklyTrends(wineryId: string): Promise<Record<string, WeeklyTrendPoint>> {
+/** Last-7-days vs the prior 7, and last-30-days vs the prior 30, per
+ * metric — keyed the same way as the metric name winery_period_trends()
+ * returns, e.g. "qr_scans", "page_views", "total_guests". avg_visitor_age
+ * can be null when a window has no checked-in guest with a birth date on
+ * file. */
+export async function getWineryPeriodTrends(wineryId: string): Promise<Record<string, PeriodTrendPoint>> {
   if (!isSupabaseConfigured) return {};
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("winery_weekly_trends", { target_winery_id: wineryId });
+    const { data, error } = await supabase.rpc("winery_period_trends", { target_winery_id: wineryId });
     if (error || !data) throw error;
 
-    const rows = data as { metric: string; this_week: number | null; last_week: number | null }[];
-    const byMetric: Record<string, WeeklyTrendPoint> = {};
+    const rows = data as {
+      metric: string;
+      this_week: number | null;
+      last_week: number | null;
+      last_30: number | null;
+      prev_30: number | null;
+    }[];
+    const byMetric: Record<string, PeriodTrendPoint> = {};
     rows.forEach((r) => {
-      byMetric[r.metric] = { thisWeek: r.this_week, lastWeek: r.last_week };
+      byMetric[r.metric] = { thisWeek: r.this_week, lastWeek: r.last_week, last30: r.last_30, prev30: r.prev_30 };
     });
     return byMetric;
   } catch {
