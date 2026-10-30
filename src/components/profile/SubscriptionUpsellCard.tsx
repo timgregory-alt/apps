@@ -34,14 +34,26 @@ export function SubscriptionUpsellCard({
   const [pendingPlan, setPendingPlan] = useState<"monthly" | "annual" | "manage" | null>(null);
   const [, startTransition] = useTransition();
 
-  // Whether any tier currently has a subscriber-only boost — checked
-  // rather than hardcoded so this stops claiming a perk that isn't
-  // actually configured if all the boosts are ever removed.
-  const hasSubscriberDiscounts = tiers.some(
-    (t) => t.subscriber_discount_percent != null && t.subscriber_discount_percent > t.discount_percent
+  // The biggest subscriber-only discount boost actually configured on any
+  // tier — computed live rather than hardcoded, so the claim on the card
+  // never overstates what's really available (and disappears cleanly if
+  // every boost is ever removed).
+  const maxSubscriberDiscount = tiers.reduce(
+    (max, t) =>
+      t.subscriber_discount_percent != null && t.subscriber_discount_percent > t.discount_percent
+        ? Math.max(max, t.subscriber_discount_percent)
+        : max,
+    0
   );
+  const hasSubscriberDiscounts = maxSubscriberDiscount > 0;
+  // Leads with the concrete dollar-savings perk — it's a provable ROI a
+  // guest can redeem on their very next visit, unlike the points/tier
+  // perks below, which only pay off for frequent visitors.
   const benefits = hasSubscriberDiscounts
-    ? [BASE_BENEFITS[0], "Unlock enhanced discounts on tastings, food, and merchandise", ...BASE_BENEFITS.slice(1)]
+    ? [
+        `Save up to ${maxSubscriberDiscount}% extra off tastings, food & merch at top reward tiers`,
+        ...BASE_BENEFITS,
+      ]
     : BASE_BENEFITS;
 
   function subscribe(plan: "monthly" | "annual") {
