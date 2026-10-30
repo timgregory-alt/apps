@@ -186,7 +186,7 @@ export function SubscriptionUpsellCard({
           type="button"
           onClick={() => subscribe("monthly")}
           disabled={pending !== null}
-          className="text-center text-xs font-medium text-[var(--color-ivory)]/55 underline underline-offset-2 disabled:opacity-60"
+          className="w-full rounded-full border border-[var(--color-ivory)]/25 px-5 py-2.5 text-sm font-medium text-[var(--color-ivory)] transition-colors hover:border-[var(--color-gold-pale)] hover:text-[var(--color-gold-pale)] disabled:opacity-60"
         >
           {pending === "monthly" ? "Starting…" : "Visiting often? Subscribe for ongoing access"}
         </button>
@@ -239,45 +239,47 @@ export function SubscriptionUpsellCard({
         See VIP Events
       </Link>
 
-      <Button
-        type="button"
-        variant="gold"
-        fullWidth
-        onClick={() => subscribe("monthly")}
-        disabled={pending !== null}
-      >
-        {pending === "monthly" ? "Starting…" : "Subscribe Monthly"}
-      </Button>
+      <div className="flex flex-col gap-2.5">
+        <Button
+          type="button"
+          variant="gold"
+          fullWidth
+          onClick={() => subscribe("monthly")}
+          disabled={pending !== null}
+        >
+          {pending === "monthly" ? "Starting…" : "Subscribe Monthly"}
+        </Button>
 
-      <button
-        type="button"
-        onClick={() => subscribe("annual")}
-        disabled={pending !== null}
-        className="text-center text-xs font-medium text-[var(--color-ivory)]/55 underline underline-offset-2 disabled:opacity-60"
-      >
-        {pending === "annual"
-          ? "Starting…"
-          : `Save ${ANNUAL_SAVINGS_PERCENT}% with Annual VIP — $${ANNUAL_PRICE}/year`}
-      </button>
+        <button
+          type="button"
+          onClick={() => subscribe("annual")}
+          disabled={pending !== null}
+          className="w-full rounded-full border border-[var(--color-gold-pale)]/35 px-5 py-2.5 text-sm font-medium text-[var(--color-gold-pale)] transition-colors hover:border-[var(--color-gold-pale)] hover:bg-[var(--color-gold-pale)]/10 disabled:opacity-60"
+        >
+          {pending === "annual"
+            ? "Starting…"
+            : `Save ${ANNUAL_SAVINGS_PERCENT}% with Annual — $${ANNUAL_PRICE}/year`}
+        </button>
 
-      <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
-        Billed ${MONTHLY_PRICE}/month. Cancel anytime.
-      </p>
+        <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
+          Billed ${MONTHLY_PRICE}/month. Cancel anytime.
+        </p>
+      </div>
 
-      <div className="border-t border-[var(--color-ivory)]/15 pt-4">
+      <div className="rounded-2xl border border-[var(--color-ivory)]/15 bg-[var(--color-ivory)]/[0.04] p-4">
         <p className="text-xs font-medium text-[var(--color-ivory)]/70">Just visiting for a few days?</p>
         <button
           type="button"
           onClick={buyTravelPass}
           disabled={pending !== null}
-          className="mt-2 text-center text-sm font-medium text-[var(--color-gold-pale)] underline underline-offset-2 disabled:opacity-60"
+          className="mt-2.5 w-full rounded-full border border-[var(--color-ivory)]/25 px-5 py-2.5 text-sm font-medium text-[var(--color-ivory)] transition-colors hover:border-[var(--color-gold-pale)] hover:text-[var(--color-gold-pale)] disabled:opacity-60"
         >
           {pending === "travel_pass"
             ? "Starting…"
-            : `Get a ${TRAVEL_PASS_DAYS}-Day Travel Pass — $${TRAVEL_PASS_PRICE}, no subscription`}
+            : `${TRAVEL_PASS_DAYS}-Day Travel Pass — $${TRAVEL_PASS_PRICE}`}
         </button>
-        <p className="mt-1 text-[0.68rem] text-[var(--color-ivory)]/50">
-          Includes {TRAVEL_PASS_BONUS_POINTS} bonus points, yours to keep.
+        <p className="mt-2 text-[0.68rem] text-[var(--color-ivory)]/50">
+          No subscription · Includes {TRAVEL_PASS_BONUS_POINTS} bonus points, yours to keep
         </p>
       </div>
     </Card>
