@@ -33,6 +33,12 @@ export function getMonthlyRevenueTarget(wineryCount: number): number {
   return wineryCount * perWineryPerMonth;
 }
 
+/** Winery staff (profiles.winery_id set) never count as admin here, even
+ * if is_admin were ever also set on that same row — the platform admin
+ * dashboard is a separate identity from any winery account. Mirrors the
+ * same rule in public.is_admin() (see migration 0070), which is what
+ * actually gates RLS and SECURITY DEFINER reads; this check is the app's
+ * own front door. */
 export async function isCurrentUserAdmin(): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
   try {
@@ -41,8 +47,12 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return false;
-    const { data } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single();
-    return !!data?.is_admin;
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_admin, winery_id")
+      .eq("id", user.id)
+      .single();
+    return !!data?.is_admin && !data.winery_id;
   } catch {
     return false;
   }
