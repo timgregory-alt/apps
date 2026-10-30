@@ -91,6 +91,10 @@ export default async function PortalDashboardPage() {
           <StatCard label="Total Guests" value={guestStats.totalGuests} />
           <StatCard label="QR Code Scans" value={qrScans} />
         </div>
+        <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
+          QR Code Scans counts every time someone scans your tasting room code, even if they don&rsquo;t
+          check in. Total Guests only counts people who actually checked in while at the winery.
+        </p>
 
         <WineryAnalyticsUpsellCard isSubscribed={isSubscribed} />
 
