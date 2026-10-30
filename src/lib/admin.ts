@@ -36,10 +36,15 @@ export interface AdminStats {
   totalWineClubClicks: number;
   totalShareEvents: number;
   totalPageViews: number;
+  totalQrScans: number;
   checkinsByWinery: Record<string, number>;
   wineClubClicksByWinery: Record<string, number>;
   shareEventsByType: Record<string, number>;
   pageViewsByWinery: Record<string, number>;
+  /** Page views that came specifically from scanning a winery's QR code
+   * (its URL carries ?src=qr), not just any page view — lets you see
+   * engagement at each physical location where a code is posted. */
+  qrScansByWinery: Record<string, number>;
   multiWineryVisitors: number;
   /** Average current age of guest accounts with a birth date on file
    * (collected at signup for 21+ verification) — excludes winery-staff and
@@ -70,10 +75,12 @@ const EMPTY_STATS: AdminStats = {
   totalWineClubClicks: 0,
   totalShareEvents: 0,
   totalPageViews: 0,
+  totalQrScans: 0,
   checkinsByWinery: {},
   wineClubClicksByWinery: {},
   shareEventsByType: {},
   pageViewsByWinery: {},
+  qrScansByWinery: {},
   multiWineryVisitors: 0,
   averageGuestAge: null,
   guestAgeGroups: AGE_GROUPS.map((ageGroup) => ({ ageGroup, count: 0 })),
@@ -106,7 +113,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       supabase.from("trail_completions").select("*", { count: "exact", head: true }),
       supabase.from("wine_club_clicks").select("winery_id"),
       supabase.from("share_events").select("share_type, winery_id"),
-      supabase.from("winery_page_views").select("winery_id"),
+      supabase.from("winery_page_views").select("winery_id, source"),
       supabase
         .from("profiles")
         .select("birth_date")
@@ -154,9 +161,12 @@ export async function getAdminStats(): Promise<AdminStats> {
     });
 
     const pageViewsByWinery: Record<string, number> = {};
+    const qrScansByWinery: Record<string, number> = {};
     (views ?? []).forEach((v) => {
       pageViewsByWinery[v.winery_id] = (pageViewsByWinery[v.winery_id] ?? 0) + 1;
+      if (v.source === "qr") qrScansByWinery[v.winery_id] = (qrScansByWinery[v.winery_id] ?? 0) + 1;
     });
+    const totalQrScans = (views ?? []).filter((v) => v.source === "qr").length;
 
     // Distinct checked-in guests who are current Premium subscribers —
     // site-wide and per-winery, so a winery can see what share of their
@@ -200,9 +210,11 @@ export async function getAdminStats(): Promise<AdminStats> {
       totalWineClubClicks: (clicks ?? []).length,
       totalShareEvents: (shares ?? []).length,
       totalPageViews: (views ?? []).length,
+      totalQrScans,
       checkinsByWinery,
       wineClubClicksByWinery,
       pageViewsByWinery,
+      qrScansByWinery,
       shareEventsByType,
       multiWineryVisitors,
       averageGuestAge,
