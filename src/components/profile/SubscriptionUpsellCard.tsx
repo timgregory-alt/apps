@@ -2,22 +2,25 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Check, Sparkles } from "lucide-react";
+import { CheckCircle2, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { createCheckoutSessionAction, createBillingPortalSessionAction } from "@/app/profile/actions";
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
 import type { RewardTier } from "@/lib/types";
 
+// Display-only — keep in sync with the actual Stripe Price configured via
+// STRIPE_PRICE_ID_MONTHLY, since this isn't fetched live from Stripe.
+const MONTHLY_PRICE = "6.99";
+
 // VIP events get a 10-day subscriber-only early-access window (see
 // VIP_EARLY_ACCESS_HOURS in src/lib/data.ts) — regular events are never
-// locked. Keep this line honest about "first access," not permanent
+// locked. Keep this line honest about "early access," not permanent
 // exclusivity — non-subscribers do eventually see VIP events too, just later.
 const BASE_BENEFITS = [
-  "First access to VIP events — harvest dinners, member-only tastings — up to 10 days before anyone else",
-  `Earn ${SUBSCRIBER_MULTIPLIER}x points on every check-in, wine rating, and referral`,
-  "Unlock extra perks, like winery review links",
+  `Earn ${SUBSCRIBER_MULTIPLIER}× points on winery check-ins, ratings, and referrals`,
+  "Get early access to VIP events and special experiences",
+  "Reach exclusive reward tiers faster",
 ];
 
 export function SubscriptionUpsellCard({
@@ -38,7 +41,7 @@ export function SubscriptionUpsellCard({
     (t) => t.subscriber_discount_percent != null && t.subscriber_discount_percent > t.discount_percent
   );
   const benefits = hasSubscriberDiscounts
-    ? [...BASE_BENEFITS, "Access to bigger discounts on food, merch & tastings at select reward tiers"]
+    ? [BASE_BENEFITS[0], "Unlock enhanced discounts on tastings, food, and merchandise", ...BASE_BENEFITS.slice(1)]
     : BASE_BENEFITS;
 
   function subscribe(plan: "monthly" | "annual") {
@@ -63,77 +66,111 @@ export function SubscriptionUpsellCard({
     });
   }
 
+  if (isSubscriber) {
+    return (
+      <Card
+        id="premium"
+        className="relative flex flex-col gap-3 overflow-hidden bg-[var(--color-burgundy)] p-5 text-[var(--color-ivory)]"
+      >
+        <div className="flex items-center gap-2">
+          <Sparkles size={16} className="text-[var(--color-gold-pale)]" />
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-gold-pale)]">
+            You&rsquo;re Subscribed
+          </p>
+        </div>
+
+        <ul className="flex flex-col gap-1.5">
+          {benefits.map((b) => (
+            <li key={b} className="flex items-start gap-2 text-sm text-[var(--color-ivory)]/85">
+              <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-gold-pale)]" />
+              {b}
+            </li>
+          ))}
+        </ul>
+
+        {error && <p className="text-sm text-[var(--color-gold-pale)]">{error}</p>}
+
+        <Link
+          href="/vip"
+          className="text-center text-xs font-medium text-[var(--color-gold-pale)] underline underline-offset-2"
+        >
+          See VIP Events
+        </Link>
+
+        <Button type="button" variant="ivory" fullWidth onClick={manage} disabled={pendingPlan !== null}>
+          {pendingPlan === "manage" ? "Opening…" : "Manage Subscription"}
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Card
       id="premium"
-      className="texture-grain relative flex flex-col gap-3 overflow-hidden bg-[var(--color-burgundy)] p-5 text-[var(--color-ivory)]"
+      className="relative flex flex-col gap-4 overflow-hidden bg-[var(--color-burgundy)] p-6 text-center text-[var(--color-ivory)]"
     >
-      <TrailCoverFrame />
-
-      <div className="relative flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2">
         <Sparkles size={16} className="text-[var(--color-gold-pale)]" />
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-gold-pale)]">
-          {isSubscriber ? "You're Subscribed" : "Go Premium"}
+          Tennessee Wine Trails VIP
         </p>
       </div>
 
-      <ul className="relative flex flex-col gap-1.5">
+      <h2 className="font-serif-display text-[1.75rem] leading-[1.15] text-[var(--color-ivory)]">
+        Make Every Winery Visit More Rewarding
+      </h2>
+
+      <p className="flex items-baseline justify-center gap-1">
+        <span className="font-serif-display text-4xl text-[var(--color-ivory)]">${MONTHLY_PRICE}</span>
+        <span className="text-sm text-[var(--color-ivory)]/60">/month</span>
+      </p>
+
+      <p className="text-sm text-[var(--color-ivory)]/70">
+        Exclusive rewards, experiences, and perks for Tennessee wine lovers.
+      </p>
+
+      <div className="border-t border-[var(--color-ivory)]/15" />
+
+      <ul className="flex flex-col gap-2.5 text-left">
         {benefits.map((b) => (
-          <li key={b} className="flex items-start gap-2 text-sm text-[var(--color-ivory)]/85">
-            <Check size={14} className="mt-0.5 shrink-0 text-[var(--color-gold-pale)]" />
+          <li key={b} className="flex items-start gap-2.5 text-sm text-[var(--color-ivory)]/85">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[var(--color-gold-pale)]" />
             {b}
           </li>
         ))}
       </ul>
 
-      {error && <p className="relative text-sm text-[var(--color-gold-pale)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--color-gold-pale)]">{error}</p>}
 
       <Link
         href="/vip"
-        className="relative text-center text-xs font-medium text-[var(--color-gold-pale)] underline underline-offset-2"
+        className="text-center text-xs font-medium text-[var(--color-gold-pale)] underline underline-offset-2"
       >
         See VIP Events
       </Link>
 
-      {isSubscriber ? (
-        <Button
-          type="button"
-          variant="ivory"
-          fullWidth
-          onClick={manage}
-          disabled={pendingPlan !== null}
-          className="relative"
-        >
-          {pendingPlan === "manage" ? "Opening…" : "Manage Subscription"}
-        </Button>
-      ) : (
-        <div className="relative flex flex-col gap-2">
-          <Button
-            type="button"
-            variant="gold"
-            fullWidth
-            onClick={() => subscribe("monthly")}
-            disabled={pendingPlan !== null}
-          >
-            {pendingPlan === "monthly" ? "Starting…" : "Subscribe Monthly"}
-          </Button>
-          <Button
-            type="button"
-            variant="ivory"
-            fullWidth
-            onClick={() => subscribe("annual")}
-            disabled={pendingPlan !== null}
-          >
-            {pendingPlan === "annual" ? "Starting…" : "Subscribe Annual"}
-          </Button>
-        </div>
-      )}
+      <Button
+        type="button"
+        variant="gold"
+        fullWidth
+        onClick={() => subscribe("monthly")}
+        disabled={pendingPlan !== null}
+      >
+        {pendingPlan === "monthly" ? "Starting…" : "Start Your 7-Day Free Trial"}
+      </Button>
 
-      {!isSubscriber && (
-        <p className="relative text-center text-[0.68rem] text-[var(--color-ivory)]/50">
-          Starts with a 7-day free trial — cancel anytime.
-        </p>
-      )}
+      <button
+        type="button"
+        onClick={() => subscribe("annual")}
+        disabled={pendingPlan !== null}
+        className="text-center text-xs font-medium text-[var(--color-ivory)]/55 underline underline-offset-2 disabled:opacity-60"
+      >
+        {pendingPlan === "annual" ? "Starting…" : "Prefer annual billing? Subscribe Annual instead"}
+      </button>
+
+      <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
+        Then ${MONTHLY_PRICE}/month. Cancel anytime.
+      </p>
     </Card>
   );
 }
