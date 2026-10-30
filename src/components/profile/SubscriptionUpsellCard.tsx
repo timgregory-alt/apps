@@ -250,6 +250,10 @@ export function SubscriptionUpsellCard({
           {pending === "monthly" ? "Starting…" : "Subscribe Monthly"}
         </Button>
 
+        <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
+          Billed ${MONTHLY_PRICE}/month. Cancel anytime.
+        </p>
+
         <button
           type="button"
           onClick={() => subscribe("annual")}
@@ -260,10 +264,6 @@ export function SubscriptionUpsellCard({
             ? "Starting…"
             : `Save ${ANNUAL_SAVINGS_PERCENT}% with Annual — $${ANNUAL_PRICE}/year`}
         </button>
-
-        <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
-          Billed ${MONTHLY_PRICE}/month. Cancel anytime.
-        </p>
       </div>
 
       <div className="rounded-2xl border border-[var(--color-ivory)]/15 bg-[var(--color-ivory)]/[0.04] p-4">
