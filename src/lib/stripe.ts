@@ -27,6 +27,16 @@ export function getPriceId(plan: SubscriptionPlan): string | null {
   return process.env[key] || null;
 }
 
+/** The Travel Pass — a one-time (not recurring) $19.99 Price granting 2
+ * days of full VIP access, for a guest who wants it for a single trip
+ * rather than an ongoing subscription. */
+export function getTravelPassPriceId(): string | null {
+  return process.env.STRIPE_PRICE_ID_TRAVEL_PASS || null;
+}
+
+export const TRAVEL_PASS_DURATION_DAYS = 2;
+export const TRAVEL_PASS_DURATION_MS = TRAVEL_PASS_DURATION_DAYS * 24 * 60 * 60 * 1000;
+
 /** The winery portal's analytics dashboard add-on — $50/mo or $500/yr (2
  * months free), billed to the winery itself rather than any one staff
  * account. */

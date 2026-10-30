@@ -66,7 +66,8 @@ export default async function RewardsPage() {
     wines,
     checkins.length,
     referralCount,
-    profile?.is_subscriber ?? false
+    profile?.is_subscriber ?? false,
+    profile?.travel_pass_purchase_count ?? 0
   );
   const balance = points.total - totalPointsSpent(redemptions);
   const ladderTiers = tiers.filter((t) => !t.birthday_only);
@@ -111,6 +112,7 @@ export default async function RewardsPage() {
             <span>{points.winesRated} wines rated</span>
             {points.completionBonus > 0 && <span>Trail completion bonus</span>}
             {points.referrals > 0 && <span>{points.referrals} friends referred</span>}
+            {points.travelPassBonus > 0 && <span>Travel Pass bonus</span>}
           </div>
         </Card>
       </div>

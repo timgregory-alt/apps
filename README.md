@@ -85,8 +85,8 @@ Guest subscriptions (`profiles.is_subscriber`) are billed through Stripe — Che
 1. Create (or use an existing) account at [stripe.com](https://stripe.com).
 2. **Products → Add product**: create one subscription product with two Prices — a monthly recurring price and an annual recurring price. Copy each Price's id (`price_…`, not the Product id) into `STRIPE_PRICE_ID_MONTHLY` / `STRIPE_PRICE_ID_ANNUAL`.
 3. **Developers → API keys**: copy the Secret key into `STRIPE_SECRET_KEY`.
-4. **Developers → Webhooks → Add endpoint**: point it at `<your-domain>/api/stripe/webhook`, and select the `customer.subscription.created`, `customer.subscription.updated`, and `customer.subscription.deleted` events (these three cover trial start, renewals, plan changes, and cancellations — Stripe represents all of them as a subscription status change). Copy the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET`.
-5. New subscriptions start with a 7-day free trial (`subscription_data.trial_period_days` in `createCheckoutSessionAction`, `src/app/profile/actions.ts`) — change the number there if you want a different length, or remove the option entirely to charge immediately.
+4. **Developers → Webhooks → Add endpoint**: point it at `<your-domain>/api/stripe/webhook`, and select the `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, and `checkout.session.completed` events (the first three cover renewals, plan changes, and cancellations — Stripe represents all of them as a subscription status change; the last one is for the one-time Travel Pass purchase below). Copy the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET`.
+5. Guest subscriptions charge immediately — no free trial (`createCheckoutSessionAction` in `src/app/profile/actions.ts` doesn't set `subscription_data.trial_period_days`; add it back there if you want to offer one).
 6. Test with [Stripe's test card numbers](https://docs.stripe.com/testing) (e.g. `4242 4242 4242 4242`, any future expiry/CVC) while using test-mode keys — no real charge happens.
 7. An admin can still grant/revoke `is_subscriber` manually from `/admin/members` independent of billing (e.g. a comp) — the webhook only updates it going forward from real subscription events.
 
@@ -96,7 +96,15 @@ The deep-analytics section of the winery portal dashboard (page views, wine club
 
 1. **Products → Add product**: create a separate subscription product ("Wine Trail Vintner's Dashboard") with two recurring Prices — $50/mo and $500/yr (2 months free). Copy each Price id into `STRIPE_PRICE_ID_WINERY_ANALYTICS_MONTHLY` / `STRIPE_PRICE_ID_WINERY_ANALYTICS_ANNUAL`.
 2. No separate webhook endpoint is needed — the existing one already listens for the right events and figures out whether a given customer is a guest or a winery.
-3. Unlike the guest plan, winery subscriptions charge immediately — no free trial (`createWineryAnalyticsCheckoutAction` in `src/app/portal/billing/actions.ts` omits `subscription_data.trial_period_days`; add it back there if you want to offer one later).
+3. Like the guest plan, winery subscriptions charge immediately — no free trial (`createWineryAnalyticsCheckoutAction` in `src/app/portal/billing/actions.ts` omits `subscription_data.trial_period_days`; add it back there if you want to offer one later).
+
+### Travel Pass ($19.99 one-time, 2 days of VIP access)
+
+A one-time purchase (not a subscription) that grants the same perks as the guest VIP plan — 2x points, VIP early access, subscriber reward discounts — for 2 days, for a guest who's only visiting briefly rather than subscribing ongoing. It reuses `profiles.is_subscriber`, the same flag the real subscription sets, so every existing perk check already works without changes; `profiles.travel_pass_expires_at` just tracks when to revoke it again.
+
+1. **Products → Add product**: create a product ("Tennessee Wine Trails Travel Pass") with a single **one-time** Price (not recurring) at $19.99. Copy its id into `STRIPE_PRICE_ID_TRAVEL_PASS`.
+2. Uses the same webhook endpoint as above — make sure `checkout.session.completed` is one of the subscribed events (step 4 above).
+3. A daily cron (`/api/cron/expire-travel-passes`, already in `vercel.json`) flips `is_subscriber` back to `false` once a Travel Pass expires — it only ever touches a profile with no `stripe_subscription_id`, so a real subscriber is never affected even if they'd bought a Travel Pass in the past.
 
 ## 6. Deploy on Vercel
 

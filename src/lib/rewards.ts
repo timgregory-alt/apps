@@ -9,6 +9,13 @@ export const POINTS_PER_REFERRAL = 50;
  * referral. Doesn't apply to the one-time completion bonus — that's a flat
  * achievement reward, not an activity that scales with a multiplier. */
 export const SUBSCRIBER_MULTIPLIER = 2;
+/** Flat, permanent bonus for buying a Travel Pass — awarded once per
+ * purchase (see profiles.travel_pass_purchase_count), on top of the same
+ * 2x earning rate a Travel Pass guest already gets from being treated as
+ * a subscriber while it's active. Doesn't scale with the multiplier —
+ * same reasoning as the completion bonus, a flat one-time reward rather
+ * than an ongoing activity. */
+export const TRAVEL_PASS_BONUS_POINTS = 100;
 
 export interface RewardsPoints {
   /** Lifetime points earned — only ever goes up, since it's derived purely
@@ -21,24 +28,30 @@ export interface RewardsPoints {
   winesRated: number;
   completionBonus: number;
   referrals: number;
+  travelPassBonus: number;
 }
 
 /** Points are always derived from check-ins, wine ratings, trail
- * completion, and qualifying referrals — never stored directly — so
- * there's nothing to keep in sync. `totalCheckins` is every check-in the
- * guest has ever made (not deduped by winery) — a guest can check in at
- * the same winery again after a 24-hour cooldown and earn points again,
- * rewarding repeat visits rather than a one-time stamp. */
+ * completion, qualifying referrals, and Travel Pass purchases — never
+ * stored directly — so there's nothing to keep in sync. `totalCheckins`
+ * is every check-in the guest has ever made (not deduped by winery) — a
+ * guest can check in at the same winery again after a 24-hour cooldown
+ * and earn points again, rewarding repeat visits rather than a one-time
+ * stamp. `travelPassPurchases` is profiles.travel_pass_purchase_count —
+ * each purchase adds another TRAVEL_PASS_BONUS_POINTS, independent of
+ * whether that pass is still active. */
 export function computeRewardsPoints(
   wineries: WineryWithStatus[],
   wines: WineWithTasting[],
   totalCheckins: number,
   referrals = 0,
-  isSubscriber = false
+  isSubscriber = false,
+  travelPassPurchases = 0
 ): RewardsPoints {
   const checkins = totalCheckins;
   const winesRated = wines.filter((w) => w.tasting != null).length;
   const completionBonus = isTrailComplete(wineries) ? COMPLETION_BONUS : 0;
+  const travelPassBonus = travelPassPurchases * TRAVEL_PASS_BONUS_POINTS;
   const multiplier = isSubscriber ? SUBSCRIBER_MULTIPLIER : 1;
 
   return {
@@ -46,11 +59,14 @@ export function computeRewardsPoints(
       Math.round(
         (checkins * POINTS_PER_CHECKIN + winesRated * POINTS_PER_WINE_RATED + referrals * POINTS_PER_REFERRAL) *
           multiplier
-      ) + completionBonus,
+      ) +
+      completionBonus +
+      travelPassBonus,
     checkins,
     winesRated,
     completionBonus,
     referrals,
+    travelPassBonus,
   };
 }
 

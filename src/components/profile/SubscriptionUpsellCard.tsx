@@ -5,16 +5,25 @@ import Link from "next/link";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { createCheckoutSessionAction, createBillingPortalSessionAction } from "@/app/profile/actions";
+import {
+  createCheckoutSessionAction,
+  createBillingPortalSessionAction,
+  createTravelPassCheckoutAction,
+} from "@/app/profile/actions";
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
+import { formatCheckinDate } from "@/lib/utils";
 import type { RewardTier } from "@/lib/types";
 
 // Display-only — keep in sync with the actual Stripe Prices configured
-// via STRIPE_PRICE_ID_MONTHLY / STRIPE_PRICE_ID_ANNUAL, since neither is
-// fetched live from Stripe.
+// via STRIPE_PRICE_ID_MONTHLY / STRIPE_PRICE_ID_ANNUAL / STRIPE_PRICE_ID_TRAVEL_PASS,
+// since none of these are fetched live from Stripe.
 const MONTHLY_PRICE = "6.99";
 const ANNUAL_PRICE = "59.88";
 const ANNUAL_SAVINGS_PERCENT = 29;
+const TRAVEL_PASS_PRICE = "19.99";
+const TRAVEL_PASS_DAYS = 2;
+// Keep in sync with TRAVEL_PASS_BONUS_POINTS in src/lib/rewards.ts.
+const TRAVEL_PASS_BONUS_POINTS = 100;
 
 // VIP events get a 10-day subscriber-only early-access window (see
 // VIP_EARLY_ACCESS_HOURS in src/lib/data.ts) — regular events are never
@@ -26,16 +35,26 @@ const BASE_BENEFITS = [
   "Reach exclusive reward tiers faster",
 ];
 
+type PendingAction = "monthly" | "annual" | "travel_pass" | "manage" | null;
+
 export function SubscriptionUpsellCard({
-  isSubscriber,
+  hasActiveSubscription,
+  travelPassExpiresAt,
   tiers,
 }: {
-  isSubscriber: boolean;
+  /** True only for a real, recurring Stripe subscription — distinct from
+   * profiles.is_subscriber, which a Travel Pass also sets but has no
+   * subscription to manage. */
+  hasActiveSubscription: boolean;
+  /** Set only while a Travel Pass is active; null otherwise. */
+  travelPassExpiresAt: string | null;
   tiers: RewardTier[];
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [pendingPlan, setPendingPlan] = useState<"monthly" | "annual" | "manage" | null>(null);
+  const [pending, setPending] = useState<PendingAction>(null);
   const [, startTransition] = useTransition();
+
+  const travelPassActive = !hasActiveSubscription && !!travelPassExpiresAt && new Date(travelPassExpiresAt) > new Date();
 
   // The biggest subscriber-only discount boost actually configured on any
   // tier — computed live rather than hardcoded, so the claim on the card
@@ -61,27 +80,37 @@ export function SubscriptionUpsellCard({
 
   function subscribe(plan: "monthly" | "annual") {
     setError(null);
-    setPendingPlan(plan);
+    setPending(plan);
     startTransition(async () => {
       const result = await createCheckoutSessionAction(plan);
       // A successful call redirects away — reaching this point means it
       // didn't, so surface the error and let the button re-enable.
       if (result?.error) setError(result.error);
-      setPendingPlan(null);
+      setPending(null);
+    });
+  }
+
+  function buyTravelPass() {
+    setError(null);
+    setPending("travel_pass");
+    startTransition(async () => {
+      const result = await createTravelPassCheckoutAction();
+      if (result?.error) setError(result.error);
+      setPending(null);
     });
   }
 
   function manage() {
     setError(null);
-    setPendingPlan("manage");
+    setPending("manage");
     startTransition(async () => {
       const result = await createBillingPortalSessionAction();
       if (result?.error) setError(result.error);
-      setPendingPlan(null);
+      setPending(null);
     });
   }
 
-  if (isSubscriber) {
+  if (hasActiveSubscription) {
     return (
       <Card
         id="premium"
@@ -112,9 +141,55 @@ export function SubscriptionUpsellCard({
           See VIP Events
         </Link>
 
-        <Button type="button" variant="ivory" fullWidth onClick={manage} disabled={pendingPlan !== null}>
-          {pendingPlan === "manage" ? "Opening…" : "Manage Subscription"}
+        <Button type="button" variant="ivory" fullWidth onClick={manage} disabled={pending !== null}>
+          {pending === "manage" ? "Opening…" : "Manage Subscription"}
         </Button>
+      </Card>
+    );
+  }
+
+  if (travelPassActive && travelPassExpiresAt) {
+    return (
+      <Card
+        id="premium"
+        className="relative flex flex-col gap-3 overflow-hidden bg-[var(--color-burgundy)] p-5 text-[var(--color-ivory)]"
+      >
+        <div className="flex items-center gap-2">
+          <Sparkles size={16} className="text-[var(--color-gold-pale)]" />
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-gold-pale)]">
+            Travel Pass Active
+          </p>
+        </div>
+        <p className="text-sm text-[var(--color-ivory)]/70">
+          Your Travel Pass is active through {formatCheckinDate(travelPassExpiresAt)}.
+        </p>
+
+        <ul className="flex flex-col gap-1.5">
+          {benefits.map((b) => (
+            <li key={b} className="flex items-start gap-2 text-sm text-[var(--color-ivory)]/85">
+              <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-gold-pale)]" />
+              {b}
+            </li>
+          ))}
+        </ul>
+
+        {error && <p className="text-sm text-[var(--color-gold-pale)]">{error}</p>}
+
+        <Link
+          href="/vip"
+          className="text-center text-xs font-medium text-[var(--color-gold-pale)] underline underline-offset-2"
+        >
+          See VIP Events
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => subscribe("monthly")}
+          disabled={pending !== null}
+          className="text-center text-xs font-medium text-[var(--color-ivory)]/55 underline underline-offset-2 disabled:opacity-60"
+        >
+          {pending === "monthly" ? "Starting…" : "Visiting often? Subscribe for ongoing access"}
+        </button>
       </Card>
     );
   }
@@ -169,18 +244,18 @@ export function SubscriptionUpsellCard({
         variant="gold"
         fullWidth
         onClick={() => subscribe("monthly")}
-        disabled={pendingPlan !== null}
+        disabled={pending !== null}
       >
-        {pendingPlan === "monthly" ? "Starting…" : "Subscribe Monthly"}
+        {pending === "monthly" ? "Starting…" : "Subscribe Monthly"}
       </Button>
 
       <button
         type="button"
         onClick={() => subscribe("annual")}
-        disabled={pendingPlan !== null}
+        disabled={pending !== null}
         className="text-center text-xs font-medium text-[var(--color-ivory)]/55 underline underline-offset-2 disabled:opacity-60"
       >
-        {pendingPlan === "annual"
+        {pending === "annual"
           ? "Starting…"
           : `Save ${ANNUAL_SAVINGS_PERCENT}% with Annual VIP — $${ANNUAL_PRICE}/year`}
       </button>
@@ -188,6 +263,23 @@ export function SubscriptionUpsellCard({
       <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
         Billed ${MONTHLY_PRICE}/month. Cancel anytime.
       </p>
+
+      <div className="border-t border-[var(--color-ivory)]/15 pt-4">
+        <p className="text-xs font-medium text-[var(--color-ivory)]/70">Just visiting for a few days?</p>
+        <button
+          type="button"
+          onClick={buyTravelPass}
+          disabled={pending !== null}
+          className="mt-2 text-center text-sm font-medium text-[var(--color-gold-pale)] underline underline-offset-2 disabled:opacity-60"
+        >
+          {pending === "travel_pass"
+            ? "Starting…"
+            : `Get a ${TRAVEL_PASS_DAYS}-Day Travel Pass — $${TRAVEL_PASS_PRICE}, no subscription`}
+        </button>
+        <p className="mt-1 text-[0.68rem] text-[var(--color-ivory)]/50">
+          Includes {TRAVEL_PASS_BONUS_POINTS} bonus points, yours to keep.
+        </p>
+      </div>
     </Card>
   );
 }

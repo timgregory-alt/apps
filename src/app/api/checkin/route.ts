@@ -111,7 +111,7 @@ export async function POST(request: Request) {
   // features (ratings, rewards) without driving to every winery.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_admin, is_subscriber")
+    .select("is_admin, is_subscriber, travel_pass_purchase_count")
     .eq("id", user.id)
     .maybeSingle();
   const isAdmin = !!profile?.is_admin;
@@ -275,7 +275,8 @@ export async function POST(request: Request) {
       wines,
       rewardCheckins.length,
       referralCount,
-      profile?.is_subscriber ?? false
+      profile?.is_subscriber ?? false,
+      profile?.travel_pass_purchase_count ?? 0
     );
     const balance = points.total - totalPointsSpent(redemptions);
     const cheapestTierPoints = tiers

@@ -106,7 +106,11 @@ export default async function ProfilePage() {
       )}
 
       <div className="px-6">
-        <SubscriptionUpsellCard isSubscriber={profile?.is_subscriber ?? false} tiers={rewardTiers} />
+        <SubscriptionUpsellCard
+          hasActiveSubscription={!!profile?.is_subscriber && !!profile?.stripe_subscription_id}
+          travelPassExpiresAt={profile?.travel_pass_expires_at ?? null}
+          tiers={rewardTiers}
+        />
       </div>
 
       <div className="px-6">

@@ -6,7 +6,13 @@ import { headers } from "next/headers";
 import { createClient, createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { calculateAge } from "@/lib/utils";
 import { LOW_RATING_THRESHOLD } from "@/lib/appRating";
-import { getStripeClient, getPriceId, isStripeConfigured, type SubscriptionPlan } from "@/lib/stripe";
+import {
+  getStripeClient,
+  getPriceId,
+  getTravelPassPriceId,
+  isStripeConfigured,
+  type SubscriptionPlan,
+} from "@/lib/stripe";
 
 const MIN_AGE = 21;
 
@@ -178,6 +184,62 @@ export async function createCheckoutSessionAction(plan: SubscriptionPlan): Promi
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
       success_url: `${origin}/profile?subscribed=1`,
+      cancel_url: `${origin}/profile`,
+    });
+
+    if (!session.url) return { error: "Could not start checkout. Please try again." };
+    checkoutUrl = session.url;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Could not start checkout. Please try again." };
+  }
+
+  redirect(checkoutUrl);
+}
+
+/** Starts a one-time Stripe Checkout for the Travel Pass — not a
+ * subscription, so there's no recurring billing and nothing to manage
+ * afterward. The webhook grants the 2 days of access on
+ * checkout.session.completed (tagged via metadata below), not here —
+ * this only starts the payment. */
+export async function createTravelPassCheckoutAction(): Promise<{ error: string } | void> {
+  if (!isStripeConfigured) return { error: "Billing isn't set up yet." };
+
+  const priceId = getTravelPassPriceId();
+  if (!priceId) return { error: "Travel Pass isn't configured yet." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sign in to buy a Travel Pass" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("stripe_customer_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  let checkoutUrl: string;
+  try {
+    const stripe = getStripeClient();
+    let customerId = profile?.stripe_customer_id ?? null;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = customer.id;
+      await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+    }
+
+    const origin = await siteOrigin();
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: { type: "travel_pass", supabase_user_id: user.id },
+      success_url: `${origin}/profile?travel_pass=1`,
       cancel_url: `${origin}/profile`,
     });
 

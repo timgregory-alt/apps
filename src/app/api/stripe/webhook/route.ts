@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/server";
-import { getStripeClient, isActiveSubscriptionStatus, isStripeConfigured } from "@/lib/stripe";
+import {
+  getStripeClient,
+  isActiveSubscriptionStatus,
+  isStripeConfigured,
+  TRAVEL_PASS_DURATION_MS,
+} from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -46,6 +51,33 @@ async function syncSubscriptionStatus(subscription: Stripe.Subscription) {
   }
 }
 
+/** Grants a Travel Pass purchase its 2 days of VIP access (reuses
+ * is_subscriber, same as a real subscription, so every existing perk
+ * gate just works without needing to know a Travel Pass exists) plus a
+ * permanent 100-point bonus via grant_travel_pass()'s atomic increment —
+ * see migration 0069. A daily cron (/api/cron/expire-travel-passes) flips
+ * is_subscriber back to false once travel_pass_expires_at passes, for
+ * anyone without a real stripe_subscription_id. */
+async function grantTravelPass(session: Stripe.Checkout.Session) {
+  const userId = session.metadata?.supabase_user_id;
+  if (!userId) {
+    console.error("Stripe webhook: travel pass checkout completed with no supabase_user_id in metadata");
+    return;
+  }
+
+  const supabase = await createAdminClient();
+  const expiresAt = new Date(Date.now() + TRAVEL_PASS_DURATION_MS).toISOString();
+  const { error } = await supabase.rpc("grant_travel_pass", {
+    target_user_id: userId,
+    expires_at: expiresAt,
+    session_id: session.id,
+  });
+
+  if (error) {
+    console.error(`Stripe webhook: failed to grant travel pass to profile ${userId}:`, error.message);
+  }
+}
+
 export async function POST(request: Request) {
   if (!isStripeConfigured || !process.env.STRIPE_WEBHOOK_SECRET) {
     return NextResponse.json({ error: "Billing isn't set up yet." }, { status: 200 });
@@ -75,6 +107,13 @@ export async function POST(request: Request) {
     case "customer.subscription.deleted":
       await syncSubscriptionStatus(event.data.object as Stripe.Subscription);
       break;
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (session.mode === "payment" && session.metadata?.type === "travel_pass") {
+        await grantTravelPass(session);
+      }
+      break;
+    }
     default:
       // Other event types (invoice.*, payment_intent.*, etc.) aren't
       // needed for the is_subscriber gate — ignored rather than erroring.

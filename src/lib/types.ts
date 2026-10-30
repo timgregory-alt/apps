@@ -243,6 +243,16 @@ export interface Profile {
    * Subscription" open the right Customer Portal session. Null until then. */
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  /** Set when a Travel Pass (one-time, 2-day VIP access) is purchased —
+   * null for a guest who's never bought one. A daily cron flips
+   * is_subscriber back to false once this passes, for anyone without a
+   * real stripe_subscription_id. */
+  travel_pass_expires_at: string | null;
+  /** How many Travel Passes this guest has ever bought — each one grants
+   * another round of permanent bonus points (see TRAVEL_PASS_BONUS_POINTS
+   * in src/lib/rewards.ts), independent of whether the pass itself is
+   * still active. */
+  travel_pass_purchase_count: number;
   trail_start_date: string | null;
   created_at: string;
   /** Set only on winery-staff accounts (created by an admin invite, never by

@@ -73,7 +73,8 @@ export async function generateRedemptionAction(
       wines,
       checkins.length,
       referralCount,
-      profile?.is_subscriber ?? false
+      profile?.is_subscriber ?? false,
+      profile?.travel_pass_purchase_count ?? 0
     );
     const balance = points.total - totalPointsSpent(redemptions);
     if (balance < tier.points_required) return { error: "Not enough points to redeem right now" };

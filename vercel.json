@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/sync-events",
       "schedule": "0 10 1 * *"
+    },
+    {
+      "path": "/api/cron/expire-travel-passes",
+      "schedule": "0 6 * * *"
     }
   ]
 }

@@ -40,7 +40,8 @@ export async function GET() {
     wines,
     checkins.length,
     referralCount,
-    profile?.is_subscriber ?? false
+    profile?.is_subscriber ?? false,
+    profile?.travel_pass_purchase_count ?? 0
   );
   const ladderTiers = tiers
     .filter((t) => !t.birthday_only)
