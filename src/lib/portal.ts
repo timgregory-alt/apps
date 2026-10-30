@@ -107,6 +107,9 @@ export interface WineryConversionStats {
   shareEvents: number;
   /** Distinct checked-in guests who are current Premium subscribers. */
   subscriberGuests: number;
+  /** Page views that came from scanning the tasting-room QR code
+   * specifically (its URL carries ?src=qr), not just any page view. */
+  qrScans: number;
 }
 
 export const EMPTY_CONVERSION_STATS: WineryConversionStats = {
@@ -116,6 +119,7 @@ export const EMPTY_CONVERSION_STATS: WineryConversionStats = {
   avgVisitorAge: null,
   shareEvents: 0,
   subscriberGuests: 0,
+  qrScans: 0,
 };
 
 /** Aggregate-only page-view/checkin/wine-club-click counts for one winery,
@@ -140,6 +144,7 @@ export async function getWineryConversionStats(wineryId: string): Promise<Winery
       avg_visitor_age: number | null;
       share_events: number;
       subscriber_guests: number;
+      qr_scans: number;
     };
     return {
       pageViews: row.page_views,
@@ -148,6 +153,7 @@ export async function getWineryConversionStats(wineryId: string): Promise<Winery
       avgVisitorAge: row.avg_visitor_age,
       shareEvents: row.share_events,
       subscriberGuests: row.subscriber_guests,
+      qrScans: row.qr_scans,
     };
   } catch {
     return EMPTY_CONVERSION_STATS;

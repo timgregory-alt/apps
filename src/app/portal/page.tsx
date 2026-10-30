@@ -66,7 +66,7 @@ export default async function PortalDashboardPage() {
       ? `${Math.round((conversionStats.wineClubClicks / conversionStats.pageViews) * 100)}%`
       : "—";
 
-  const qrUrl = `https://winetrailonline.com/winery/${ctx.winery.slug}`;
+  const qrUrl = `https://winetrailonline.com/winery/${ctx.winery.slug}?src=qr`;
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
@@ -117,6 +117,7 @@ export default async function PortalDashboardPage() {
               <StatCard label="One-Time Guests" value={guestStats.oneVisit} />
               <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
               <StatCard label="Page Views" value={conversionStats.pageViews} />
+              <StatCard label="QR Code Scans" value={conversionStats.qrScans} />
               <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
               <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
               <StatCard

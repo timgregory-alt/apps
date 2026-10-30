@@ -138,11 +138,15 @@ export async function getPrimaryTrailSlugForWinery(wineryId: string): Promise<st
  * Called via next/server's after() so it never adds latency to the page
  * response; failures are swallowed since this is analytics, not a feature
  * a visitor should ever see break. */
-export async function logWineryPageView(wineryId: string, userId: string | null): Promise<void> {
+export async function logWineryPageView(
+  wineryId: string,
+  userId: string | null,
+  source: string | null = null
+): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
     const supabase = await createClient();
-    await supabase.from("winery_page_views").insert({ winery_id: wineryId, user_id: userId });
+    await supabase.from("winery_page_views").insert({ winery_id: wineryId, user_id: userId, source });
   } catch {
     // Analytics-only — never worth surfacing to the visitor.
   }

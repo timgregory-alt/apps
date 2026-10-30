@@ -41,10 +41,13 @@ export async function generateMetadata({
 
 export default async function WineryDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ src?: string }>;
 }) {
   const { slug } = await params;
+  const { src } = await searchParams;
   const winery = await getWineryBySlug(slug);
   if (!winery) notFound();
 
@@ -52,7 +55,7 @@ export default async function WineryDetailPage({
   const profile = user ? await getProfile(user.id) : null;
   const isSubscriber = profile?.is_subscriber ?? false;
 
-  after(() => logWineryPageView(winery.id, user?.id ?? null));
+  after(() => logWineryPageView(winery.id, user?.id ?? null, src === "qr" ? "qr" : null));
 
   const trailSlug = await getPrimaryTrailSlugForWinery(winery.id);
   const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
