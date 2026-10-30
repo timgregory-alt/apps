@@ -9,9 +9,12 @@ import { createCheckoutSessionAction, createBillingPortalSessionAction } from "@
 import { SUBSCRIBER_MULTIPLIER } from "@/lib/rewards";
 import type { RewardTier } from "@/lib/types";
 
-// Display-only — keep in sync with the actual Stripe Price configured via
-// STRIPE_PRICE_ID_MONTHLY, since this isn't fetched live from Stripe.
+// Display-only — keep in sync with the actual Stripe Prices configured
+// via STRIPE_PRICE_ID_MONTHLY / STRIPE_PRICE_ID_ANNUAL, since neither is
+// fetched live from Stripe.
 const MONTHLY_PRICE = "6.99";
+const ANNUAL_PRICE = "59.99";
+const ANNUAL_SAVINGS_PERCENT = 28;
 
 // VIP events get a 10-day subscriber-only early-access window (see
 // VIP_EARLY_ACCESS_HOURS in src/lib/data.ts) — regular events are never
@@ -177,7 +180,9 @@ export function SubscriptionUpsellCard({
         disabled={pendingPlan !== null}
         className="text-center text-xs font-medium text-[var(--color-ivory)]/55 underline underline-offset-2 disabled:opacity-60"
       >
-        {pendingPlan === "annual" ? "Starting…" : "Prefer annual billing? Subscribe Annual instead"}
+        {pendingPlan === "annual"
+          ? "Starting…"
+          : `Save ${ANNUAL_SAVINGS_PERCENT}% with Annual VIP — $${ANNUAL_PRICE}/year`}
       </button>
 
       <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
