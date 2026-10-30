@@ -176,7 +176,6 @@ export async function createCheckoutSessionAction(plan: SubscriptionPlan): Promi
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { trial_period_days: 7 },
       allow_promotion_codes: true,
       success_url: `${origin}/profile?subscribed=1`,
       cancel_url: `${origin}/profile`,

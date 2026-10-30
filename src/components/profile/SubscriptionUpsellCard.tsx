@@ -171,7 +171,7 @@ export function SubscriptionUpsellCard({
         onClick={() => subscribe("monthly")}
         disabled={pendingPlan !== null}
       >
-        {pendingPlan === "monthly" ? "Starting…" : "Start Your 7-Day Free Trial"}
+        {pendingPlan === "monthly" ? "Starting…" : "Subscribe Monthly"}
       </Button>
 
       <button
@@ -186,7 +186,7 @@ export function SubscriptionUpsellCard({
       </button>
 
       <p className="text-center text-[0.68rem] text-[var(--color-ivory)]/50">
-        Then ${MONTHLY_PRICE}/month. Cancel anytime.
+        Billed ${MONTHLY_PRICE}/month. Cancel anytime.
       </p>
     </Card>
   );

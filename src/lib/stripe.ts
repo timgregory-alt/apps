@@ -37,7 +37,9 @@ export function getWineryAnalyticsPriceId(plan: SubscriptionPlan): string | null
 }
 
 /** Statuses that count as "has an active subscription" for gating premium
- * features — trialing guests get the perks during their free trial too. */
+ * features. Checkout no longer offers a free trial, but "trialing" still
+ * counts here in case a subscription is ever manually trialed from the
+ * Stripe dashboard. */
 export function isActiveSubscriptionStatus(status: Stripe.Subscription.Status): boolean {
   return status === "trialing" || status === "active";
 }
