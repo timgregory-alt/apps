@@ -2,6 +2,7 @@ import {
   getWineryStaffContext,
   getRepeatGuestStats,
   getWineryQrScanCount,
+  getWineryWeeklyTrends,
   getWineryConversionStats,
   getWineryAgeGroups,
   getWineryVisitsByDayOfWeek,
@@ -18,6 +19,7 @@ import { StatCard } from "@/components/analytics/StatCard";
 import { WineryAnalyticsUpsellCard } from "@/components/portal/WineryAnalyticsUpsellCard";
 import { WineryFeedbackForm } from "@/components/portal/WineryFeedbackForm";
 import { formatCheckinDate } from "@/lib/utils";
+import { computeTrend } from "@/lib/trends";
 
 export default async function PortalDashboardPage() {
   const ctx = await getWineryStaffContext();
@@ -31,6 +33,7 @@ export default async function PortalDashboardPage() {
     { count: vipCount },
     guestStats,
     qrScans,
+    trends,
     conversionStats,
     ageGroups,
     visitsByDayOfWeek,
@@ -52,6 +55,7 @@ export default async function PortalDashboardPage() {
       .gte("event_date", todayISO),
     getRepeatGuestStats(ctx.winery.id),
     getWineryQrScanCount(ctx.winery.id),
+    getWineryWeeklyTrends(ctx.winery.id),
     // Everything below is the paid analytics bundle — skip the RPCs
     // entirely for a non-subscribed winery rather than fetching data
     // that's just going to be hidden behind the upsell card.
@@ -68,6 +72,21 @@ export default async function PortalDashboardPage() {
     conversionStats.pageViews > 0
       ? `${Math.round((conversionStats.wineClubClicks / conversionStats.pageViews) * 100)}%`
       : "—";
+
+  // Wine Club CTR has no stored weekly row of its own — derive each
+  // week's rate from that week's clicks/views and diff those.
+  const pv = trends.page_views;
+  const wc = trends.wine_club_clicks;
+  const wineClubCTRTrend =
+    pv && wc && pv.thisWeek != null && pv.lastWeek != null && wc.thisWeek != null && wc.lastWeek != null
+      ? computeTrend(
+          {
+            thisWeek: pv.thisWeek > 0 ? Math.round((wc.thisWeek / pv.thisWeek) * 100) : 0,
+            lastWeek: pv.lastWeek > 0 ? Math.round((wc.lastWeek / pv.lastWeek) * 100) : 0,
+          },
+          { unit: "%" }
+        )
+      : null;
 
   const qrUrl = `https://winetrailonline.com/winery/${ctx.winery.slug}?src=qr`;
 
@@ -88,8 +107,12 @@ export default async function PortalDashboardPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label="Upcoming Events" value={upcomingCount ?? 0} />
           <StatCard label="Upcoming VIP Events" value={vipCount ?? 0} />
-          <StatCard label="Total Guests" value={guestStats.totalGuests} />
-          <StatCard label="QR Code Scans" value={qrScans} />
+          <StatCard
+            label="Total Guests"
+            value={guestStats.totalGuests}
+            trend={computeTrend(trends.total_guests)}
+          />
+          <StatCard label="QR Code Scans" value={qrScans} trend={computeTrend(trends.qr_scans)} />
         </div>
         <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
           QR Code Scans counts every time someone scans your tasting room code, even if they don&rsquo;t
@@ -122,17 +145,42 @@ export default async function PortalDashboardPage() {
         {isSubscribed && (
           <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatCard label="One-Time Guests" value={guestStats.oneVisit} />
-              <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
-              <StatCard label="Page Views" value={conversionStats.pageViews} />
-              <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
-              <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
+              <StatCard
+                label="One-Time Guests"
+                value={guestStats.oneVisit}
+                trend={computeTrend(trends.one_time_guests)}
+              />
+              <StatCard
+                label="Repeat Guests"
+                value={guestStats.repeatGuests}
+                trend={computeTrend(trends.repeat_guests)}
+              />
+              <StatCard
+                label="Page Views"
+                value={conversionStats.pageViews}
+                trend={computeTrend(trends.page_views)}
+              />
+              <StatCard
+                label="Wine Club Clicks"
+                value={conversionStats.wineClubClicks}
+                trend={computeTrend(trends.wine_club_clicks)}
+              />
+              <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} trend={wineClubCTRTrend} />
               <StatCard
                 label="Avg Visitor Age"
                 value={conversionStats.avgVisitorAge != null ? conversionStats.avgVisitorAge : "—"}
+                trend={computeTrend(trends.avg_visitor_age, { decimals: 1, unit: " yrs" })}
               />
-              <StatCard label="Social Shares" value={conversionStats.shareEvents} />
-              <StatCard label="Subscriber Guests" value={conversionStats.subscriberGuests} />
+              <StatCard
+                label="Social Shares"
+                value={conversionStats.shareEvents}
+                trend={computeTrend(trends.share_events)}
+              />
+              <StatCard
+                label="Subscriber Guests"
+                value={conversionStats.subscriberGuests}
+                trend={computeTrend(trends.subscriber_guests)}
+              />
               <StatCard
                 label="Top Guest City"
                 value={guestOrigins.topZips[0]?.place ?? guestOrigins.topZips[0]?.zipCode ?? "—"}

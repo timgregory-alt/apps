@@ -111,6 +111,33 @@ export async function getWineryQrScanCount(wineryId: string): Promise<number> {
   }
 }
 
+export interface WeeklyTrendPoint {
+  thisWeek: number | null;
+  lastWeek: number | null;
+}
+
+/** Last-7-days vs the 7 days before that, per metric — keyed the same way
+ * as the metric name winery_weekly_trends() returns, e.g. "qr_scans",
+ * "page_views", "total_guests". avg_visitor_age can be null when a window
+ * has no checked-in guest with a birth date on file. */
+export async function getWineryWeeklyTrends(wineryId: string): Promise<Record<string, WeeklyTrendPoint>> {
+  if (!isSupabaseConfigured) return {};
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_weekly_trends", { target_winery_id: wineryId });
+    if (error || !data) throw error;
+
+    const rows = data as { metric: string; this_week: number | null; last_week: number | null }[];
+    const byMetric: Record<string, WeeklyTrendPoint> = {};
+    rows.forEach((r) => {
+      byMetric[r.metric] = { thisWeek: r.this_week, lastWeek: r.last_week };
+    });
+    return byMetric;
+  } catch {
+    return {};
+  }
+}
+
 export interface WineryConversionStats {
   pageViews: number;
   checkins: number;
