@@ -4,6 +4,7 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
 import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
+import type { PeriodTrendPoint } from "@/lib/portal";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
  * Members list — best-effort, so an unrecognized or malformed zip just
@@ -229,6 +230,35 @@ export async function getAdminStats(): Promise<AdminStats> {
     };
   } catch {
     return EMPTY_STATS;
+  }
+}
+
+/** Site-wide last-7-days vs prior 7, and last-30-days vs prior 30, per
+ * metric — same shape as getWineryPeriodTrends but scoped to the whole
+ * trail. Keyed by metric name: "new_accounts", "checkins",
+ * "trail_completions", "wine_club_clicks", "page_views", "qr_scans",
+ * "share_events", "subscriber_guests". */
+export async function getAdminPeriodTrends(): Promise<Record<string, PeriodTrendPoint>> {
+  if (!isSupabaseConfigured) return {};
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("admin_period_trends");
+    if (error || !data) throw error;
+
+    const rows = data as {
+      metric: string;
+      this_week: number | null;
+      last_week: number | null;
+      last_30: number | null;
+      prev_30: number | null;
+    }[];
+    const byMetric: Record<string, PeriodTrendPoint> = {};
+    rows.forEach((r) => {
+      byMetric[r.metric] = { thisWeek: r.this_week, lastWeek: r.last_week, last30: r.last_30, prev30: r.prev_30 };
+    });
+    return byMetric;
+  } catch {
+    return {};
   }
 }
 

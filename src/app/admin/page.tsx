@@ -1,5 +1,6 @@
 import {
   getAdminStats,
+  getAdminPeriodTrends,
   getAllWineriesAdmin,
   getWineLikeStats,
   getAppRatingStats,
@@ -14,14 +15,16 @@ import {
   deleteWineryFeedbackAction,
 } from "@/app/admin/actions";
 import { formatCheckinDate } from "@/lib/utils";
+import { computeTrend, computeTrend30 } from "@/lib/trends";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
 import { FeedbackActions } from "@/components/admin/FeedbackActions";
 import { QrCode } from "@/components/ui/QrCode";
 
 export default async function AdminDashboardPage() {
-  const [stats, wineries, wineLikeStats, appRatingStats, wineryFeedback, members] = await Promise.all([
+  const [stats, trends, wineries, wineLikeStats, appRatingStats, wineryFeedback, members] = await Promise.all([
     getAdminStats(),
+    getAdminPeriodTrends(),
     getAllWineriesAdmin(),
     getWineLikeStats(),
     getAppRatingStats(),
@@ -33,6 +36,61 @@ export default async function AdminDashboardPage() {
   const mostPopularWinery = wineries.find((w) => w.id === mostPopular?.[0]);
   const termsAgreedCount = members.filter((m) => m.agreed_to_terms_at).length;
 
+  // Completion Rate and Wine Club CTR have no stored row of their own —
+  // derive each period's rate from that period's two raw counts and diff
+  // those, same approach as the winery portal dashboard.
+  const accounts = trends.new_accounts;
+  const completions = trends.trail_completions;
+  const completionRateTrend =
+    accounts &&
+    completions &&
+    accounts.thisWeek != null &&
+    accounts.lastWeek != null &&
+    completions.thisWeek != null &&
+    completions.lastWeek != null
+      ? computeTrend(
+          {
+            thisWeek: accounts.thisWeek > 0 ? Math.round((completions.thisWeek / accounts.thisWeek) * 100) : 0,
+            lastWeek: accounts.lastWeek > 0 ? Math.round((completions.lastWeek / accounts.lastWeek) * 100) : 0,
+          },
+          { unit: "%" }
+        )
+      : null;
+  const completionRateTrend30 =
+    accounts && completions && accounts.last30 != null && accounts.prev30 != null &&
+    completions.last30 != null && completions.prev30 != null
+      ? computeTrend30(
+          {
+            last30: accounts.last30 > 0 ? Math.round((completions.last30 / accounts.last30) * 100) : 0,
+            prev30: accounts.prev30 > 0 ? Math.round((completions.prev30 / accounts.prev30) * 100) : 0,
+          },
+          { unit: "%" }
+        )
+      : null;
+
+  const pv = trends.page_views;
+  const wc = trends.wine_club_clicks;
+  const wineClubCTRTrend =
+    pv && wc && pv.thisWeek != null && pv.lastWeek != null && wc.thisWeek != null && wc.lastWeek != null
+      ? computeTrend(
+          {
+            thisWeek: pv.thisWeek > 0 ? Math.round((wc.thisWeek / pv.thisWeek) * 100) : 0,
+            lastWeek: pv.lastWeek > 0 ? Math.round((wc.lastWeek / pv.lastWeek) * 100) : 0,
+          },
+          { unit: "%" }
+        )
+      : null;
+  const wineClubCTRTrend30 =
+    pv && wc && pv.last30 != null && pv.prev30 != null && wc.last30 != null && wc.prev30 != null
+      ? computeTrend30(
+          {
+            last30: pv.last30 > 0 ? Math.round((wc.last30 / pv.last30) * 100) : 0,
+            prev30: pv.prev30 > 0 ? Math.round((wc.prev30 / pv.prev30) * 100) : 0,
+          },
+          { unit: "%" }
+        )
+      : null;
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -42,12 +100,20 @@ export default async function AdminDashboardPage() {
             Traffic, engagement, and conversion across the trail.
           </p>
         </div>
-        <a
-          href="/api/admin/export-members"
-          className="rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-sm font-medium text-[var(--color-ivory)] hover:bg-[var(--color-burgundy-deep)]"
-        >
-          Export Member List (CSV)
-        </a>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <a
+            href="/api/admin/export-metrics"
+            className="rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-charcoal)]/70 hover:border-[var(--color-gold)] hover:text-[var(--color-burgundy)]"
+          >
+            Export Metrics (CSV)
+          </a>
+          <a
+            href="/api/admin/export-members"
+            className="rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-sm font-medium text-[var(--color-ivory)] hover:bg-[var(--color-burgundy-deep)]"
+          >
+            Export Member List (CSV)
+          </a>
+        </div>
       </div>
 
       <div className="w-full max-w-xs rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
@@ -70,13 +136,48 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="New Accounts" value={stats.totalAccounts} />
-        <StatCard label="Total Check-ins" value={stats.totalCheckins} />
-        <StatCard label="Trail Completions" value={stats.totalCompletions} />
-        <StatCard label="Wine Club Clicks" value={stats.totalWineClubClicks} />
-        <StatCard label="Winery Page Views" value={stats.totalPageViews} />
-        <StatCard label="QR Code Scans" value={stats.totalQrScans} />
-        <StatCard label="Share Events" value={stats.totalShareEvents} />
+        <StatCard
+          label="New Accounts"
+          value={stats.totalAccounts}
+          trend={computeTrend(trends.new_accounts)}
+          trend30={computeTrend30(trends.new_accounts)}
+        />
+        <StatCard
+          label="Total Check-ins"
+          value={stats.totalCheckins}
+          trend={computeTrend(trends.checkins)}
+          trend30={computeTrend30(trends.checkins)}
+        />
+        <StatCard
+          label="Trail Completions"
+          value={stats.totalCompletions}
+          trend={computeTrend(trends.trail_completions)}
+          trend30={computeTrend30(trends.trail_completions)}
+        />
+        <StatCard
+          label="Wine Club Clicks"
+          value={stats.totalWineClubClicks}
+          trend={computeTrend(trends.wine_club_clicks)}
+          trend30={computeTrend30(trends.wine_club_clicks)}
+        />
+        <StatCard
+          label="Winery Page Views"
+          value={stats.totalPageViews}
+          trend={computeTrend(trends.page_views)}
+          trend30={computeTrend30(trends.page_views)}
+        />
+        <StatCard
+          label="QR Code Scans"
+          value={stats.totalQrScans}
+          trend={computeTrend(trends.qr_scans)}
+          trend30={computeTrend30(trends.qr_scans)}
+        />
+        <StatCard
+          label="Share Events"
+          value={stats.totalShareEvents}
+          trend={computeTrend(trends.share_events)}
+          trend30={computeTrend30(trends.share_events)}
+        />
         <StatCard label="Multi-Winery Visitors" value={stats.multiWineryVisitors} />
         <StatCard
           label="Most Popular Winery"
@@ -89,6 +190,8 @@ export default async function AdminDashboardPage() {
               ? `${Math.round((stats.totalCompletions / stats.totalAccounts) * 100)}%`
               : "—"
           }
+          trend={completionRateTrend}
+          trend30={completionRateTrend30}
         />
         <StatCard
           label="Wine Club Click-Through Rate"
@@ -97,6 +200,8 @@ export default async function AdminDashboardPage() {
               ? `${Math.round((stats.totalWineClubClicks / stats.totalPageViews) * 100)}%`
               : "—"
           }
+          trend={wineClubCTRTrend}
+          trend30={wineClubCTRTrend30}
         />
         <StatCard
           label="Avg App Rating"
@@ -122,7 +227,12 @@ export default async function AdminDashboardPage() {
               : "—"
           }
         />
-        <StatCard label="Subscriber Guests" value={stats.totalSubscriberGuests} />
+        <StatCard
+          label="Subscriber Guests"
+          value={stats.totalSubscriberGuests}
+          trend={computeTrend(trends.subscriber_guests)}
+          trend30={computeTrend30(trends.subscriber_guests)}
+        />
       </div>
       <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
         Wine Club Click-Through Rate is wine club link clicks divided by winery page views.

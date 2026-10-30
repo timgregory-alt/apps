@@ -103,15 +103,23 @@ export default async function PortalDashboardPage() {
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
       <div className="flex flex-1 flex-col gap-8">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
-            Welcome{ctx.name ? `, ${ctx.name}` : ""}
-          </p>
-          <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">{ctx.winery.name}</h1>
-          <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
-            {ctx.email ? `Signed in as ${ctx.email} — manage` : "Manage"} your events, wines, hours,
-            links, and see how guests are returning.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+              Welcome{ctx.name ? `, ${ctx.name}` : ""}
+            </p>
+            <h1 className="font-serif-display text-2xl text-[var(--color-charcoal)]">{ctx.winery.name}</h1>
+            <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
+              {ctx.email ? `Signed in as ${ctx.email} — manage` : "Manage"} your events, wines, hours,
+              links, and see how guests are returning.
+            </p>
+          </div>
+          <a
+            href="/api/portal/export-metrics"
+            className="shrink-0 rounded-full border border-[var(--color-line)] px-4 py-2 text-xs font-medium text-[var(--color-charcoal)]/70 hover:border-[var(--color-gold)] hover:text-[var(--color-burgundy)]"
+          >
+            Export Metrics (CSV)
+          </a>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
