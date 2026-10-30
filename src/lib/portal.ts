@@ -96,6 +96,21 @@ export async function getRepeatGuestStats(wineryId: string): Promise<RepeatGuest
   }
 }
 
+/** How many times the tasting-room QR code has been scanned — a free,
+ * always-available count (basic operational info, like Total Guests),
+ * separate from the paid conversion-stats bundle below. */
+export async function getWineryQrScanCount(wineryId: string): Promise<number> {
+  if (!isSupabaseConfigured) return 0;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("winery_qr_scan_count", { target_winery_id: wineryId });
+    if (error) throw error;
+    return typeof data === "number" ? data : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export interface WineryConversionStats {
   pageViews: number;
   checkins: number;

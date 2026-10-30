@@ -1,6 +1,7 @@
 import {
   getWineryStaffContext,
   getRepeatGuestStats,
+  getWineryQrScanCount,
   getWineryConversionStats,
   getWineryAgeGroups,
   getWineryVisitsByDayOfWeek,
@@ -29,6 +30,7 @@ export default async function PortalDashboardPage() {
     { count: upcomingCount },
     { count: vipCount },
     guestStats,
+    qrScans,
     conversionStats,
     ageGroups,
     visitsByDayOfWeek,
@@ -49,6 +51,7 @@ export default async function PortalDashboardPage() {
       .eq("vip_only", true)
       .gte("event_date", todayISO),
     getRepeatGuestStats(ctx.winery.id),
+    getWineryQrScanCount(ctx.winery.id),
     // Everything below is the paid analytics bundle — skip the RPCs
     // entirely for a non-subscribed winery rather than fetching data
     // that's just going to be hidden behind the upsell card.
@@ -86,6 +89,7 @@ export default async function PortalDashboardPage() {
           <StatCard label="Upcoming Events" value={upcomingCount ?? 0} />
           <StatCard label="Upcoming VIP Events" value={vipCount ?? 0} />
           <StatCard label="Total Guests" value={guestStats.totalGuests} />
+          <StatCard label="QR Code Scans" value={qrScans} />
         </div>
 
         <WineryAnalyticsUpsellCard isSubscribed={isSubscribed} />
@@ -117,7 +121,6 @@ export default async function PortalDashboardPage() {
               <StatCard label="One-Time Guests" value={guestStats.oneVisit} />
               <StatCard label="Repeat Guests" value={guestStats.repeatGuests} />
               <StatCard label="Page Views" value={conversionStats.pageViews} />
-              <StatCard label="QR Code Scans" value={conversionStats.qrScans} />
               <StatCard label="Wine Club Clicks" value={conversionStats.wineClubClicks} />
               <StatCard label="Wine Club Click-Through Rate" value={wineClubCTR} />
               <StatCard
