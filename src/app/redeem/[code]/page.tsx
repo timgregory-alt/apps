@@ -61,6 +61,9 @@ export default async function RedeemCodePage({ params }: { params: Promise<{ cod
             <div className="flex items-center gap-2 rounded-full bg-[var(--color-gold-pale)]/50 px-4 py-2 text-sm font-medium text-[var(--color-burgundy-deep)]">
               <CheckCircle2 size={16} /> Redeemed {formatCheckinDate(data.redeemed_at)}
             </div>
+            <p className="text-xs text-[var(--color-charcoal)]/45">
+              Cannot be combined with other offers or discounts.
+            </p>
           </Card>
         )}
       </div>

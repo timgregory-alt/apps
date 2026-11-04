@@ -54,6 +54,9 @@ export function RedemptionCodeDisplay({ redemption }: { redemption: RewardRedemp
           <p className="text-center text-xs text-[var(--color-charcoal)]/55">
             Show this QR code to winery staff, or give them the code above if they can&apos;t scan it.
           </p>
+          <p className="text-center text-[0.68rem] text-[var(--color-charcoal)]/40">
+            Cannot be combined with other offers or discounts.
+          </p>
         </div>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-black/[0.03] px-4 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]">

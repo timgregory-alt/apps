@@ -105,8 +105,9 @@ export default function TermsPage() {
             believe they were earned through fraud or abuse of the system. We may change the
             points structure, reward tiers, or discontinue the rewards program at any time. Some
             rewards are offered directly by us; others may depend on participation by individual
-            wineries, which we do not control and cannot guarantee. We&rsquo;ll try to give
-            reasonable notice of material changes where practical.
+            wineries, which we do not control and cannot guarantee. Reward discounts cannot be
+            combined with other offers or discounts. We&rsquo;ll try to give reasonable notice of
+            material changes where practical.
           </p>
         </Section>
 
