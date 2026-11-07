@@ -154,6 +154,48 @@ export async function saveWineryHoursAction(
   revalidatePath(`/admin/wineries/${wineryId}`);
 }
 
+export interface WeeklyHoursInput {
+  day_of_week: number;
+  is_closed: boolean;
+  open_time: string | null;
+  close_time: string | null;
+}
+
+/** Replaces a winery's whole structured weekly schedule — one row per day,
+ * 0 (Monday) through 6 (Sunday). A day marked closed, or missing an
+ * open/close time, is saved with both times null. */
+export async function saveWineryWeeklyHoursAction(
+  wineryId: string,
+  days: WeeklyHoursInput[]
+): Promise<WineryActionResult> {
+  if (!(await isCurrentUserAdmin()) && !(await isCurrentUserStaffFor(wineryId))) {
+    return { error: "Not authorized" };
+  }
+
+  const supabase = await createClient();
+  const { error: deleteError } = await supabase
+    .from("winery_weekly_hours")
+    .delete()
+    .eq("winery_id", wineryId);
+  if (deleteError) return { error: deleteError.message };
+
+  const rows = days.map((d) => ({
+    winery_id: wineryId,
+    day_of_week: d.day_of_week,
+    is_closed: d.is_closed,
+    open_time: d.is_closed ? null : (d.open_time ?? null),
+    close_time: d.is_closed ? null : (d.close_time ?? null),
+  }));
+
+  const { error: insertError } = await supabase.from("winery_weekly_hours").insert(rows);
+  if (insertError) return { error: insertError.message };
+
+  const winery = await getWineryByIdAdmin(wineryId);
+  revalidatePath(`/admin/wineries/${wineryId}`);
+  revalidatePath("/portal/details");
+  if (winery) revalidatePath(`/winery/${winery.slug}`);
+}
+
 export async function setWineSoldOutAction(
   wineId: string,
   wineryId: string,

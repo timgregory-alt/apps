@@ -1,13 +1,17 @@
 import { getWineryStaffContext } from "@/lib/portal";
-import { getWineryHours } from "@/lib/data";
+import { getWineryHours, getWineryWeeklyHours } from "@/lib/data";
 import { PortalDetailsForm } from "@/components/portal/PortalDetailsForm";
 import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
+import { WeeklyHoursEditor } from "@/components/portal/WeeklyHoursEditor";
 
 export default async function PortalDetailsPage() {
   const ctx = await getWineryStaffContext();
   if (!ctx) return null;
 
-  const seasons = await getWineryHours(ctx.winery.id);
+  const [seasons, weeklyHours] = await Promise.all([
+    getWineryHours(ctx.winery.id),
+    getWineryWeeklyHours(ctx.winery.id),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -20,6 +24,7 @@ export default async function PortalDetailsPage() {
       </div>
 
       <PortalDetailsForm winery={ctx.winery} />
+      <WeeklyHoursEditor wineryId={ctx.winery.id} initialDays={weeklyHours} />
       <SeasonalHoursEditor wineryId={ctx.winery.id} initialSeasons={seasons} />
     </div>
   );

@@ -9,6 +9,7 @@ import {
 } from "@/app/portal/billing/actions";
 
 const BENEFITS = [
+  "Export your guest list — names and emails — to CSV",
   "Page views and wine club click-through rate",
   "Guest age groups and where guests are coming from",
   "How many guests are one-time vs. repeat visitors",

@@ -132,6 +132,21 @@ export interface WineryHours {
   created_at: string;
 }
 
+/** One day of a winery's structured weekly schedule. `day_of_week` is 0
+ * (Monday) through 6 (Sunday). `open_time`/`close_time` are Postgres `time`
+ * values as "HH:MM:SS" strings, null when `is_closed`. Takes priority over
+ * both the seasonal WineryHours table and the plain `hours` text field when
+ * a winery has filled it out. */
+export interface WineryWeeklyHours {
+  id: UUID;
+  winery_id: UUID;
+  day_of_week: number;
+  is_closed: boolean;
+  open_time: string | null;
+  close_time: string | null;
+  created_at: string;
+}
+
 export interface TrailWinery {
   id: UUID;
   trail_id: UUID;

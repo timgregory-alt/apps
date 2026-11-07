@@ -10,6 +10,7 @@ import {
   getWinesWithTastings,
   getCustomWineTastings,
   getWineryHours,
+  getWineryWeeklyHours,
   getPrimaryTrailSlugForWinery,
   logWineryPageView,
 } from "@/lib/data";
@@ -58,11 +59,12 @@ export default async function WineryDetailPage({
   after(() => logWineryPageView(winery.id, user?.id ?? null, src === "qr" ? "qr" : null));
 
   const trailSlug = await getPrimaryTrailSlugForWinery(winery.id);
-  const [wineries, allWines, customTastings, hoursSeasons] = await Promise.all([
+  const [wineries, allWines, customTastings, hoursSeasons, weeklyHours] = await Promise.all([
     getWineriesWithStatus(user?.id ?? null, trailSlug),
     getWinesWithTastings(user?.id ?? null, trailSlug),
     user ? getCustomWineTastings(user.id) : Promise.resolve([]),
     getWineryHours(winery.id),
+    getWineryWeeklyHours(winery.id),
   ]);
   const wineryWithStatus = wineries.find((w) => w.id === winery.id) ?? {
     ...winery,
@@ -118,7 +120,7 @@ export default async function WineryDetailPage({
           )
         )}
 
-        <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} />
+        <WineryDetailsList winery={winery} hoursSeasons={hoursSeasons} weeklyHours={weeklyHours} />
 
         {!winery.redeems_rewards && (
           <div className="rounded-2xl border border-[var(--color-gold)]/40 bg-[var(--color-gold-pale)]/20 px-4 py-3 text-center">

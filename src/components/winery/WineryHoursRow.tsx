@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import { Clock, ChevronDown } from "lucide-react";
-import { getCurrentSeasonHours, formatMonthRange, parseHoursLines } from "@/lib/hours";
-import type { WineryHours } from "@/lib/types";
+import { getCurrentSeasonHours, formatMonthRange, parseHoursLines, formatWeeklyHoursLines, type HoursLine } from "@/lib/hours";
+import type { WineryHours, WineryWeeklyHours } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-/** Renders a free-text hours string as one line per day range instead of a
- * single run-on string, falling back to "Hours coming soon" when unset. */
-function HoursLines({ text }: { text: string | null }) {
-  const lines = parseHoursLines(text);
+/** Renders a day-range/time pair per line instead of a single run-on
+ * string, falling back to "Hours coming soon" when there's nothing to show. */
+function HoursLines({ lines }: { lines: HoursLine[] }) {
   if (lines.length === 0) {
     return <dd className="mt-0.5 text-sm text-[var(--color-charcoal)]/85">Hours coming soon</dd>;
   }
@@ -28,11 +27,27 @@ function HoursLines({ text }: { text: string | null }) {
 export function WineryHoursRow({
   fallbackHours,
   seasons,
+  weeklyHours = [],
 }: {
   fallbackHours: string | null;
   seasons: WineryHours[];
+  weeklyHours?: WineryWeeklyHours[];
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  if (weeklyHours.length > 0) {
+    return (
+      <div className="flex items-start gap-3 px-4 py-3.5">
+        <Clock size={17} strokeWidth={1.75} className="mt-0.5 shrink-0 text-[var(--color-gold)]" />
+        <div className="min-w-0">
+          <dt className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
+            Hours
+          </dt>
+          <HoursLines lines={formatWeeklyHoursLines(weeklyHours)} />
+        </div>
+      </div>
+    );
+  }
 
   if (seasons.length === 0) {
     return (
@@ -42,7 +57,7 @@ export function WineryHoursRow({
           <dt className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--color-charcoal)]/45">
             Hours
           </dt>
-          <HoursLines text={fallbackHours} />
+          <HoursLines lines={parseHoursLines(fallbackHours)} />
         </div>
       </div>
     );
@@ -63,7 +78,7 @@ export function WineryHoursRow({
               </span>
             )}
           </dt>
-          <HoursLines text={current?.hours_text ?? fallbackHours ?? null} />
+          <HoursLines lines={parseHoursLines(current?.hours_text ?? fallbackHours ?? null)} />
 
           {seasons.length > 1 && (
             <button

@@ -4,14 +4,16 @@ import { useState } from "react";
 import { ChevronDown, Clock, MapPin } from "lucide-react";
 import { WineryHoursRow } from "@/components/winery/WineryHoursRow";
 import { cn } from "@/lib/utils";
-import type { Winery, WineryHours } from "@/lib/types";
+import type { Winery, WineryHours, WineryWeeklyHours } from "@/lib/types";
 
 export function WineryDetailsList({
   winery,
   hoursSeasons = [],
+  weeklyHours = [],
 }: {
   winery: Winery;
   hoursSeasons?: WineryHours[];
+  weeklyHours?: WineryWeeklyHours[];
 }) {
   const [open, setOpen] = useState(false);
 
@@ -39,7 +41,7 @@ export function WineryDetailsList({
       {open && (
         <dl className="flex flex-col divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
           <Row icon={MapPin} label="Address" value={winery.address} />
-          <WineryHoursRow fallbackHours={winery.hours} seasons={hoursSeasons} />
+          <WineryHoursRow fallbackHours={winery.hours} seasons={hoursSeasons} weeklyHours={weeklyHours} />
           {winery.phone && <Row icon={Clock} label="Phone" value={winery.phone} />}
         </dl>
       )}

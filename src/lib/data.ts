@@ -27,6 +27,7 @@ import type {
   LockableWineryEvent,
   WineryEventGroup,
   WineryHours,
+  WineryWeeklyHours,
   WineryWithStatus,
 } from "@/lib/types";
 
@@ -184,6 +185,26 @@ export async function getWineryHours(wineryId: string): Promise<WineryHours[]> {
     return SEED_WINERY_HOURS.filter((h) => h.winery_id === wineryId).sort(
       (a, b) => a.sort_order - b.sort_order
     );
+  }
+}
+
+/** A winery's structured per-day hours, if it's filled any out — public,
+ * guest-facing. No seed fallback: a demo/no-Supabase run just shows the
+ * plain `hours` text field instead, same as a winery that hasn't set this
+ * up yet. */
+export async function getWineryWeeklyHours(wineryId: string): Promise<WineryWeeklyHours[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("winery_weekly_hours")
+      .select("*")
+      .eq("winery_id", wineryId)
+      .order("day_of_week", { ascending: true });
+    if (error || !data) throw error;
+    return data as WineryWeeklyHours[];
+  } catch {
+    return [];
   }
 }
 
