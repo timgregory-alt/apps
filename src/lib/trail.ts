@@ -42,8 +42,18 @@ export function recommendNextStop(
   return ranked[0];
 }
 
+/** Below this many active wineries, "completing the trail" is just visiting
+ * the one or two stops that happen to exist yet — not a real multi-stop
+ * achievement. Gating the completion bonus (and the "Trail Complete!"
+ * celebration) behind this keeps both meaningful as the trail grows,
+ * rather than firing on a guest's very first check-in. */
+export const MIN_WINERIES_FOR_TRAIL_COMPLETION = 3;
+
 export function isTrailComplete(wineries: WineryWithStatus[]): boolean {
-  return wineries.length > 0 && wineries.every((w) => w.status !== "not_visited");
+  return (
+    wineries.length >= MIN_WINERIES_FOR_TRAIL_COMPLETION &&
+    wineries.every((w) => w.status !== "not_visited")
+  );
 }
 
 export function visitedCount(wineries: WineryWithStatus[]): number {

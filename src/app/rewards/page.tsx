@@ -21,6 +21,7 @@ import {
   POINTS_PER_REFERRAL,
   SUBSCRIBER_MULTIPLIER,
 } from "@/lib/rewards";
+import { MIN_WINERIES_FOR_TRAIL_COMPLETION } from "@/lib/trail";
 import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
@@ -135,10 +136,15 @@ export default async function RewardsPage() {
                 +{POINTS_PER_WINE_RATED} pts
               </span>
             </li>
-            <li className="flex items-center justify-between gap-3 py-2">
-              <span className="text-sm text-[var(--color-charcoal)]/80">Complete the full trail</span>
-              <span className="text-sm font-medium text-[var(--color-burgundy)]">
-                +{COMPLETION_BONUS} pts
+            <li className="flex flex-col gap-0.5 py-2">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-[var(--color-charcoal)]/80">Complete the full trail</span>
+                <span className="text-sm font-medium text-[var(--color-burgundy)]">
+                  +{COMPLETION_BONUS} pts
+                </span>
+              </div>
+              <span className="text-xs text-[var(--color-charcoal)]/45">
+                Once the trail has {MIN_WINERIES_FOR_TRAIL_COMPLETION}+ wineries
               </span>
             </li>
             <li className="py-2">

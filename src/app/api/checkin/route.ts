@@ -12,6 +12,7 @@ import {
   getUserCheckins,
 } from "@/lib/data";
 import { computeRewardsPoints, totalPointsSpent } from "@/lib/rewards";
+import { MIN_WINERIES_FOR_TRAIL_COMPLETION } from "@/lib/trail";
 import type { Winery } from "@/lib/types";
 
 interface CheckinBody {
@@ -242,7 +243,11 @@ export async function POST(request: Request) {
     const requiredIds = (trailWineryIds ?? SEED_WINERIES.map((w) => ({ winery_id: w.id }))).map(
       (r) => r.winery_id
     );
-    if (requiredIds.length === 0 || !requiredIds.every((id) => visitedIds.has(id))) continue;
+    if (
+      requiredIds.length < MIN_WINERIES_FOR_TRAIL_COMPLETION ||
+      !requiredIds.every((id) => visitedIds.has(id))
+    )
+      continue;
 
     trailComplete = true;
     const { data } = await supabase
