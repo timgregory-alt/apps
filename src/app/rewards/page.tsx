@@ -169,7 +169,7 @@ export default async function RewardsPage() {
                   {profile?.is_subscriber ? "You're a subscriber" : "Go Premium"}
                 </span>
                 <span className="text-sm font-medium text-[var(--color-burgundy)]">
-                  {SUBSCRIBER_MULTIPLIER}x pts
+                  {SUBSCRIBER_MULTIPLIER}x pts + more
                 </span>
               </Link>
             </li>
