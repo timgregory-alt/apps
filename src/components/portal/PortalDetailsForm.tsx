@@ -37,11 +37,6 @@ export function PortalDetailsForm({ winery }: { winery: Winery }) {
         />
       </label>
 
-      <label className={labelClass}>
-        <span className={labelTextClass}>Hours (plain text fallback)</span>
-        <input name="hours" defaultValue={winery.hours ?? ""} className={inputClass} />
-      </label>
-
       <div className="grid grid-cols-2 gap-4">
         <label className={labelClass}>
           <span className={labelTextClass}>Phone</span>
