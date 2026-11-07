@@ -109,7 +109,7 @@ export default async function HomePage({
                 </Card>
               </Link>
             ))}
-            {[1, 2, 3].map((i) => (
+            {[1, 2].map((i) => (
               <Card
                 key={`coming-soon-${i}`}
                 className="flex items-center gap-4 overflow-hidden border-dashed p-3 opacity-60"
