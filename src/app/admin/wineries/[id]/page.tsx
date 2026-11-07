@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { getWineryByIdAdmin, getWineryWinesAdmin, getWineryStaffAdmin } from "@/lib/admin";
-import { getWineryHours } from "@/lib/data";
+import { getWineryHours, getWineryWeeklyHours } from "@/lib/data";
 import { WineryForm } from "@/components/admin/WineryForm";
 import { SeasonalHoursEditor } from "@/components/admin/SeasonalHoursEditor";
+import { WeeklyHoursEditor } from "@/components/portal/WeeklyHoursEditor";
 import { WineSyncPanel } from "@/components/admin/WineSyncPanel";
 import { EventSyncPanel } from "@/components/admin/EventSyncPanel";
 import { WineSoldOutList } from "@/components/admin/WineSoldOutList";
@@ -19,8 +20,9 @@ export default async function EditWineryPage({
   const winery = await getWineryByIdAdmin(id);
   if (!winery) notFound();
 
-  const [hoursSeasons, wines, staff] = await Promise.all([
+  const [hoursSeasons, weeklyHours, wines, staff] = await Promise.all([
     getWineryHours(winery.id),
+    getWineryWeeklyHours(winery.id),
     getWineryWinesAdmin(winery.id),
     getWineryStaffAdmin(winery.id),
   ]);
@@ -35,6 +37,10 @@ export default async function EditWineryPage({
           Editing this winery updates the live app immediately.
         </p>
         <WineryForm winery={winery} action={boundAction} />
+
+        <div className="mt-6">
+          <WeeklyHoursEditor wineryId={winery.id} initialDays={weeklyHours} />
+        </div>
 
         <div className="mt-6">
           <SeasonalHoursEditor wineryId={winery.id} initialSeasons={hoursSeasons} />
