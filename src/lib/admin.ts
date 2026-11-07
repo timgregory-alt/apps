@@ -290,6 +290,34 @@ export async function getAdminPeriodTrends(): Promise<Record<string, PeriodTrend
   }
 }
 
+/** One point per day for the last 30 days, per metric — same metric keys
+ * as getAdminPeriodTrends, for the stat-card hover sparklines. Every day
+ * in the window appears even with a value of 0, so the line never has
+ * gaps. */
+export interface DailyTrendPoint {
+  day: string;
+  value: number;
+}
+
+export async function getAdminDailyTrends(): Promise<Record<string, DailyTrendPoint[]>> {
+  if (!isSupabaseConfigured) return {};
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("admin_daily_trends");
+    if (error || !data) throw error;
+
+    const rows = data as { metric: string; day: string; value: number }[];
+    const byMetric: Record<string, DailyTrendPoint[]> = {};
+    rows.forEach((r) => {
+      (byMetric[r.metric] ??= []).push({ day: r.day, value: r.value });
+    });
+    Object.values(byMetric).forEach((series) => series.sort((a, b) => a.day.localeCompare(b.day)));
+    return byMetric;
+  } catch {
+    return {};
+  }
+}
+
 export async function getAllWineriesAdmin(): Promise<Winery[]> {
   if (!isSupabaseConfigured) return SEED_WINERIES;
   try {

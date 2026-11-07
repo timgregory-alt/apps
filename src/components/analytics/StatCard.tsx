@@ -1,5 +1,6 @@
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Sparkline } from "@/components/analytics/Sparkline";
 import type { Trend } from "@/lib/trends";
 
 const TREND_ICONS = { up: ArrowUp, down: ArrowDown, flat: Minus } as const;
@@ -31,19 +32,24 @@ function TrendLine({ trend, className }: { trend: Trend; className?: string }) {
  * pass this for metrics a 7-day comparison actually makes sense for, not
  * forward-looking counts like upcoming events. `trend30` adds the same
  * comparison over 30 days, revealed in a hover tooltip instead of taking
- * up permanent space on the card. */
+ * up permanent space on the card. An optional `series` (last 30 daily
+ * points, see getAdminDailyTrends/getWineryDailyTrends) draws a small
+ * sparkline in that same tooltip, with its own hover crosshair — only
+ * pass it alongside `trend30`, since it lives in that tooltip. */
 export function StatCard({
   label,
   value,
   caption,
   trend,
   trend30,
+  series,
 }: {
   label: string;
   value: string | number;
   caption?: string;
   trend?: Trend | null;
   trend30?: Trend | null;
+  series?: { day: string; value: number }[];
 }) {
   const isLong = String(value).length > 14;
 
@@ -69,12 +75,16 @@ export function StatCard({
       {trend30 && (
         <div
           role="tooltip"
-          className="pointer-events-none absolute bottom-[calc(100%+0.5rem)] left-1/2 z-20 w-max max-w-[14rem] -translate-x-1/2 rounded-xl bg-[var(--color-charcoal)] px-3 py-2 text-center opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
+          className={cn(
+            "absolute bottom-[calc(100%+0.5rem)] left-1/2 z-20 w-max max-w-[14rem] -translate-x-1/2 rounded-xl bg-[var(--color-charcoal)] px-3 py-2 text-center opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100",
+            series && series.length >= 2 ? "pointer-events-auto" : "pointer-events-none"
+          )}
         >
           <p className="text-[0.65rem] font-medium uppercase tracking-wide text-[var(--color-ivory)]/50">
             Last 30 Days
           </p>
           <TrendLine trend={trend30} className="mt-0.5 justify-center !text-[var(--color-gold-pale)]" />
+          {series && series.length >= 2 && <Sparkline data={series} />}
           <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-[var(--color-charcoal)]" />
         </div>
       )}

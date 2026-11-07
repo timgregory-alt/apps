@@ -1,6 +1,7 @@
 import {
   getAdminStats,
   getAdminPeriodTrends,
+  getAdminDailyTrends,
   getAllWineriesAdmin,
   getWineLikeStats,
   getAppRatingStats,
@@ -25,17 +26,27 @@ import { QrCode } from "@/components/ui/QrCode";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 
 export default async function AdminDashboardPage() {
-  const [stats, trends, wineries, wineLikeStats, appRatingStats, wineryFeedback, members, actualRevenueThisMonth] =
-    await Promise.all([
-      getAdminStats(),
-      getAdminPeriodTrends(),
-      getAllWineriesAdmin(),
-      getWineLikeStats(),
-      getAppRatingStats(),
-      getWineryFeedbackAdmin(),
-      getAllMembersAdmin(),
-      getActualRevenueThisMonth(),
-    ]);
+  const [
+    stats,
+    trends,
+    dailyTrends,
+    wineries,
+    wineLikeStats,
+    appRatingStats,
+    wineryFeedback,
+    members,
+    actualRevenueThisMonth,
+  ] = await Promise.all([
+    getAdminStats(),
+    getAdminPeriodTrends(),
+    getAdminDailyTrends(),
+    getAllWineriesAdmin(),
+    getWineLikeStats(),
+    getAppRatingStats(),
+    getWineryFeedbackAdmin(),
+    getAllMembersAdmin(),
+    getActualRevenueThisMonth(),
+  ]);
 
   const revenueTarget = getMonthlyRevenueTarget(wineries.length);
   const revenuePct = revenueTarget > 0 ? Math.round(((actualRevenueThisMonth ?? 0) / revenueTarget) * 100) : 0;
@@ -124,60 +135,62 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-sm rounded-2xl border border-[var(--color-line)] bg-white p-5">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
-            Monthly Revenue vs. Target
-          </p>
-          {actualRevenueThisMonth != null && (
-            <p
-              className={cn(
-                "text-xs font-medium",
-                revenuePct >= 100 ? "text-[var(--color-gold)]" : "text-[var(--color-charcoal)]/55"
-              )}
-            >
-              {revenuePct}% of target
+      <div className="flex flex-wrap items-start gap-4">
+        <div className="min-w-[280px] max-w-sm flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+              Monthly Revenue vs. Target
             </p>
-          )}
-        </div>
-        <div className="mt-2 flex items-baseline gap-2">
-          <p className="font-serif-display text-3xl text-[var(--color-burgundy)]">
-            {actualRevenueThisMonth != null ? `$${Math.round(actualRevenueThisMonth).toLocaleString()}` : "—"}
-          </p>
-          <p className="text-sm text-[var(--color-charcoal)]/45">
-            of ${Math.round(revenueTarget).toLocaleString()} target
-          </p>
-        </div>
-        <ProgressBar
-          value={Math.round(actualRevenueThisMonth ?? 0)}
-          max={Math.max(Math.round(revenueTarget), 1)}
-          label="Monthly revenue vs. target"
-          className="mt-3"
-        />
-        <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
-          {actualRevenueThisMonth == null
-            ? "Billing isn't configured yet, so actual revenue can't be shown."
-            : `Target scaled from the Moderate scenario of the revenue model, at ${wineries.length} wineries.`}
-        </p>
-      </div>
-
-      <div className="w-full max-w-xs rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
-        <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
-          General App QR Code
-        </p>
-        <div className="mt-3 flex justify-center">
-          <QrCode
-            value="https://winetrailonline.com"
-            size={160}
-            downloadable
-            filename="winetrailonline-qr"
+            {actualRevenueThisMonth != null && (
+              <p
+                className={cn(
+                  "text-xs font-medium",
+                  revenuePct >= 100 ? "text-[var(--color-gold)]" : "text-[var(--color-charcoal)]/55"
+                )}
+              >
+                {revenuePct}% of target
+              </p>
+            )}
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <p className="font-serif-display text-3xl text-[var(--color-burgundy)]">
+              {actualRevenueThisMonth != null ? `$${Math.round(actualRevenueThisMonth).toLocaleString()}` : "—"}
+            </p>
+            <p className="text-sm text-[var(--color-charcoal)]/45">
+              of ${Math.round(revenueTarget).toLocaleString()} target
+            </p>
+          </div>
+          <ProgressBar
+            value={Math.round(actualRevenueThisMonth ?? 0)}
+            max={Math.max(Math.round(revenueTarget), 1)}
+            label="Monthly revenue vs. target"
+            className="mt-3"
           />
+          <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
+            {actualRevenueThisMonth == null
+              ? "Billing isn't configured yet, so actual revenue can't be shown."
+              : `Target scaled from the Moderate scenario of the revenue model, at ${wineries.length} wineries.`}
+          </p>
         </div>
-        <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">https://winetrailonline.com</p>
-        <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
-          Not tied to any winery — use this on banners, cards, or signage you might move between
-          locations.
-        </p>
+
+        <div className="min-w-[260px] max-w-xs flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+            General App QR Code
+          </p>
+          <div className="mt-3 flex justify-center">
+            <QrCode
+              value="https://winetrailonline.com"
+              size={160}
+              downloadable
+              filename="winetrailonline-qr"
+            />
+          </div>
+          <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">https://winetrailonline.com</p>
+          <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
+            Not tied to any winery — use this on banners, cards, or signage you might move between
+            locations.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -186,42 +199,49 @@ export default async function AdminDashboardPage() {
           value={stats.totalAccounts}
           trend={computeTrend(trends.new_accounts)}
           trend30={computeTrend30(trends.new_accounts)}
+          series={dailyTrends.new_accounts}
         />
         <StatCard
           label="Total Check-ins"
           value={stats.totalCheckins}
           trend={computeTrend(trends.checkins)}
           trend30={computeTrend30(trends.checkins)}
+          series={dailyTrends.checkins}
         />
         <StatCard
           label="Trail Completions"
           value={stats.totalCompletions}
           trend={computeTrend(trends.trail_completions)}
           trend30={computeTrend30(trends.trail_completions)}
+          series={dailyTrends.trail_completions}
         />
         <StatCard
           label="Wine Club Clicks"
           value={stats.totalWineClubClicks}
           trend={computeTrend(trends.wine_club_clicks)}
           trend30={computeTrend30(trends.wine_club_clicks)}
+          series={dailyTrends.wine_club_clicks}
         />
         <StatCard
           label="Winery Page Views"
           value={stats.totalPageViews}
           trend={computeTrend(trends.page_views)}
           trend30={computeTrend30(trends.page_views)}
+          series={dailyTrends.page_views}
         />
         <StatCard
           label="QR Code Scans"
           value={stats.totalQrScans}
           trend={computeTrend(trends.qr_scans)}
           trend30={computeTrend30(trends.qr_scans)}
+          series={dailyTrends.qr_scans}
         />
         <StatCard
           label="Share Events"
           value={stats.totalShareEvents}
           trend={computeTrend(trends.share_events)}
           trend30={computeTrend30(trends.share_events)}
+          series={dailyTrends.share_events}
         />
         <StatCard label="Multi-Winery Visitors" value={stats.multiWineryVisitors} />
         <StatCard
@@ -277,6 +297,7 @@ export default async function AdminDashboardPage() {
           value={stats.totalSubscriberGuests}
           trend={computeTrend(trends.subscriber_guests)}
           trend30={computeTrend30(trends.subscriber_guests)}
+          series={dailyTrends.subscriber_guests}
         />
       </div>
       <p className="-mt-5 text-xs text-[var(--color-charcoal)]/45">
