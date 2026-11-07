@@ -23,23 +23,22 @@ export default async function PortalGuestsPage() {
             trail.
           </p>
         </div>
-        {guests.length > 0 &&
-          (isSubscribed ? (
-            <a
-              href="/api/portal/export-guests"
-              className="shrink-0 rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-burgundy-deep)]"
-            >
-              Export Guest List (CSV)
-            </a>
-          ) : (
-            <Link
-              href="/portal"
-              className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-charcoal)]/60 hover:border-[var(--color-gold)] hover:text-[var(--color-burgundy)]"
-            >
-              <Lock size={13} strokeWidth={2} />
-              Export Guest List — Winery Analytics
-            </Link>
-          ))}
+        {isSubscribed ? (
+          <a
+            href="/api/portal/export-guests"
+            className="shrink-0 rounded-full bg-[var(--color-burgundy)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-burgundy-deep)]"
+          >
+            Export Guest List (CSV)
+          </a>
+        ) : (
+          <Link
+            href="/portal"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-charcoal)]/60 hover:border-[var(--color-gold)] hover:text-[var(--color-burgundy)]"
+          >
+            <Lock size={13} strokeWidth={2} />
+            Export Guest List — Winery Analytics
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
