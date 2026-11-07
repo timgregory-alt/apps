@@ -12,6 +12,7 @@ export interface VerifyRedemptionResult {
   discountText?: string;
   alreadyVerified?: boolean;
   verifiedAt?: string;
+  verifiedAtWineryName?: string | null;
 }
 
 /** Looks up a guest's redemption code and, the first time it's checked,
@@ -50,6 +51,12 @@ export async function verifyRedemptionCodeAction(rawCode: string): Promise<Verif
   const percent = tier ? effectiveDiscountPercent(tier, profile?.is_subscriber ?? false) : 0;
   const discountText = data.chosen_option ?? (tier ? discountLabel(percent) : "");
 
+  async function wineryName(wineryId: string | null): Promise<string | null> {
+    if (!wineryId) return null;
+    const { data: winery } = await supabase.from("wineries").select("name").eq("id", wineryId).maybeSingle();
+    return winery?.name ?? null;
+  }
+
   if (data.verified_at) {
     return {
       code,
@@ -57,24 +64,37 @@ export async function verifyRedemptionCodeAction(rawCode: string): Promise<Verif
       discountText,
       alreadyVerified: true,
       verifiedAt: data.verified_at,
+      verifiedAtWineryName: await wineryName(data.verified_by_winery_id),
     };
   }
 
   const now = new Date().toISOString();
   const { data: updated, error: updateError } = await supabase
     .from("reward_redemptions")
-    .update({ verified_at: now })
+    .update({ verified_at: now, verified_by_winery_id: ctx.winery.id })
     .eq("id", data.id)
     .is("verified_at", null)
     .select()
     .maybeSingle();
   if (updateError) return { error: updateError.message };
 
-  // Someone else verified it between our select and this update — treat
-  // this scan as the duplicate, not the original.
-  if (!updated) {
-    return { code, tierLabel: tier?.label, discountText, alreadyVerified: true, verifiedAt: now };
+  if (updated) {
+    return { code, tierLabel: tier?.label, discountText, alreadyVerified: false, verifiedAt: now };
   }
 
-  return { code, tierLabel: tier?.label, discountText, alreadyVerified: false, verifiedAt: now };
+  // Someone else verified it between our select and this update — re-fetch
+  // to report the actual original time/winery, not our own attempt.
+  const { data: current } = await supabase
+    .from("reward_redemptions")
+    .select("verified_at, verified_by_winery_id")
+    .eq("id", data.id)
+    .maybeSingle();
+  return {
+    code,
+    tierLabel: tier?.label,
+    discountText,
+    alreadyVerified: true,
+    verifiedAt: current?.verified_at ?? now,
+    verifiedAtWineryName: await wineryName(current?.verified_by_winery_id ?? null),
+  };
 }

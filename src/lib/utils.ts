@@ -13,6 +13,16 @@ export function formatCheckinDate(iso: string): string {
   });
 }
 
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 /** Age in whole years from an ISO date (YYYY-MM-DD), computed by string parts
  * to avoid UTC/local timezone shifting a birthdate by a day. */
 export function calculateAge(birthDateIso: string, today: Date = new Date()): number {

@@ -391,4 +391,7 @@ export interface RewardRedemption {
    * claimed it. A second scan reports the code as already verified rather
    * than honoring it again, so a screenshotted QR code can't be reused. */
   verified_at: string | null;
+  /** Which winery's staff first verified this code — shown to whoever scans
+   * it next, so they know where (not just when) it was already honored. */
+  verified_by_winery_id: UUID | null;
 }

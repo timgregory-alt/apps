@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import jsQR from "jsqr";
 import { Camera, CheckCircle2, Keyboard, XCircle } from "lucide-react";
 import { verifyRedemptionCodeAction, type VerifyRedemptionResult } from "@/app/portal/redeem/actions";
-import { formatCheckinDate } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
 
 /** Pulls a redemption code out of either a bare code (manual entry) or the
  * full QR payload, which encodes a URL like ".../redeem/7K4RXQ9M". */
@@ -116,7 +116,8 @@ export function RedeemScanner() {
             </p>
             {result.verifiedAt && (
               <p className="text-xs text-[var(--color-charcoal)]/45">
-                First redeemed {formatCheckinDate(result.verifiedAt)}
+                First redeemed {formatDateTime(result.verifiedAt)}
+                {result.verifiedAtWineryName ? ` at ${result.verifiedAtWineryName}` : ""}
               </p>
             )}
           </div>
