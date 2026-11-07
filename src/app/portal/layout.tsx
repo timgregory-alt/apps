@@ -41,6 +41,9 @@ export default async function PortalLayout({ children }: { children: React.React
             <Link href="/portal" className="hover:text-[var(--color-gold)]">
               Dashboard
             </Link>
+            <Link href="/portal/redeem" className="hover:text-[var(--color-gold)]">
+              Redeem
+            </Link>
             <Link href="/portal/events" className="hover:text-[var(--color-gold)]">
               Events
             </Link>

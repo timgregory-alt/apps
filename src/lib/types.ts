@@ -386,4 +386,9 @@ export interface RewardRedemption {
   status: RewardRedemptionStatus;
   issued_at: string;
   redeemed_at: string | null;
+  /** Set the first time winery staff actually scan/look up this code in the
+   * portal — distinct from redeemed_at, which is just when the guest
+   * claimed it. A second scan reports the code as already verified rather
+   * than honoring it again, so a screenshotted QR code can't be reused. */
+  verified_at: string | null;
 }
