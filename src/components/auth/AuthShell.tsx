@@ -32,6 +32,10 @@ export function AuthShell({
       {children}
 
       {footer && <div className="mt-6 text-center text-sm text-[var(--color-charcoal)]/65">{footer}</div>}
+
+      <p className="mt-8 text-center text-[0.65rem] uppercase tracking-[0.2em] text-[var(--color-charcoal)]/30">
+        Powered by TokSocial
+      </p>
     </main>
   );
 }
