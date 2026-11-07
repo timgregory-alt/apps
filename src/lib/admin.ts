@@ -57,12 +57,18 @@ export function getRevenueTargetEquivalents(targetDollars: number): {
   };
 }
 
-/** Winery staff (profiles.winery_id set) never count as admin here, even
- * if is_admin were ever also set on that same row — the platform admin
- * dashboard is a separate identity from any winery account. Mirrors the
- * same rule in public.is_admin() (see migration 0070), which is what
- * actually gates RLS and SECURITY DEFINER reads; this check is the app's
- * own front door. */
+/** Keep in sync with the allowlist in supabase/migrations/0076 — the only
+ * emails allowed to be both winery staff and platform admin on the same
+ * account. */
+const ADMIN_WINERY_EXCEPTION_EMAILS = new Set(["tim.gregory@hotmail.com", "tim@woodfeatherfarm.com"]);
+
+/** Winery staff (profiles.winery_id set) never count as admin here, even if
+ * is_admin were ever also set on that same row — the platform admin
+ * dashboard is a separate identity from any winery account — except for the
+ * couple of owner emails above, who legitimately use the same account for
+ * both. Mirrors the same rule in public.is_admin() (see migrations 0070 and
+ * 0076), which is what actually gates RLS and SECURITY DEFINER reads; this
+ * check is the app's own front door. */
 export async function isCurrentUserAdmin(): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
   try {
@@ -73,10 +79,12 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
     if (!user) return false;
     const { data } = await supabase
       .from("profiles")
-      .select("is_admin, winery_id")
+      .select("is_admin, winery_id, email")
       .eq("id", user.id)
       .single();
-    return !!data?.is_admin && !data.winery_id;
+    if (!data?.is_admin) return false;
+    if (!data.winery_id) return true;
+    return ADMIN_WINERY_EXCEPTION_EMAILS.has((data.email ?? "").toLowerCase());
   } catch {
     return false;
   }
