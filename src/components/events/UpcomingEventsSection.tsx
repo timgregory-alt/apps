@@ -101,8 +101,8 @@ export function UpcomingEventsSection({ groups }: { groups: WineryEventGroup[] }
                       );
                     }
 
-                    return (
-                      <li key={event.id} className="flex items-center gap-3 py-2.5">
+                    const content = (
+                      <>
                         {dateBadge}
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">
@@ -114,6 +114,23 @@ export function UpcomingEventsSection({ groups }: { groups: WineryEventGroup[] }
                             </p>
                           )}
                         </div>
+                      </>
+                    );
+
+                    return (
+                      <li key={event.id}>
+                        {event.source_url ? (
+                          <a
+                            href={event.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 py-2.5"
+                          >
+                            {content}
+                          </a>
+                        ) : (
+                          <div className="flex items-center gap-3 py-2.5">{content}</div>
+                        )}
                       </li>
                     );
                   })}
