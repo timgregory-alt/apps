@@ -53,3 +53,37 @@ export async function deleteWineryFeedbackAction(id: string): Promise<AdminActio
 
   revalidatePath("/admin");
 }
+
+/** Marks a guest-submitted bug report resolved — stays on the dashboard,
+ * just moved out of the open group. */
+export async function resolveBugReportAction(id: string): Promise<AdminActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("bug_reports").update({ status: "resolved" }).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+}
+
+/** Reopens a bug report marked resolved by mistake. */
+export async function reopenBugReportAction(id: string): Promise<AdminActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("bug_reports").update({ status: "open" }).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+}
+
+/** Permanently removes a bug report — for spam or duplicates. */
+export async function deleteBugReportAction(id: string): Promise<AdminActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("bug_reports").delete().eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin");
+}

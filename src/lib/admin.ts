@@ -3,7 +3,7 @@ import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
-import type { Winery, Wine, RewardTier, UUID } from "@/lib/types";
+import type { Winery, Wine, RewardTier, UUID, BugReportStatus } from "@/lib/types";
 import type { PeriodTrendPoint } from "@/lib/portal";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
@@ -619,6 +619,55 @@ export async function getWineryFeedbackAdmin(): Promise<WineryFeedbackEntry[]> {
       feedback: r.feedback,
       created_at: r.created_at,
     }));
+  } catch {
+    return [];
+  }
+}
+
+export interface BugReportEntry {
+  id: string;
+  description: string;
+  page_url: string | null;
+  status: BugReportStatus;
+  created_at: string;
+  memberName: string;
+  memberEmail: string | null;
+}
+
+/** Open bug reports first, then recently resolved ones — newest within each
+ * group — shown on the admin dashboard's "Bug Reports" section. RLS on
+ * bug_reports already lets an admin read every row. */
+export async function getBugReportsAdmin(): Promise<BugReportEntry[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("bug_reports")
+      .select("id, user_id, description, page_url, status, created_at")
+      .order("status", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (error || !data) throw error;
+
+    const userIds = [...new Set(data.map((r) => r.user_id))];
+    const memberById = new Map<string, { name: string | null; email: string | null }>();
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("id, name, email").in("id", userIds);
+      (profiles ?? []).forEach((p) => memberById.set(p.id, { name: p.name, email: p.email }));
+    }
+
+    return data.map((r) => {
+      const member = memberById.get(r.user_id);
+      return {
+        id: r.id,
+        description: r.description,
+        page_url: r.page_url,
+        status: r.status as BugReportStatus,
+        created_at: r.created_at,
+        memberName: member?.name || member?.email || "Guest",
+        memberEmail: member?.email ?? null,
+      };
+    });
   } catch {
     return [];
   }

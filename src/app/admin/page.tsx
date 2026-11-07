@@ -6,6 +6,7 @@ import {
   getWineLikeStats,
   getAppRatingStats,
   getWineryFeedbackAdmin,
+  getBugReportsAdmin,
   getAllMembersAdmin,
   getMonthlyRevenueTarget,
   getRevenueTargetEquivalents,
@@ -17,12 +18,16 @@ import {
   deleteAppFeedbackAction,
   archiveWineryFeedbackAction,
   deleteWineryFeedbackAction,
+  resolveBugReportAction,
+  reopenBugReportAction,
+  deleteBugReportAction,
 } from "@/app/admin/actions";
 import { cn, formatCheckinDate } from "@/lib/utils";
 import { computeTrend, computeTrend30 } from "@/lib/trends";
 import { LabeledBars } from "@/components/analytics/LabeledBars";
 import { StatCard } from "@/components/analytics/StatCard";
 import { FeedbackActions } from "@/components/admin/FeedbackActions";
+import { BugReportActions } from "@/components/admin/BugReportActions";
 import { QrCode } from "@/components/ui/QrCode";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 
@@ -35,6 +40,7 @@ export default async function AdminDashboardPage() {
     wineLikeStats,
     appRatingStats,
     wineryFeedback,
+    bugReports,
     members,
     actualRevenueThisMonth,
   ] = await Promise.all([
@@ -45,6 +51,7 @@ export default async function AdminDashboardPage() {
     getWineLikeStats(),
     getAppRatingStats(),
     getWineryFeedbackAdmin(),
+    getBugReportsAdmin(),
     getAllMembersAdmin(),
     getActualRevenueThisMonth(),
   ]);
@@ -440,6 +447,60 @@ export default async function AdminDashboardPage() {
             </table>
           </div>
         </div>
+      </div>
+
+      <div>
+        <h2 className="font-serif-display text-xl text-[var(--color-charcoal)]">Bug Reports</h2>
+        <p className="mt-1 text-sm text-[var(--color-charcoal)]/55">
+          Submitted from the Profile page&rsquo;s &ldquo;Report a Bug&rdquo; card. Open reports are shown first.
+        </p>
+
+        {bugReports.length === 0 ? (
+          <p className="mt-3 text-sm text-[var(--color-charcoal)]/45">No bug reports yet.</p>
+        ) : (
+          <div className="mt-3 flex flex-col gap-3">
+            {bugReports.map((r) => (
+              <div
+                key={r.id}
+                className={cn(
+                  "rounded-2xl border bg-white px-4 py-3 text-sm",
+                  r.status === "open" ? "border-[var(--color-gold)]/40" : "border-[var(--color-line)] opacity-60"
+                )}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide",
+                        r.status === "open"
+                          ? "bg-[var(--color-gold-pale)]/60 text-[var(--color-burgundy-deep)]"
+                          : "bg-black/5 text-[var(--color-charcoal)]/50"
+                      )}
+                    >
+                      {r.status}
+                    </span>
+                    <span className="ml-2 text-xs text-[var(--color-charcoal)]/45">
+                      {formatCheckinDate(r.created_at)}
+                    </span>
+                  </div>
+                  <BugReportActions
+                    id={r.id}
+                    status={r.status}
+                    resolveAction={resolveBugReportAction}
+                    reopenAction={reopenBugReportAction}
+                    deleteAction={deleteBugReportAction}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs font-medium text-[var(--color-charcoal)]/60">
+                  {r.memberName}
+                  {r.memberEmail && r.memberEmail !== r.memberName ? ` · ${r.memberEmail}` : ""}
+                  {r.page_url ? ` · ${r.page_url}` : ""}
+                </p>
+                <p className="mt-0.5 text-[var(--color-charcoal)]/80">{r.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
