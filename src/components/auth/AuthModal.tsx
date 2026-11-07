@@ -87,6 +87,10 @@ export function AuthModal() {
             </>
           )}
         </p>
+
+        <p className="mt-4 text-center text-[0.65rem] uppercase tracking-[0.2em] text-[var(--color-charcoal)]/30">
+          Powered by TokSocial
+        </p>
       </div>
     </div>
   );
