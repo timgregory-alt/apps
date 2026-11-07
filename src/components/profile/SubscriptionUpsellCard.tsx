@@ -23,7 +23,7 @@ const ANNUAL_SAVINGS_PERCENT = 29;
 const TRAVEL_PASS_PRICE = "19.99";
 const TRAVEL_PASS_DAYS = 2;
 // Keep in sync with TRAVEL_PASS_BONUS_POINTS in src/lib/rewards.ts.
-const TRAVEL_PASS_BONUS_POINTS = 100;
+const TRAVEL_PASS_BONUS_POINTS = 50;
 
 // VIP events get a 10-day subscriber-only early-access window (see
 // VIP_EARLY_ACCESS_HOURS in src/lib/data.ts) — regular events are never

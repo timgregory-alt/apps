@@ -15,7 +15,7 @@ export const SUBSCRIBER_MULTIPLIER = 2;
  * a subscriber while it's active. Doesn't scale with the multiplier —
  * same reasoning as the completion bonus, a flat one-time reward rather
  * than an ongoing activity. */
-export const TRAVEL_PASS_BONUS_POINTS = 100;
+export const TRAVEL_PASS_BONUS_POINTS = 50;
 
 export interface RewardsPoints {
   /** Lifetime points earned — only ever goes up, since it's derived purely
