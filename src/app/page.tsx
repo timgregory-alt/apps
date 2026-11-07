@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Wine } from "lucide-react";
 import {
   getCurrentUser,
   getProfile,
@@ -93,21 +93,37 @@ export default async function HomePage({
           All Wineries
         </p>
         {hasWineries ? (
-          wineries.map((w) => (
-            <Link key={w.id} href={`/winery/${w.slug}`}>
-              <Card className="flex items-center gap-4 overflow-hidden p-3">
-                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                  <WineryImage name={w.name} slug={w.slug} src={w.hero_image} rows={false} />
+          <>
+            {wineries.map((w) => (
+              <Link key={w.id} href={`/winery/${w.slug}`}>
+                <Card className="flex items-center gap-4 overflow-hidden p-3">
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+                    <WineryImage name={w.name} slug={w.slug} src={w.hero_image} rows={false} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
+                    <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
+                  </div>
+                  <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={40} />
+                  <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
+                </Card>
+              </Link>
+            ))}
+            {[1, 2, 3].map((i) => (
+              <Card
+                key={`coming-soon-${i}`}
+                className="flex items-center gap-4 overflow-hidden border-dashed p-3 opacity-60"
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[var(--color-line)]">
+                  <Wine size={20} className="text-[var(--color-charcoal)]/30" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-[var(--color-charcoal)]">{w.name}</p>
-                  <p className="text-xs text-[var(--color-charcoal)]/55">{w.city}, TN</p>
+                  <p className="text-sm font-medium text-[var(--color-charcoal)]/50">More stops coming soon</p>
+                  <p className="text-xs text-[var(--color-charcoal)]/35">Growing the trail</p>
                 </div>
-                <WineryTastingGlass {...getWineryTastingProgress(wines, w.id)} size={40} />
-                <ArrowRight size={16} className="shrink-0 text-[var(--color-charcoal)]/30" />
               </Card>
-            </Link>
-          ))
+            ))}
+          </>
         ) : (
           <Card className="px-4 py-6 text-center text-sm text-[var(--color-charcoal)]/55">
             {selectedTrail?.name ?? "This trail"} is coming soon — check back for wineries to visit.
