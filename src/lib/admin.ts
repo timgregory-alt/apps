@@ -33,6 +33,30 @@ export function getMonthlyRevenueTarget(wineryCount: number): number {
   return wineryCount * perWineryPerMonth;
 }
 
+/** Display-only prices, same as SubscriptionUpsellCard's — keep in sync
+ * with the actual Stripe Prices configured via STRIPE_PRICE_ID_MONTHLY /
+ * STRIPE_PRICE_ID_ANNUAL / STRIPE_PRICE_ID_TRAVEL_PASS, since none of these
+ * are fetched live from Stripe. Blended subscriber revenue assumes the same
+ * 75% monthly / 25% annual mix used in the revenue model: 0.75 × $6.99 +
+ * 0.25 × ($59.88 ÷ 12) ≈ $6.49/mo per active subscriber. */
+const BLENDED_SUBSCRIBER_REVENUE_PER_MONTH = 6.49;
+const TRAVEL_PASS_PRICE = 19.99;
+
+/** How many active subscribers, or how many Travel Pass sales this month,
+ * alone would add up to the given dollar target — two illustrative
+ * equivalents for the admin dashboard, not a literal required split across
+ * both (actual revenue is some mix of subscriptions, Travel Pass, and
+ * Winery Analytics). */
+export function getRevenueTargetEquivalents(targetDollars: number): {
+  subscribers: number;
+  travelPasses: number;
+} {
+  return {
+    subscribers: Math.ceil(targetDollars / BLENDED_SUBSCRIBER_REVENUE_PER_MONTH),
+    travelPasses: Math.ceil(targetDollars / TRAVEL_PASS_PRICE),
+  };
+}
+
 /** Winery staff (profiles.winery_id set) never count as admin here, even
  * if is_admin were ever also set on that same row — the platform admin
  * dashboard is a separate identity from any winery account. Mirrors the

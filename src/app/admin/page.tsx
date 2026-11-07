@@ -8,6 +8,7 @@ import {
   getWineryFeedbackAdmin,
   getAllMembersAdmin,
   getMonthlyRevenueTarget,
+  getRevenueTargetEquivalents,
   LIKED_RATING_THRESHOLD,
 } from "@/lib/admin";
 import { getActualRevenueThisMonth } from "@/lib/stripe";
@@ -50,6 +51,7 @@ export default async function AdminDashboardPage() {
 
   const revenueTarget = getMonthlyRevenueTarget(wineries.length);
   const revenuePct = revenueTarget > 0 ? Math.round(((actualRevenueThisMonth ?? 0) / revenueTarget) * 100) : 0;
+  const revenueTargetEquivalents = getRevenueTargetEquivalents(revenueTarget);
 
   const mostPopular = Object.entries(stats.checkinsByWinery).sort((a, b) => b[1] - a[1])[0];
   const mostPopularWinery = wineries.find((w) => w.id === mostPopular?.[0]);
@@ -170,6 +172,10 @@ export default async function AdminDashboardPage() {
             {actualRevenueThisMonth == null
               ? "Billing isn't configured yet, so actual revenue can't be shown."
               : `Target scaled from the Moderate scenario of the revenue model, at ${wineries.length} wineries.`}
+          </p>
+          <p className="mt-1 text-xs text-[var(--color-charcoal)]/45">
+            That&rsquo;s about {revenueTargetEquivalents.subscribers.toLocaleString()} active subscribers, or{" "}
+            {revenueTargetEquivalents.travelPasses.toLocaleString()} Travel Pass sales this month, on their own.
           </p>
         </div>
 
