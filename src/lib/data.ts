@@ -161,9 +161,10 @@ export async function logAppQrScan(source: string | null, userId: string | null)
   if (!isSupabaseConfigured) return;
   try {
     const supabase = await createClient();
-    await supabase.from("app_qr_scans").insert({ user_id: userId, source });
-  } catch {
-    // Analytics-only — never worth surfacing to the visitor.
+    const { error } = await supabase.from("app_qr_scans").insert({ user_id: userId, source });
+    if (error) console.error("logAppQrScan insert failed:", error.message);
+  } catch (err) {
+    console.error("logAppQrScan threw:", err);
   }
 }
 
