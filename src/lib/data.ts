@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   DEFAULT_TRAIL_SLUG,
   SOUTH_NASHVILLE_TRAIL,
@@ -146,10 +146,15 @@ export async function logWineryPageView(
 ): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
-    const supabase = await createClient();
-    await supabase.from("winery_page_views").insert({ winery_id: wineryId, user_id: userId, source });
-  } catch {
-    // Analytics-only — never worth surfacing to the visitor.
+    // The admin client is used (not the cookie-bound createClient()) because
+    // this runs inside after(), and Next.js forbids calling cookies() there —
+    // the regular client reads cookies() internally to resolve the request's
+    // session, which silently threw and dropped every page-view ping.
+    const supabase = await createAdminClient();
+    const { error } = await supabase.from("winery_page_views").insert({ winery_id: wineryId, user_id: userId, source });
+    if (error) console.error("logWineryPageView insert failed:", error.message);
+  } catch (err) {
+    console.error("logWineryPageView threw:", err);
   }
 }
 
@@ -160,7 +165,9 @@ export async function logWineryPageView(
 export async function logAppQrScan(source: string | null, userId: string | null): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
-    const supabase = await createClient();
+    // See logWineryPageView — the admin client avoids cookies(), which
+    // Next.js forbids calling inside after().
+    const supabase = await createAdminClient();
     const { error } = await supabase.from("app_qr_scans").insert({ user_id: userId, source });
     if (error) console.error("logAppQrScan insert failed:", error.message);
   } catch (err) {
