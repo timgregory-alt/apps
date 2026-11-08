@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { after } from "next/server";
 import { ArrowRight, Wine } from "lucide-react";
 import {
   getCurrentUser,
@@ -10,6 +11,7 @@ import {
   getWinesWithTastings,
   getUpcomingEventsByWinery,
   getVipEvents,
+  logAppQrScan,
 } from "@/lib/data";
 import { DEFAULT_TRAIL_SLUG } from "@/lib/seed-data";
 import { visitedCount } from "@/lib/trail";
@@ -28,11 +30,13 @@ import { AuthModal } from "@/components/auth/AuthModal";
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ trail?: string }>;
+  searchParams: Promise<{ trail?: string; src?: string }>;
 }) {
-  const { trail: trailParam } = await searchParams;
+  const { trail: trailParam, src } = await searchParams;
   const user = await getCurrentUser();
   const profile = user ? await getProfile(user.id) : null;
+
+  if (src) after(() => logAppQrScan(src, user?.id ?? null));
   const trails = await getAllTrails();
   const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
   const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;

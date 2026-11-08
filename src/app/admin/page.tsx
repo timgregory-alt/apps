@@ -7,6 +7,7 @@ import {
   getAppRatingStats,
   getWineryFeedbackAdmin,
   getBugReportsAdmin,
+  getAppQrScanStats,
   getAllMembersAdmin,
   getMonthlyRevenueTarget,
   getRevenueTargetEquivalents,
@@ -41,6 +42,7 @@ export default async function AdminDashboardPage() {
     appRatingStats,
     wineryFeedback,
     bugReports,
+    appQrScanStats,
     members,
     actualRevenueThisMonth,
   ] = await Promise.all([
@@ -52,6 +54,7 @@ export default async function AdminDashboardPage() {
     getAppRatingStats(),
     getWineryFeedbackAdmin(),
     getBugReportsAdmin(),
+    getAppQrScanStats(),
     getAllMembersAdmin(),
     getActualRevenueThisMonth(),
   ]);
@@ -192,16 +195,22 @@ export default async function AdminDashboardPage() {
           </p>
           <div className="mt-3 flex justify-center">
             <QrCode
-              value="https://winetrailonline.com"
+              value="https://winetrailonline.com?src=qr"
               size={160}
               downloadable
               filename="winetrailonline-qr"
             />
           </div>
-          <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">https://winetrailonline.com</p>
+          <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">
+            https://winetrailonline.com?src=qr
+          </p>
           <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
             Not tied to any winery — use this on banners, cards, or signage you might move between
             locations.
+          </p>
+          <p className="mt-2 text-xs font-medium text-[var(--color-burgundy)]">
+            {appQrScanStats.total.toLocaleString()} scan{appQrScanStats.total === 1 ? "" : "s"} all-time ·{" "}
+            {appQrScanStats.last7Days.toLocaleString()} in the last 7 days
           </p>
         </div>
       </div>
