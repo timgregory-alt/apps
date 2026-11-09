@@ -3,7 +3,7 @@ import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
-import type { Winery, Wine, RewardTier, UUID, BugReportStatus } from "@/lib/types";
+import type { Winery, Wine, RewardTier, UUID, BugReportStatus, TrackedLink } from "@/lib/types";
 import type { PeriodTrendPoint } from "@/lib/portal";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
@@ -653,6 +653,44 @@ export async function getAppQrScanStats(): Promise<AppQrScanStats> {
     return { total: total ?? 0, last7Days: last7Days ?? 0 };
   } catch {
     return EMPTY_APP_QR_SCAN_STATS;
+  }
+}
+
+export interface TrackedLinkWithStats extends TrackedLink {
+  totalClicks: number;
+  last7DaysClicks: number;
+}
+
+/** Every tracked redirect link (/t/<slug>) with its click counts — shown on
+ * the admin dashboard's Links page. Click counts are aggregated in JS
+ * rather than a SQL GROUP BY since the row count here is expected to stay
+ * small (a handful of campaigns/QR codes, not per-guest volume). */
+export async function getTrackedLinksAdmin(): Promise<TrackedLinkWithStats[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data: links, error } = await supabase
+      .from("tracked_links")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error || !links) throw error;
+
+    const { data: clicks } = await supabase.from("link_clicks").select("link_id, created_at");
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const countsByLink = new Map<string, { total: number; last7: number }>();
+    (clicks ?? []).forEach((c) => {
+      const entry = countsByLink.get(c.link_id) ?? { total: 0, last7: 0 };
+      entry.total++;
+      if (new Date(c.created_at).getTime() >= sevenDaysAgo) entry.last7++;
+      countsByLink.set(c.link_id, entry);
+    });
+
+    return (links as TrackedLink[]).map((link) => {
+      const counts = countsByLink.get(link.id) ?? { total: 0, last7: 0 };
+      return { ...link, totalClicks: counts.total, last7DaysClicks: counts.last7 };
+    });
+  } catch {
+    return [];
   }
 }
 

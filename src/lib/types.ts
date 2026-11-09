@@ -6,6 +6,16 @@
 
 export type UUID = string;
 
+/** A short redirect link (/t/<slug>) whose destination can be changed
+ * without reprinting whatever QR code or link points at it. */
+export interface TrackedLink {
+  id: UUID;
+  slug: string;
+  label: string;
+  destination_url: string;
+  created_at: string;
+}
+
 export interface Trail {
   id: UUID;
   name: string;

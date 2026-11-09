@@ -19,6 +19,7 @@ import type {
   RewardRedemption,
   RewardTier,
   Trail,
+  TrackedLink,
   Wine,
   WineTasting,
   WineWithTasting,
@@ -172,6 +173,35 @@ export async function logAppQrScan(source: string | null, userId: string | null)
     if (error) console.error("logAppQrScan insert failed:", error.message);
   } catch (err) {
     console.error("logAppQrScan threw:", err);
+  }
+}
+
+/** Looks up a tracked redirect link by its slug — public/anonymous-readable,
+ * used by the /t/[slug] redirect route to resolve where to send the
+ * visitor. Returns null for an unknown slug (the route falls back to the
+ * homepage rather than erroring). */
+export async function getTrackedLinkBySlug(slug: string): Promise<TrackedLink | null> {
+  if (!isSupabaseConfigured) return null;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("tracked_links").select("*").eq("slug", slug).maybeSingle();
+    if (error || !data) throw error;
+    return data as TrackedLink;
+  } catch {
+    return null;
+  }
+}
+
+/** Best-effort ping for a click on a tracked redirect link — see
+ * logWineryPageView for why this uses the admin client inside after(). */
+export async function logLinkClick(linkId: string, userId: string | null): Promise<void> {
+  if (!isSupabaseConfigured) return;
+  try {
+    const supabase = await createAdminClient();
+    const { error } = await supabase.from("link_clicks").insert({ link_id: linkId, user_id: userId });
+    if (error) console.error("logLinkClick insert failed:", error.message);
+  } catch (err) {
+    console.error("logLinkClick threw:", err);
   }
 }
 
