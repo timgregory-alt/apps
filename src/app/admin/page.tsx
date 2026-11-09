@@ -7,7 +7,7 @@ import {
   getAppRatingStats,
   getWineryFeedbackAdmin,
   getBugReportsAdmin,
-  getAppQrScanStats,
+  getHomePageViewStats,
   getAllMembersAdmin,
   getMonthlyRevenueTarget,
   getRevenueTargetEquivalents,
@@ -42,7 +42,7 @@ export default async function AdminDashboardPage() {
     appRatingStats,
     wineryFeedback,
     bugReports,
-    appQrScanStats,
+    homePageViewStats,
     members,
     actualRevenueThisMonth,
   ] = await Promise.all([
@@ -54,7 +54,7 @@ export default async function AdminDashboardPage() {
     getAppRatingStats(),
     getWineryFeedbackAdmin(),
     getBugReportsAdmin(),
-    getAppQrScanStats(),
+    getHomePageViewStats(),
     getAllMembersAdmin(),
     getActualRevenueThisMonth(),
   ]);
@@ -209,8 +209,9 @@ export default async function AdminDashboardPage() {
             locations.
           </p>
           <p className="mt-2 text-xs font-medium text-[var(--color-burgundy)]">
-            {appQrScanStats.total.toLocaleString()} scan{appQrScanStats.total === 1 ? "" : "s"} all-time ·{" "}
-            {appQrScanStats.last7Days.toLocaleString()} in the last 7 days
+            {homePageViewStats.total.toLocaleString()} homepage view
+            {homePageViewStats.total === 1 ? "" : "s"} all-time ·{" "}
+            {homePageViewStats.last7Days.toLocaleString()} in the last 7 days
           </p>
         </div>
       </div>

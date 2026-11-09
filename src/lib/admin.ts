@@ -632,27 +632,27 @@ export async function getWineryFeedbackAdmin(): Promise<WineryFeedbackEntry[]> {
   }
 }
 
-export interface AppQrScanStats {
+export interface HomePageViewStats {
   total: number;
   last7Days: number;
 }
 
-const EMPTY_APP_QR_SCAN_STATS: AppQrScanStats = { total: 0, last7Days: 0 };
+const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = { total: 0, last7Days: 0 };
 
-/** Scans of the general (non-winery-specific) app QR code — the one on
- * business cards, banners, and similar printed collateral. */
-export async function getAppQrScanStats(): Promise<AppQrScanStats> {
-  if (!isSupabaseConfigured) return EMPTY_APP_QR_SCAN_STATS;
+/** Every homepage visit — organic traffic and anyone arriving via a QR code
+ * or tracked link alike. */
+export async function getHomePageViewStats(): Promise<HomePageViewStats> {
+  if (!isSupabaseConfigured) return EMPTY_HOME_PAGE_VIEW_STATS;
   try {
     const supabase = await createClient();
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const [{ count: total }, { count: last7Days }] = await Promise.all([
-      supabase.from("app_qr_scans").select("*", { count: "exact", head: true }),
-      supabase.from("app_qr_scans").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+      supabase.from("home_page_views").select("*", { count: "exact", head: true }),
+      supabase.from("home_page_views").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
     ]);
     return { total: total ?? 0, last7Days: last7Days ?? 0 };
   } catch {
-    return EMPTY_APP_QR_SCAN_STATS;
+    return EMPTY_HOME_PAGE_VIEW_STATS;
   }
 }
 

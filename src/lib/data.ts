@@ -159,20 +159,20 @@ export async function logWineryPageView(
   }
 }
 
-/** Best-effort ping for a scan of the general (non-winery-specific) app QR
- * code — the one printed on business cards, banners, and similar
- * collateral. Lets the admin dashboard distinguish "someone scanned our
- * marketing material" from ordinary homepage traffic. */
-export async function logAppQrScan(source: string | null, userId: string | null): Promise<void> {
+/** Best-effort ping for every homepage visit — source is null for ordinary/
+ * organic traffic, or whatever tag (e.g. "qr") a QR code or tracked link
+ * appended, letting the admin dashboard see both total homepage traffic and
+ * how much of it came from marketing collateral specifically. */
+export async function logHomePageView(source: string | null, userId: string | null): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
     // See logWineryPageView — the admin client avoids cookies(), which
     // Next.js forbids calling inside after().
     const supabase = await createAdminClient();
-    const { error } = await supabase.from("app_qr_scans").insert({ user_id: userId, source });
-    if (error) console.error("logAppQrScan insert failed:", error.message);
+    const { error } = await supabase.from("home_page_views").insert({ user_id: userId, source });
+    if (error) console.error("logHomePageView insert failed:", error.message);
   } catch (err) {
-    console.error("logAppQrScan threw:", err);
+    console.error("logHomePageView threw:", err);
   }
 }
 
