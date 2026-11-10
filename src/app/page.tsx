@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { after } from "next/server";
 import { ArrowRight, Wine } from "lucide-react";
@@ -25,7 +24,6 @@ import { TrailPicker } from "@/components/trail/TrailPicker";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
-import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function HomePage({
   searchParams,
@@ -169,11 +167,6 @@ export default async function HomePage({
         </div>
       )}
       </main>
-      {!user && (
-        <Suspense>
-          <AuthModal />
-        </Suspense>
-      )}
     </>
   );
 }

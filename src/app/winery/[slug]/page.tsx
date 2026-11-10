@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import type { Metadata } from "next";
@@ -24,7 +23,6 @@ import { WineTastingList } from "@/components/tasting/WineTastingList";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { SectionEyebrow } from "@/components/ui/Card";
 import { Lock, Star } from "lucide-react";
-import { AuthModal } from "@/components/auth/AuthModal";
 
 export async function generateMetadata({
   params,
@@ -174,11 +172,6 @@ export default async function WineryDetailPage({
         <WineClubSection winery={winery} />
       </div>
     </main>
-    {!user && (
-      <Suspense>
-        <AuthModal />
-      </Suspense>
-    )}
     </>
   );
 }
