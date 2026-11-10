@@ -85,16 +85,15 @@ export function UpcomingEventsSection({ groups }: { groups: WineryEventGroup[] }
                     );
 
                     if (event.locked) {
+                      const href = event.lockReason === "signin" ? "/login?redirectTo=/" : "/profile#premium";
+                      const label = event.lockReason === "signin" ? "Sign in to see" : "Subscribers only";
                       return (
                         <li key={event.id}>
-                          <Link
-                            href="/profile#premium"
-                            className="flex items-center gap-3 py-2.5"
-                          >
+                          <Link href={href} className="flex items-center gap-3 py-2.5">
                             {dateBadge}
                             <div className="flex min-w-0 items-center gap-1.5 text-[var(--color-charcoal)]/45">
                               <Lock size={13} strokeWidth={2} />
-                              <span className="truncate text-sm">Subscribers only</span>
+                              <span className="truncate text-sm">{label}</span>
                             </div>
                           </Link>
                         </li>

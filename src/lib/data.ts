@@ -516,22 +516,31 @@ async function getAllWineryEvents(): Promise<WineryEvent[]> {
 
 /** VIP events stay subscriber-only for this long after being added — that's
  * the "early access" a Premium membership buys — before opening up to
- * everyone. Regular events are never locked; only VIP events use this. */
+ * everyone. */
 const VIP_EARLY_ACCESS_HOURS = 240;
 
-function isLocked(e: WineryEvent, isSubscriber: boolean): boolean {
-  if (isSubscriber || !e.vip_only) return false;
+/** A signed-out guest sees that an event exists but not its details, same
+ * teased treatment as a VIP-only event in its early-access window — signed-
+ * in guests fall through to the existing subscriber-only VIP gate. */
+function lockReasonFor(
+  e: WineryEvent,
+  isLoggedIn: boolean,
+  isSubscriber: boolean
+): "signin" | "subscriber" | null {
+  if (!isLoggedIn) return "signin";
+  if (isSubscriber || !e.vip_only) return null;
   const cutoff = Date.now() - VIP_EARLY_ACCESS_HOURS * 60 * 60 * 1000;
-  return new Date(e.created_at).getTime() > cutoff;
+  return new Date(e.created_at).getTime() > cutoff ? "subscriber" : null;
 }
 
 /** Upcoming events grouped one entry per winery (trail order, including
- * wineries with none scheduled) — public, so it's fine to show a logged-out
- * Explore visitor too. Grouped rather than a single soonest-first list so a
- * winery with lots of upcoming events can't crowd the others out. VIP events
- * don't appear here at all — they're exclusive to the /vip page instead,
- * which is also the only place isLocked() ever returns true. */
+ * wineries with none scheduled) — the section itself is visible to a
+ * logged-out Explore visitor, but each event's real details are locked
+ * behind signing in. Grouped rather than a single soonest-first list so a
+ * winery with lots of upcoming events can't crowd the others out. VIP
+ * events don't appear here at all — they're exclusive to the /vip page. */
 export async function getUpcomingEventsByWinery(
+  isLoggedIn: boolean,
   isSubscriber = false,
   trailSlug: string = DEFAULT_TRAIL_SLUG
 ): Promise<WineryEventGroup[]> {
@@ -542,7 +551,8 @@ export async function getUpcomingEventsByWinery(
   for (const e of events) {
     if (e.event_date < todayISO || e.vip_only) continue;
     const list = eventsByWinery.get(e.winery_id) ?? [];
-    list.push({ ...e, locked: isLocked(e, isSubscriber) });
+    const lockReason = lockReasonFor(e, isLoggedIn, isSubscriber);
+    list.push({ ...e, locked: lockReason !== null, lockReason });
     eventsByWinery.set(e.winery_id, list);
   }
 
@@ -583,7 +593,17 @@ export async function getVipEvents(isSubscriber = false): Promise<VipEvent[]> {
     .filter((e) => e.vip_only && e.event_date >= todayISO && wineryById.get(e.winery_id))
     .map((e) => {
       const winery = wineryById.get(e.winery_id)!;
-      return { ...e, locked: isLocked(e, isSubscriber), winery_name: winery.name, winery_slug: winery.slug };
+      // Unlike the homepage carousel, /vip was never gated behind signing in
+      // at all — always pass isLoggedIn: true here so this keeps its
+      // original subscriber-only (not signin-only) locking behavior.
+      const lockReason = lockReasonFor(e, true, isSubscriber);
+      return {
+        ...e,
+        locked: lockReason !== null,
+        lockReason,
+        winery_name: winery.name,
+        winery_slug: winery.slug,
+      };
     })
     .sort((a, b) => a.event_date.localeCompare(b.event_date));
 }

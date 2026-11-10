@@ -43,7 +43,7 @@ export default async function HomePage({
     Promise.all(trails.map((t) => getTrailWineries(t.slug))),
     getWineriesWithStatus(user?.id ?? null, selectedSlug),
     getWinesWithTastings(user?.id ?? null, selectedSlug),
-    getUpcomingEventsByWinery(profile?.is_subscriber ?? false, selectedSlug),
+    getUpcomingEventsByWinery(!!user, profile?.is_subscriber ?? false, selectedSlug),
     getVipEvents(profile?.is_subscriber ?? false),
   ]);
   const stopCountBySlug = new Map(trails.map((t, i) => [t.slug, trailWineryLists[i].length]));

@@ -109,6 +109,10 @@ export interface WineryEvent {
  * viewer — the date shows, but the details stay locked behind Premium. */
 export interface LockableWineryEvent extends WineryEvent {
   locked: boolean;
+  /** Which message/link to show when locked — "signin" for a signed-out
+   * guest (any event), "subscriber" for a VIP-only event still in its early-
+   * access window. Meaningless when locked is false. */
+  lockReason: "signin" | "subscriber" | null;
 }
 
 /** One winery's upcoming events (may be empty) — the shape the Explore
