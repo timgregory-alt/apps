@@ -21,6 +21,7 @@ export function WineTastingRow({
   pending,
   locked = false,
   onLockedAttempt,
+  onFlipAttempt,
 }: {
   wine: WineWithTasting;
   onRate: (rating: number) => void;
@@ -34,6 +35,10 @@ export function WineTastingRow({
   /** Called instead of onRate when a locked guest taps a star, so the
    * parent can explain why with a popup. */
   onLockedAttempt?: () => void;
+  /** Gate for flipping to see tasting notes/food pairing — called before
+   * flipping; return false to block it (e.g. a signed-out guest who's
+   * already used their one free preview). Omit to always allow. */
+  onFlipAttempt?: () => boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [flipped, setFlipped] = useState(false);
@@ -108,7 +113,9 @@ export function WineTastingRow({
           {/* Front */}
           <button
             type="button"
-            onClick={() => setFlipped(true)}
+            onClick={() => {
+              if (onFlipAttempt?.() ?? true) setFlipped(true);
+            }}
             aria-label={`${wine.name}${soldOut ? " — sold out" : ""} — tap to see tasting notes and food pairing`}
             className={cn(
               "absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-3xl border border-[var(--color-line)] bg-white/70 p-6 text-center backdrop-blur-sm [backface-visibility:hidden]",

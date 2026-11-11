@@ -54,6 +54,7 @@ export function WineTastingList({
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showLockedPopup, setShowLockedPopup] = useState(false);
+  const [hasUsedFreeFlip, setHasUsedFreeFlip] = useState(false);
   const [query, setQuery] = useState("");
   const [activeStyle, setActiveStyle] = useState<WineStyle | "all">("all");
   const [expanded, setExpanded] = useState(false);
@@ -91,6 +92,20 @@ export function WineTastingList({
   function requireLogin(action: string) {
     void logGatedActionAttemptAction(action, wineryId);
     router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
+  }
+
+  /** Signed-in guests can always flip a card. Signed-out guests get exactly
+   * one free look at a tasting flip across the whole list — after that,
+   * flipping any card (even one already flipped before) requires signing
+   * in. Returns whether the flip should actually happen. */
+  function handleFlipAttempt(): boolean {
+    if (isLoggedIn) return true;
+    if (!hasUsedFreeFlip) {
+      setHasUsedFreeFlip(true);
+      return true;
+    }
+    requireLogin("flip_wine_card");
+    return false;
   }
 
   function handleLockedAttempt() {
@@ -311,6 +326,7 @@ export function WineTastingList({
             onRate={(rating) => handleRate(wine.id, rating)}
             onSaveNotes={(notes) => handleSaveNotes(wine.id, notes)}
             onLockedAttempt={handleLockedAttempt}
+            onFlipAttempt={handleFlipAttempt}
           />
         ))}
         {hiddenCount > 0 && (
