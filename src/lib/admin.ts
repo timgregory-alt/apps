@@ -694,6 +694,39 @@ export async function getTrackedLinksAdmin(): Promise<TrackedLinkWithStats[]> {
   }
 }
 
+export interface GatedActionAttemptStats {
+  total: number;
+  last7Days: number;
+  byAction: Record<string, number>;
+}
+
+const EMPTY_GATED_ACTION_ATTEMPT_STATS: GatedActionAttemptStats = { total: 0, last7Days: 0, byAction: {} };
+
+/** How many times a signed-out visitor attempted something that requires an
+ * account (check-in, rating a wine, etc.) and got sent to /login — the
+ * signal that someone engaged deep enough to hit the wall, as opposed to
+ * just browsing and leaving. */
+export async function getGatedActionAttemptStats(): Promise<GatedActionAttemptStats> {
+  if (!isSupabaseConfigured) return EMPTY_GATED_ACTION_ATTEMPT_STATS;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("gated_action_attempts").select("action, created_at");
+    if (error || !data) throw error;
+
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const byAction: Record<string, number> = {};
+    let last7Days = 0;
+    data.forEach((row) => {
+      byAction[row.action] = (byAction[row.action] ?? 0) + 1;
+      if (new Date(row.created_at).getTime() >= sevenDaysAgo) last7Days++;
+    });
+
+    return { total: data.length, last7Days, byAction };
+  } catch {
+    return EMPTY_GATED_ACTION_ATTEMPT_STATS;
+  }
+}
+
 export interface BugReportEntry {
   id: string;
   description: string;

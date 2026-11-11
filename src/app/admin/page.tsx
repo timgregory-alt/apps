@@ -8,6 +8,7 @@ import {
   getWineryFeedbackAdmin,
   getBugReportsAdmin,
   getHomePageViewStats,
+  getGatedActionAttemptStats,
   getAllMembersAdmin,
   getMonthlyRevenueTarget,
   getRevenueTargetEquivalents,
@@ -43,6 +44,7 @@ export default async function AdminDashboardPage() {
     wineryFeedback,
     bugReports,
     homePageViewStats,
+    gatedActionAttemptStats,
     members,
     actualRevenueThisMonth,
   ] = await Promise.all([
@@ -55,6 +57,7 @@ export default async function AdminDashboardPage() {
     getWineryFeedbackAdmin(),
     getBugReportsAdmin(),
     getHomePageViewStats(),
+    getGatedActionAttemptStats(),
     getAllMembersAdmin(),
     getActualRevenueThisMonth(),
   ]);
@@ -213,6 +216,35 @@ export default async function AdminDashboardPage() {
             {homePageViewStats.total === 1 ? "" : "s"} all-time ·{" "}
             {homePageViewStats.last7Days.toLocaleString()} in the last 7 days
           </p>
+        </div>
+
+        <div className="min-w-[260px] max-w-xs flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+            Signed-Out Gated Attempts
+          </p>
+          <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
+            How many times someone not signed in tried to check in, rate a wine, or do something
+            else that needs an account — the signal that they engaged deep enough to hit the wall,
+            not just browsed and left.
+          </p>
+          <p className="mt-4 font-serif-display text-3xl text-[var(--color-burgundy)]">
+            {gatedActionAttemptStats.total.toLocaleString()}
+          </p>
+          <p className="mt-1 text-xs font-medium text-[var(--color-charcoal)]/60">
+            {gatedActionAttemptStats.last7Days.toLocaleString()} in the last 7 days
+          </p>
+          {Object.keys(gatedActionAttemptStats.byAction).length > 0 && (
+            <ul className="mt-3 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
+              {Object.entries(gatedActionAttemptStats.byAction)
+                .sort((a, b) => b[1] - a[1])
+                .map(([action, count]) => (
+                  <li key={action} className="flex items-center justify-between">
+                    <span>{action}</span>
+                    <span className="font-medium text-[var(--color-charcoal)]">{count}</span>
+                  </li>
+                ))}
+            </ul>
+          )}
         </div>
       </div>
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Wine } from "lucide-react";
+import { logGatedActionAttemptAction } from "@/app/actions/analytics";
 import { Button } from "@/components/ui/Button";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { CelebrationOverlay } from "@/components/checkin/CelebrationOverlay";
@@ -56,6 +57,7 @@ export function CheckInFlow({
 
   async function handleCheckIn() {
     if (!isLoggedIn) {
+      void logGatedActionAttemptAction("checkin", winery.id);
       router.push(`/login?redirectTo=/winery/${winery.slug}`);
       return;
     }

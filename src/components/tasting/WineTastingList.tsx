@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Lock, MapPin } from "lucide-react";
+import { logGatedActionAttemptAction } from "@/app/actions/analytics";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { WineTastingRow } from "@/components/tasting/WineTastingRow";
 import { CustomWineRow } from "@/components/tasting/CustomWineRow";
@@ -87,7 +88,8 @@ export function WineTastingList({
     expanded || isFiltering ? filteredWines : filteredWines.slice(0, INITIAL_VISIBLE_COUNT);
   const hiddenCount = filteredWines.length - visibleWines.length;
 
-  function requireLogin() {
+  function requireLogin(action: string) {
+    void logGatedActionAttemptAction(action, wineryId);
     router.push(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
   }
 
@@ -96,7 +98,7 @@ export function WineTastingList({
   }
 
   async function handleRate(wineId: string, rating: number) {
-    if (!isLoggedIn) return requireLogin();
+    if (!isLoggedIn) return requireLogin("rate_wine");
     if (!isCheckedIn) {
       handleLockedAttempt();
       return;
@@ -149,7 +151,7 @@ export function WineTastingList({
    * ride along with the existing rating rather than needing their own
    * row-creation path. */
   async function handleSaveNotes(wineId: string, notes: string) {
-    if (!isLoggedIn) return requireLogin();
+    if (!isLoggedIn) return requireLogin("save_notes");
     if (!isCheckedIn) {
       handleLockedAttempt();
       return;
@@ -199,7 +201,7 @@ export function WineTastingList({
     foodPairing: string;
     liked: boolean;
   }) {
-    if (!isLoggedIn) return requireLogin();
+    if (!isLoggedIn) return requireLogin("add_custom_wine");
     if (!isCheckedIn) {
       handleLockedAttempt();
       return;
