@@ -192,46 +192,55 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="min-w-[260px] max-w-xs flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+        <div className="min-w-[160px] max-w-[200px] flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-3.5 text-center">
+          <p className="text-[0.65rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
             General App QR Code
           </p>
-          <div className="mt-3 flex justify-center">
+          <div className="mt-2 flex justify-center">
             <QrCode
               value="https://winetrailonline.com?src=qr"
-              size={160}
+              size={88}
               downloadable
               filename="winetrailonline-qr"
             />
           </div>
-          <p className="mt-3 break-all text-xs text-[var(--color-charcoal)]/45">
-            https://winetrailonline.com?src=qr
-          </p>
-          <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
-            Not tied to any winery — use this on banners, cards, or signage you might move between
-            locations.
-          </p>
-          <p className="mt-2 text-xs font-medium text-[var(--color-burgundy)]">
-            {homePageViewStats.total.toLocaleString()} homepage view
-            {homePageViewStats.total === 1 ? "" : "s"} all-time ·{" "}
-            {homePageViewStats.last7Days.toLocaleString()} in the last 7 days
+          <p className="mt-2 text-[0.65rem] text-[var(--color-charcoal)]/40">
+            For anything not tied to one winery.
           </p>
         </div>
 
         <div className="min-w-[260px] max-w-xs flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-5 text-center">
           <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
-            Signed-Out Gated Attempts
+            Signed-Out Engagement
           </p>
           <p className="mt-2 text-xs text-[var(--color-charcoal)]/45">
-            How many times someone not signed in tried to check in, rate a wine, or do something
-            else that needs an account — the signal that they engaged deep enough to hit the wall,
-            not just browsed and left.
+            How far signed-out visitors get — from browsing the homepage to actually trying
+            something that needs an account, like checking in or rating a wine.
           </p>
-          <p className="mt-4 font-serif-display text-3xl text-[var(--color-burgundy)]">
-            {gatedActionAttemptStats.total.toLocaleString()}
-          </p>
-          <p className="mt-1 text-xs font-medium text-[var(--color-charcoal)]/60">
-            {gatedActionAttemptStats.last7Days.toLocaleString()} in the last 7 days
+
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <div>
+              <p className="font-serif-display text-2xl text-[var(--color-charcoal)]">
+                {homePageViewStats.total.toLocaleString()}
+              </p>
+              <p className="text-[0.6rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                Homepage Views
+              </p>
+            </div>
+            <span className="text-[var(--color-charcoal)]/25">→</span>
+            <div>
+              <p className="font-serif-display text-2xl text-[var(--color-burgundy)]">
+                {gatedActionAttemptStats.total.toLocaleString()}
+              </p>
+              <p className="text-[0.6rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                Gated Attempts
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-2 text-xs font-medium text-[var(--color-charcoal)]/60">
+            {homePageViewStats.last7Days.toLocaleString()} / {gatedActionAttemptStats.last7Days.toLocaleString()}{" "}
+            in the last 7 days
           </p>
           {Object.keys(gatedActionAttemptStats.byAction).length > 0 && (
             <ul className="mt-3 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
