@@ -20,7 +20,8 @@ import { DirectionsButton } from "@/components/winery/DirectionsButton";
 import { WineClubSection } from "@/components/wineclub/WineClubSection";
 import { CheckInFlow } from "@/components/checkin/CheckInFlow";
 import { WineTastingList } from "@/components/tasting/WineTastingList";
-import { Button, LinkButton } from "@/components/ui/Button";
+import { Button, LinkButton, buttonVariants } from "@/components/ui/Button";
+import { GatedExternalLink } from "@/components/ui/GatedExternalLink";
 import { SectionEyebrow } from "@/components/ui/Card";
 import { Lock, Star } from "lucide-react";
 
@@ -82,7 +83,7 @@ export default async function WineryDetailPage({
       <div className="flex flex-col gap-7 px-6 pt-6">
         <WineryDescription winery={winery} />
 
-        <WinerySocialRow winery={winery} />
+        <WinerySocialRow winery={winery} isLoggedIn={!!user} redirectTo={`/winery/${winery.slug}`} />
 
         <div className="grid grid-cols-2 gap-2.5">
           <DirectionsButton
@@ -91,11 +92,21 @@ export default async function WineryDetailPage({
             label={winery.name}
             variant="outline"
             fullWidth
+            isLoggedIn={!!user}
+            wineryId={winery.id}
+            redirectTo={`/winery/${winery.slug}`}
           />
           {winery.website_url ? (
-            <LinkButton href={winery.website_url} target="_blank" rel="noopener noreferrer" variant="outline" fullWidth>
+            <GatedExternalLink
+              href={winery.website_url}
+              isLoggedIn={!!user}
+              action="visit_website"
+              wineryId={winery.id}
+              redirectTo={`/winery/${winery.slug}`}
+              className={buttonVariants({ variant: "outline", fullWidth: true })}
+            >
               Website
-            </LinkButton>
+            </GatedExternalLink>
           ) : (
             <span />
           )}
@@ -169,7 +180,7 @@ export default async function WineryDetailPage({
           </div>
         )}
 
-        <WineClubSection winery={winery} />
+        <WineClubSection winery={winery} isLoggedIn={!!user} redirectTo={`/winery/${winery.slug}`} />
       </div>
     </main>
     </>

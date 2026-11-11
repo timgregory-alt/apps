@@ -2,7 +2,15 @@ import { Check, Wine } from "lucide-react";
 import type { Winery } from "@/lib/types";
 import { WineClubLink } from "@/components/wineclub/WineClubLink";
 
-export function WineClubSection({ winery }: { winery: Winery }) {
+export function WineClubSection({
+  winery,
+  isLoggedIn,
+  redirectTo,
+}: {
+  winery: Winery;
+  isLoggedIn: boolean;
+  redirectTo: string;
+}) {
   if (!winery.wine_club_url) return null;
 
   const benefits = winery.wine_club_benefits?.length
@@ -32,6 +40,8 @@ export function WineClubSection({ winery }: { winery: Winery }) {
         wineryId={winery.id}
         wineryName={winery.name}
         url={winery.wine_club_url}
+        isLoggedIn={isLoggedIn}
+        redirectTo={redirectTo}
         className="mt-6"
       />
     </section>
