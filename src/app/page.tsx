@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { after } from "next/server";
+import { headers } from "next/headers";
 import { ArrowRight, Wine } from "lucide-react";
 import {
   getCurrentUser,
@@ -33,8 +34,11 @@ export default async function HomePage({
   const { trail: trailParam, src } = await searchParams;
   const user = await getCurrentUser();
   const profile = user ? await getProfile(user.id) : null;
+  // Read here, not inside after() — headers() is a request-bound API Next.js
+  // forbids calling once the response may have already started streaming.
+  const userAgent = (await headers()).get("user-agent");
 
-  after(() => logHomePageView(src ?? null, user?.id ?? null));
+  after(() => logHomePageView(src ?? null, user?.id ?? null, userAgent));
   const trails = await getAllTrails();
   const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
   const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;

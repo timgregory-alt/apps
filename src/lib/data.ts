@@ -163,13 +163,19 @@ export async function logWineryPageView(
  * organic traffic, or whatever tag (e.g. "qr") a QR code or tracked link
  * appended, letting the admin dashboard see both total homepage traffic and
  * how much of it came from marketing collateral specifically. */
-export async function logHomePageView(source: string | null, userId: string | null): Promise<void> {
+export async function logHomePageView(
+  source: string | null,
+  userId: string | null,
+  userAgent: string | null = null
+): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
     // See logWineryPageView — the admin client avoids cookies(), which
     // Next.js forbids calling inside after().
     const supabase = await createAdminClient();
-    const { error } = await supabase.from("home_page_views").insert({ user_id: userId, source });
+    const { error } = await supabase
+      .from("home_page_views")
+      .insert({ user_id: userId, source, user_agent: userAgent });
     if (error) console.error("logHomePageView insert failed:", error.message);
   } catch (err) {
     console.error("logHomePageView threw:", err);
