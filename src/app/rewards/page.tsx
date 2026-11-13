@@ -25,6 +25,7 @@ import { Header } from "@/components/layout/Header";
 import { Card } from "@/components/ui/Card";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
+import { GatedInternalLink } from "@/components/ui/GatedInternalLink";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 
 export default async function RewardsPage() {
@@ -154,8 +155,11 @@ export default async function RewardsPage() {
               </span>
             </li>
             <li className="py-2">
-              <Link
+              <GatedInternalLink
                 href="/profile#referral"
+                isLoggedIn={!!user}
+                action="view_referral"
+                redirectTo="/rewards"
                 className="flex items-center justify-between gap-3 -mx-1 rounded-lg px-1 py-0.5 transition-colors hover:bg-black/5"
               >
                 <span className="text-sm text-[var(--color-charcoal)]/80 underline decoration-[var(--color-charcoal)]/25 underline-offset-2">
@@ -164,11 +168,14 @@ export default async function RewardsPage() {
                 <span className="text-sm font-medium text-[var(--color-burgundy)]">
                   +{POINTS_PER_REFERRAL} pts
                 </span>
-              </Link>
+              </GatedInternalLink>
             </li>
             <li className="py-2 last:pb-0">
-              <Link
+              <GatedInternalLink
                 href="/profile#premium"
+                isLoggedIn={!!user}
+                action="view_premium"
+                redirectTo="/rewards"
                 className="flex items-center justify-between gap-3 -mx-1 rounded-lg px-1 py-0.5 transition-colors hover:bg-black/5"
               >
                 <span className="text-sm text-[var(--color-charcoal)]/80 underline decoration-[var(--color-charcoal)]/25 underline-offset-2">
@@ -177,7 +184,7 @@ export default async function RewardsPage() {
                 <span className="text-sm font-medium text-[var(--color-burgundy)]">
                   {SUBSCRIBER_MULTIPLIER}x pts + more
                 </span>
-              </Link>
+              </GatedInternalLink>
             </li>
           </ul>
         </Card>
@@ -200,6 +207,7 @@ export default async function RewardsPage() {
               balance={balance}
               lifetimeTotal={points.total}
               isSubscriber={profile?.is_subscriber ?? false}
+              isLoggedIn={!!user}
             />
           </div>
         )}
@@ -208,9 +216,15 @@ export default async function RewardsPage() {
       <div className="px-6">
         <p className="text-center text-xs text-[var(--color-charcoal)]/45">
           Check in and rate wines on{" "}
-          <Link href="/my-trail" className="underline">
+          <GatedInternalLink
+            href="/my-trail"
+            isLoggedIn={!!user}
+            action="view_my_trail"
+            redirectTo="/rewards"
+            className="underline"
+          >
             My Trails
-          </Link>{" "}
+          </GatedInternalLink>{" "}
           to start earning.
         </p>
       </div>

@@ -11,11 +11,13 @@ export function RewardTierCarousel({
   balance,
   lifetimeTotal,
   isSubscriber,
+  isLoggedIn,
 }: {
   tiers: RewardTier[];
   balance: number;
   lifetimeTotal: number;
   isSubscriber: boolean;
+  isLoggedIn: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -50,6 +52,7 @@ export function RewardTierCarousel({
               balance={balance}
               lifetimeTotal={lifetimeTotal}
               isSubscriber={isSubscriber}
+              isLoggedIn={isLoggedIn}
             />
           </div>
         ))}

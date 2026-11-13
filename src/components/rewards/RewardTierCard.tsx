@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { Gift, Check } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { CenteredDialog } from "@/components/ui/CenteredDialog";
+import { GatedInternalLink } from "@/components/ui/GatedInternalLink";
 import { generateRedemptionAction } from "@/app/rewards/actions";
 import { RedemptionCodeDisplay } from "@/components/rewards/RedemptionCodeDisplay";
 import { discountLabel, effectiveDiscountPercent } from "@/lib/rewards";
@@ -17,6 +17,7 @@ export function RewardTierCard({
   balance,
   lifetimeTotal,
   isSubscriber,
+  isLoggedIn,
 }: {
   tier: RewardTier;
   /** Currently spendable — lifetime points minus points already redeemed. */
@@ -26,6 +27,7 @@ export function RewardTierCard({
    * points have been spent. */
   lifetimeTotal: number;
   isSubscriber: boolean;
+  isLoggedIn: boolean;
 }) {
   const [code, setCode] = useState<RewardRedemption | null>(null);
   const [confirmOption, setConfirmOption] = useState<string | null>(null);
@@ -127,12 +129,15 @@ export function RewardTierCard({
           )}
 
           {!isSubscriber && hasSubscriberBoost && (
-            <Link
+            <GatedInternalLink
               href="/profile#premium"
+              isLoggedIn={isLoggedIn}
+              action="view_premium"
+              redirectTo="/rewards"
               className="text-xs text-[var(--color-burgundy)] underline decoration-[var(--color-burgundy)]/30 underline-offset-2"
             >
               Go Premium for the bigger discount
-            </Link>
+            </GatedInternalLink>
           )}
 
           {error && <p className="text-xs text-[var(--color-burgundy)]">{error}</p>}
