@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import {
   getCurrentUser,
@@ -27,39 +26,22 @@ import { Card } from "@/components/ui/Card";
 import { RewardTierCarousel } from "@/components/rewards/RewardTierCarousel";
 import { BirthdayRewardCard } from "@/components/rewards/BirthdayRewardCard";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
-import { AuthModal } from "@/components/auth/AuthModal";
 
 export default async function RewardsPage() {
   const user = await getCurrentUser();
 
-  if (!user) {
-    return (
-      <>
-        <main className="mx-auto flex max-w-md flex-col gap-8 pb-10">
-          <Header eyebrow="Rewards" title="Your Rewards" />
-          <div className="px-6">
-            <Card className="flex flex-col items-center gap-3 p-6 text-center">
-              <p className="text-sm text-[var(--color-charcoal)]/70">
-                Sign up to start earning points for check-ins, wine ratings, and completing the trail.
-              </p>
-            </Card>
-          </div>
-        </main>
-        <Suspense>
-          <AuthModal />
-        </Suspense>
-      </>
-    );
-  }
-
+  // Signed-out guests can see what's earnable and browse every reward tier
+  // (locked to "X points to go" since balance is 0, same as a brand-new
+  // guest) — only the personal stuff (a real balance, redeeming, the
+  // birthday reward) needs an account.
   const [wineries, wines, tiers, redemptions, profile, referralCount, checkins] = await Promise.all([
-    getWineriesWithStatus(user.id),
-    getWinesWithTastings(user.id),
+    user ? getWineriesWithStatus(user.id) : Promise.resolve([]),
+    user ? getWinesWithTastings(user.id) : Promise.resolve([]),
     getActiveRewardTiers(),
-    getUserRewardRedemptions(user.id),
-    getProfile(user.id),
-    getQualifyingReferralCount(),
-    getUserCheckins(user.id),
+    user ? getUserRewardRedemptions(user.id) : Promise.resolve([]),
+    user ? getProfile(user.id) : Promise.resolve(null),
+    user ? getQualifyingReferralCount() : Promise.resolve(0),
+    user ? getUserCheckins(user.id) : Promise.resolve([]),
   ]);
 
   const points = computeRewardsPoints(
@@ -75,7 +57,8 @@ export default async function RewardsPage() {
   const sortedTiers = [...ladderTiers].sort((a, b) => a.points_required - b.points_required);
 
   const birthdayTier = tiers.find((t) => t.birthday_only) ?? null;
-  const showBirthdayReward = birthdayTier != null && isBirthdayToday(profile?.birth_date ?? null);
+  const showBirthdayReward =
+    !!user && birthdayTier != null && isBirthdayToday(profile?.birth_date ?? null);
   const birthdayRedemption = birthdayTier
     ? (redemptions.find(
         (r) => r.tier_id === birthdayTier.id && r.period_key === currentRewardPeriodKey()
@@ -99,22 +82,45 @@ export default async function RewardsPage() {
       <div className="px-6">
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] p-6 text-[var(--color-ivory)]">
           <TrailCoverFrame />
-          <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
-            Points Available to Redeem
-          </p>
-          <p className="font-serif-display relative mt-1 text-4xl">{balance}</p>
-          {balance !== points.total && (
-            <p className="relative mt-1 text-xs text-[var(--color-ivory)]/60">
-              {points.total} lifetime points earned
-            </p>
+          {user ? (
+            <>
+              <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
+                Points Available to Redeem
+              </p>
+              <p className="font-serif-display relative mt-1 text-4xl">{balance}</p>
+              {balance !== points.total && (
+                <p className="relative mt-1 text-xs text-[var(--color-ivory)]/60">
+                  {points.total} lifetime points earned
+                </p>
+              )}
+              <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[var(--color-ivory)]/70">
+                <span>{points.checkins} check-ins</span>
+                <span>{points.winesRated} wines rated</span>
+                {points.completionBonus > 0 && <span>Trail completion bonus</span>}
+                {points.referrals > 0 && <span>{points.referrals} friends referred</span>}
+                {points.travelPassBonus > 0 && <span>Travel Pass bonus</span>}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
+                Start Earning
+              </p>
+              <p className="font-serif-display relative mt-1 text-2xl leading-snug">
+                Sign up free to start earning points
+              </p>
+              <p className="relative mt-2 text-sm text-[var(--color-ivory)]/70">
+                Check in at a winery, rate a wine, or complete the trail — see what&rsquo;s earnable
+                below.
+              </p>
+              <Link
+                href="/signup"
+                className="relative mt-4 inline-flex items-center justify-center rounded-full bg-[var(--color-gold)] px-5 py-2.5 text-sm font-medium text-[var(--color-charcoal)]"
+              >
+                Create Free Account
+              </Link>
+            </>
           )}
-          <div className="relative mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[var(--color-ivory)]/70">
-            <span>{points.checkins} check-ins</span>
-            <span>{points.winesRated} wines rated</span>
-            {points.completionBonus > 0 && <span>Trail completion bonus</span>}
-            {points.referrals > 0 && <span>{points.referrals} friends referred</span>}
-            {points.travelPassBonus > 0 && <span>Travel Pass bonus</span>}
-          </div>
         </Card>
       </div>
 
