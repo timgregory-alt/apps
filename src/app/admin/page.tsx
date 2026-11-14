@@ -226,6 +226,7 @@ export default async function AdminDashboardPage() {
               <p className="text-[0.6rem] uppercase tracking-wide text-[var(--color-charcoal)]/45">
                 Homepage Views
               </p>
+              <p className="text-[0.55rem] text-[var(--color-charcoal)]/35">bots filtered</p>
             </div>
             <span className="text-[var(--color-charcoal)]/25">→</span>
             <div>

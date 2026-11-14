@@ -3,6 +3,7 @@ import zipcodes from "zipcodes";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
+import { isBotUserAgent } from "@/lib/bot-detection";
 import type { Winery, Wine, RewardTier, UUID, BugReportStatus, TrackedLink } from "@/lib/types";
 import type { PeriodTrendPoint } from "@/lib/portal";
 
@@ -640,17 +641,21 @@ export interface HomePageViewStats {
 const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = { total: 0, last7Days: 0 };
 
 /** Every homepage visit — organic traffic and anyone arriving via a QR code
- * or tracked link alike. */
+ * or tracked link alike — minus known bots/crawlers/link-preview fetchers
+ * (see isBotUserAgent). Rows logged before user_agent capture was added have
+ * no value to check and are kept, since we never had a way to tell for
+ * those. */
 export async function getHomePageViewStats(): Promise<HomePageViewStats> {
   if (!isSupabaseConfigured) return EMPTY_HOME_PAGE_VIEW_STATS;
   try {
     const supabase = await createClient();
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const [{ count: total }, { count: last7Days }] = await Promise.all([
-      supabase.from("home_page_views").select("*", { count: "exact", head: true }),
-      supabase.from("home_page_views").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-    ]);
-    return { total: total ?? 0, last7Days: last7Days ?? 0 };
+    const { data, error } = await supabase.from("home_page_views").select("user_agent, created_at");
+    if (error || !data) throw error;
+
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const human = data.filter((row) => !isBotUserAgent(row.user_agent));
+    const last7Days = human.filter((row) => new Date(row.created_at).getTime() >= sevenDaysAgo).length;
+    return { total: human.length, last7Days };
   } catch {
     return EMPTY_HOME_PAGE_VIEW_STATS;
   }
