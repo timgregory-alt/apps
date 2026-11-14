@@ -11,7 +11,9 @@ export type PortalActionResult = { error: string } | void;
  * excludes name/slug/address/coordinates/checkin radius/active/sort order/
  * sponsored/featured, which stay admin-only (identity, anti-fraud, and
  * platform monetization controls), and the plain-text hours field, which
- * staff now set via the structured Weekly Hours editor instead. */
+ * staff now set via the structured Weekly Hours editor instead.
+ * status_banner is included so staff can post a same-day notice (closure,
+ * temporary relocation) without going through the admin dashboard. */
 function parseDetailsForm(formData: FormData) {
   const benefits = String(formData.get("wine_club_benefits") ?? "")
     .split("\n")
@@ -20,6 +22,7 @@ function parseDetailsForm(formData: FormData) {
 
   return {
     description: String(formData.get("description") ?? "").trim(),
+    status_banner: String(formData.get("status_banner") ?? "").trim() || null,
     phone: String(formData.get("phone") ?? "").trim() || null,
     instagram_url: String(formData.get("instagram_url") ?? "").trim() || null,
     facebook_url: String(formData.get("facebook_url") ?? "").trim() || null,

@@ -49,6 +49,9 @@ export interface Winery {
   wine_club_description: string | null;
   wine_club_benefits: string[] | null;
   hours: string | null;
+  /** Short, staff-editable notice shown at the top of this winery's page —
+   * e.g. a temporary closure or relocation. Null means nothing to show. */
+  status_banner: string | null;
   phone: string | null;
   instagram_url: string | null;
   facebook_url: string | null;

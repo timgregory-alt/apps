@@ -37,6 +37,16 @@ export function PortalDetailsForm({ winery }: { winery: Winery }) {
         />
       </label>
 
+      <label className={labelClass}>
+        <span className={labelTextClass}>Status Banner (shows at the top of your page — leave blank for none)</span>
+        <input
+          name="status_banner"
+          placeholder="e.g. Tasting room closed today — the vineyard is open!"
+          defaultValue={winery.status_banner ?? ""}
+          className={inputClass}
+        />
+      </label>
+
       <div className="grid grid-cols-2 gap-4">
         <label className={labelClass}>
           <span className={labelTextClass}>Phone</span>

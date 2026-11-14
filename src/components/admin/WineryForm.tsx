@@ -117,6 +117,15 @@ export function WineryForm({
           <input name="hours" defaultValue={winery?.hours ?? ""} className={inputClass} />
         </label>
         <label className={labelClass}>
+          <span className={labelTextClass}>Status Banner (e.g. temporary closure notice)</span>
+          <input
+            name="status_banner"
+            placeholder="Tasting room closed — vineyard open at 3595 Clark Rd, Lewisburg"
+            defaultValue={winery?.status_banner ?? ""}
+            className={inputClass}
+          />
+        </label>
+        <label className={labelClass}>
           <span className={labelTextClass}>Phone</span>
           <input name="phone" defaultValue={winery?.phone ?? ""} className={inputClass} />
         </label>

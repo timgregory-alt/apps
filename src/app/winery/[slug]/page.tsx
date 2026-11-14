@@ -23,7 +23,7 @@ import { WineTastingList } from "@/components/tasting/WineTastingList";
 import { Button, LinkButton, buttonVariants } from "@/components/ui/Button";
 import { GatedExternalLink } from "@/components/ui/GatedExternalLink";
 import { SectionEyebrow } from "@/components/ui/Card";
-import { Lock, Star } from "lucide-react";
+import { Lock, Star, Megaphone } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -81,6 +81,13 @@ export default async function WineryDetailPage({
       <WineryHero winery={wineryWithStatus} />
 
       <div className="flex flex-col gap-7 px-6 pt-6">
+        {winery.status_banner && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-[var(--color-gold)]/40 bg-[var(--color-gold-pale)] px-4 py-3">
+            <Megaphone size={16} className="mt-0.5 shrink-0 text-[var(--color-burgundy)]" strokeWidth={2} />
+            <p className="text-sm font-medium text-[var(--color-charcoal)]">{winery.status_banner}</p>
+          </div>
+        )}
+
         <WineryDescription winery={winery} />
 
         <WinerySocialRow winery={winery} isLoggedIn={!!user} redirectTo={`/winery/${winery.slug}`} />
