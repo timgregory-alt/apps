@@ -170,7 +170,11 @@ export async function getAdminStats(): Promise<AdminStats> {
       { data: guestBirthDates },
       { data: guestSubscriberFlags },
     ] = await Promise.all([
-      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("is_staff_account", false)
+        .eq("is_admin", false),
       supabase.from("checkins").select("winery_id, user_id, checkin_date"),
       supabase.from("trail_completions").select("*", { count: "exact", head: true }),
       supabase.from("wine_club_clicks").select("winery_id"),
@@ -179,10 +183,14 @@ export async function getAdminStats(): Promise<AdminStats> {
       supabase
         .from("profiles")
         .select("birth_date")
-        .is("winery_id", null)
+        .eq("is_staff_account", false)
         .eq("is_admin", false)
         .not("birth_date", "is", null),
-      supabase.from("profiles").select("id, is_subscriber").is("winery_id", null).eq("is_admin", false),
+      supabase
+        .from("profiles")
+        .select("id, is_subscriber")
+        .eq("is_staff_account", false)
+        .eq("is_admin", false),
     ]);
 
     const checkinsByWinery: Record<string, number> = {};
@@ -792,8 +800,13 @@ export interface MemberRow {
   created_at: string;
 }
 
-/** All signed-up members, oldest first — used for the admin CSV export and
- * the Members page. */
+/** All signed-up guest members, oldest first — used for the admin CSV
+ * export and the Members page. Excludes winery staff and admin accounts
+ * (same is_staff_account/is_admin filter used everywhere else "guests" are
+ * counted) since those aren't real members, they're logins we created.
+ * is_staff_account stays true even after portal access is later revoked —
+ * unlike winery_id, it doesn't un-flag someone just because they stopped
+ * having access. */
 export async function getAllMembersAdmin(): Promise<MemberRow[]> {
   if (!isSupabaseConfigured) return [];
   try {
@@ -801,6 +814,8 @@ export async function getAllMembersAdmin(): Promise<MemberRow[]> {
     const { data } = await supabase
       .from("profiles")
       .select("id, name, email, zip_code, is_subscriber, subscription_status, agreed_to_terms_at, created_at")
+      .eq("is_staff_account", false)
+      .eq("is_admin", false)
       .order("created_at", { ascending: true });
     return (data as MemberRow[]) ?? [];
   } catch {

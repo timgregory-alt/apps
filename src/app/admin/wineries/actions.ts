@@ -291,7 +291,10 @@ export async function inviteWineryStaffAction(wineryId: string, email: string): 
     .maybeSingle();
 
   if (existing) {
-    const { error } = await supabase.from("profiles").update({ winery_id: wineryId }).eq("id", existing.id);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ winery_id: wineryId, is_staff_account: true })
+      .eq("id", existing.id);
     if (error) return { error: error.message };
     revalidatePath(`/admin/wineries/${wineryId}`);
     return;
