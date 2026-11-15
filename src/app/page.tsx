@@ -117,20 +117,15 @@ export default async function HomePage({
                 </Card>
               </Link>
             ))}
-            {[1, 2].map((i) => (
-              <Card
-                key={`coming-soon-${i}`}
-                className="flex items-center gap-4 overflow-hidden border-dashed p-3 opacity-60"
-              >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[var(--color-line)]">
-                  <Wine size={20} className="text-[var(--color-charcoal)]/30" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-[var(--color-charcoal)]/50">More stops coming soon</p>
-                  <p className="text-xs text-[var(--color-charcoal)]/35">Growing the trail</p>
-                </div>
-              </Card>
-            ))}
+            <Card className="flex items-center gap-4 overflow-hidden border-dashed p-3 opacity-60">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-[var(--color-line)]">
+                <Wine size={20} className="text-[var(--color-charcoal)]/30" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-[var(--color-charcoal)]/50">More stops coming soon</p>
+                <p className="text-xs text-[var(--color-charcoal)]/35">Growing the trail</p>
+              </div>
+            </Card>
           </>
         ) : (
           <Card className="px-4 py-6 text-center text-sm text-[var(--color-charcoal)]/55">
