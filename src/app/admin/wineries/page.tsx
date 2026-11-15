@@ -15,13 +15,21 @@ export default async function AdminWineriesPage() {
             Manage the winery roster. New wineries can be added without a code change.
           </p>
         </div>
-        <Link
-          href="/admin/wineries/new"
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-burgundy)] px-4 py-2.5 text-sm font-medium text-white"
-        >
-          <Plus size={16} />
-          Add Winery
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/admin/trails"
+            className="rounded-full border border-[var(--color-line)] px-4 py-2.5 text-sm font-medium text-[var(--color-charcoal)] hover:border-[var(--color-gold)]"
+          >
+            Manage Trails
+          </Link>
+          <Link
+            href="/admin/wineries/new"
+            className="flex items-center gap-1.5 rounded-full bg-[var(--color-burgundy)] px-4 py-2.5 text-sm font-medium text-white"
+          >
+            <Plus size={16} />
+            Add Winery
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">

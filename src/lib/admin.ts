@@ -4,7 +4,7 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
 import { isBotUserAgent } from "@/lib/bot-detection";
-import type { Winery, Wine, RewardTier, UUID, BugReportStatus, TrackedLink } from "@/lib/types";
+import type { Winery, Wine, RewardTier, UUID, BugReportStatus, TrackedLink, Trail } from "@/lib/types";
 import type { PeriodTrendPoint } from "@/lib/portal";
 
 /** Looks up the city/state for a guest's signup zip code, for the admin
@@ -367,6 +367,42 @@ export async function getAllWineriesAdmin(): Promise<Winery[]> {
     return (data as Winery[]) ?? [];
   } catch {
     return SEED_WINERIES;
+  }
+}
+
+export async function getAllTrailsAdmin(): Promise<Trail[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("trails").select("*").order("sort_order");
+    return (data as Trail[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export interface TrailAssignment {
+  trail_id: string;
+  winery_id: string;
+  display_order: number;
+}
+
+/** Every trail-winery assignment across the whole roster, raw — the admin
+ * Trails board groups these by trail_id itself (and treats any winery with
+ * no row here as unassigned) rather than this function pre-grouping them,
+ * so the client can keep its own optimistic drag state in sync with
+ * exactly this shape. */
+export async function getAllTrailAssignmentsAdmin(): Promise<TrailAssignment[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("trail_wineries")
+      .select("trail_id, winery_id, display_order")
+      .order("display_order");
+    return (data as TrailAssignment[]) ?? [];
+  } catch {
+    return [];
   }
 }
 
