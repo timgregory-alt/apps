@@ -38,13 +38,26 @@ export function PortalDetailsForm({ winery }: { winery: Winery }) {
       </label>
 
       <label className={labelClass}>
-        <span className={labelTextClass}>Status Banner (shows at the top of your page — leave blank for none)</span>
+        <span className={labelTextClass}>Status Banner</span>
         <input
           name="status_banner"
           placeholder="e.g. Tasting room closed today — the vineyard is open!"
           defaultValue={winery.status_banner ?? ""}
           className={inputClass}
         />
+        <span className="mt-1 flex items-center gap-2 text-sm text-[var(--color-charcoal)]">
+          <input
+            type="checkbox"
+            name="status_banner_active"
+            defaultChecked={winery.status_banner_active}
+            className="h-4 w-4 rounded border-[var(--color-line)]"
+          />
+          Show this banner on your page now
+        </span>
+        <span className="text-xs text-[var(--color-charcoal)]/45">
+          Keep the message saved and just uncheck the box when it no longer applies — no need to
+          delete the text.
+        </span>
       </label>
 
       <div className="grid grid-cols-2 gap-4">

@@ -23,6 +23,7 @@ function parseDetailsForm(formData: FormData) {
   return {
     description: String(formData.get("description") ?? "").trim(),
     status_banner: String(formData.get("status_banner") ?? "").trim() || null,
+    status_banner_active: formData.get("status_banner_active") === "on",
     phone: String(formData.get("phone") ?? "").trim() || null,
     instagram_url: String(formData.get("instagram_url") ?? "").trim() || null,
     facebook_url: String(formData.get("facebook_url") ?? "").trim() || null,

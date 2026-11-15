@@ -50,8 +50,11 @@ export interface Winery {
   wine_club_benefits: string[] | null;
   hours: string | null;
   /** Short, staff-editable notice shown at the top of this winery's page —
-   * e.g. a temporary closure or relocation. Null means nothing to show. */
+   * e.g. a temporary closure or relocation. Only shown when
+   * status_banner_active is true, so staff can keep the message saved and
+   * just toggle visibility instead of deleting/retyping it each time. */
   status_banner: string | null;
+  status_banner_active: boolean;
   phone: string | null;
   instagram_url: string | null;
   facebook_url: string | null;

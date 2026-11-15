@@ -124,6 +124,15 @@ export function WineryForm({
             defaultValue={winery?.status_banner ?? ""}
             className={inputClass}
           />
+          <span className="mt-1 flex items-center gap-2 text-sm text-[var(--color-charcoal)]">
+            <input
+              type="checkbox"
+              name="status_banner_active"
+              defaultChecked={winery?.status_banner_active ?? false}
+              className="h-4 w-4 rounded border-[var(--color-line)]"
+            />
+            Show this banner on the winery page
+          </span>
         </label>
         <label className={labelClass}>
           <span className={labelTextClass}>Phone</span>
