@@ -22,7 +22,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { renameTrailAction, saveTrailLayoutAction, type TrailColumnInput } from "@/app/admin/trails/actions";
+import {
+  renameTrailAction,
+  updateTrailDetailsAction,
+  saveTrailLayoutAction,
+  type TrailColumnInput,
+} from "@/app/admin/trails/actions";
 import type { Trail, Winery } from "@/lib/types";
 import type { TrailAssignment } from "@/lib/admin";
 
@@ -150,6 +155,93 @@ function TrailName({ trail }: { trail: Trail }) {
         {pending ? "Saving…" : value}
       </button>
       {error && <p className="text-xs text-[var(--color-burgundy)]">{error}</p>}
+    </div>
+  );
+}
+
+/** The description and region shown on the trail's hero card (the one on
+ * the homepage/Explore page) — collapsed by default since they're edited
+ * far less often than a quick rename or a drag. */
+function TrailDetailsEditor({ trail }: { trail: Trail }) {
+  const [open, setOpen] = useState(false);
+  const [description, setDescription] = useState(trail.description ?? "");
+  const [region, setRegion] = useState(trail.region);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const [synced, setSynced] = useState({ description: trail.description, region: trail.region });
+  if (trail.description !== synced.description || trail.region !== synced.region) {
+    setSynced({ description: trail.description, region: trail.region });
+    setDescription(trail.description ?? "");
+    setRegion(trail.region);
+  }
+
+  function save() {
+    setError(null);
+    setSaved(false);
+    startTransition(async () => {
+      const result = await updateTrailDetailsAction(trail.id, { description, region });
+      if (result?.error) setError(result.error);
+      else setSaved(true);
+    });
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-left text-xs text-[var(--color-charcoal)]/45 hover:text-[var(--color-burgundy)]"
+      >
+        Edit card details
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-line)] bg-white p-2.5">
+      <label className="flex flex-col gap-1">
+        <span className="text-[0.65rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
+          Region
+        </span>
+        <input
+          value={region}
+          onChange={(e) => setRegion(e.target.value)}
+          placeholder="Middle Tennessee"
+          className="rounded-md border border-[var(--color-line)] px-2 py-1 text-xs outline-none focus:border-[var(--color-gold)]"
+        />
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className="text-[0.65rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
+          Description
+        </span>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          placeholder="A countryside tour through..."
+          className="resize-none rounded-md border border-[var(--color-line)] px-2 py-1 text-xs outline-none focus:border-[var(--color-gold)]"
+        />
+      </label>
+      {error && <p className="text-xs text-[var(--color-burgundy)]">{error}</p>}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={save}
+          disabled={pending}
+          className="rounded-full bg-[var(--color-charcoal)] px-3 py-1 text-xs font-medium text-white disabled:opacity-60"
+        >
+          {pending ? "Saving…" : saved ? "Saved" : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-xs text-[var(--color-charcoal)]/50 hover:text-[var(--color-burgundy)]"
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 }
@@ -314,7 +406,12 @@ export function TrailBoard({
           <Column
             key={trail.id}
             id={trail.id}
-            title={<TrailName trail={trail} />}
+            title={
+              <div className="flex flex-col gap-1">
+                <TrailName trail={trail} />
+                <TrailDetailsEditor trail={trail} />
+              </div>
+            }
             badge={
               trail.coming_soon && (
                 <span className="shrink-0 rounded-full bg-black/5 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">

@@ -27,6 +27,10 @@ export interface Trail {
    * it already has wineries mapped — distinct from a trail with zero
    * wineries, which gets the same treatment automatically. */
   coming_soon: boolean;
+  /** Shown on the trail's hero card, e.g. "Middle Tennessee" — a real
+   * per-trail field rather than a hardcoded string, since each trail
+   * covers a different part of the state. */
+  region: string;
   sort_order: number;
   created_at: string;
 }

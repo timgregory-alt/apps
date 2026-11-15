@@ -73,7 +73,9 @@ export default async function HomePage({
         <Card className="texture-grain relative overflow-hidden bg-[var(--color-burgundy)] px-6 py-6 text-[var(--color-ivory)]">
           <TrailCoverFrame />
           <p className="relative text-[0.68rem] font-medium uppercase tracking-[0.24em] text-[var(--color-gold-pale)]">
-            {hasWineries ? `${wineries.length} Stops · Middle Tennessee` : "Middle Tennessee"}
+            {hasWineries
+              ? `${wineries.length} Stops · ${selectedTrail?.region ?? "Tennessee"}`
+              : (selectedTrail?.region ?? "Tennessee")}
           </p>
           <p className="font-serif-display relative mt-2 text-2xl leading-tight">
             {selectedTrail?.name ?? "Coming Soon"}

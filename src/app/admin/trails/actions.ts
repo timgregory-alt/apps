@@ -18,6 +18,30 @@ export async function renameTrailAction(trailId: string, name: string): Promise<
 
   revalidatePath("/admin/trails");
   revalidatePath("/explore");
+  revalidatePath("/");
+}
+
+/** Updates the trail's hero-card copy — description and region (e.g.
+ * "Middle Tennessee") — shown on the homepage and Explore page. */
+export async function updateTrailDetailsAction(
+  trailId: string,
+  details: { description: string | null; region: string }
+): Promise<TrailActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const region = details.region.trim();
+  if (!region) return { error: "Region is required" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("trails")
+    .update({ description: details.description?.trim() || null, region })
+    .eq("id", trailId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/trails");
+  revalidatePath("/explore");
+  revalidatePath("/");
 }
 
 export interface TrailColumnInput {
