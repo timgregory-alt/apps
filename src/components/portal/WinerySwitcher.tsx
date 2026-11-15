@@ -20,7 +20,7 @@ export function WinerySwitcher({ wineries, activeId }: { wineries: Winery[]; act
           await setActivePortalWineryAction(wineryId);
         });
       }}
-      className="rounded-full border border-[var(--color-ivory)]/25 bg-transparent px-3 py-1 font-serif-display text-lg text-[var(--color-ivory)] outline-none disabled:opacity-60"
+      className="-ml-1 cursor-pointer rounded-md bg-transparent px-1 font-serif-display text-lg leading-tight text-[var(--color-ivory)] outline-none disabled:cursor-default disabled:opacity-60"
     >
       {wineries.map((w) => (
         <option key={w.id} value={w.id} className="text-[var(--color-charcoal)]">

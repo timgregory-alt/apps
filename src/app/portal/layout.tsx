@@ -34,18 +34,20 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <div className="min-h-dvh bg-[var(--color-ivory-deep)]">
       <header className="border-b border-[var(--color-line)] bg-[var(--color-charcoal)] px-6 py-4 text-[var(--color-ivory)]">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          {ctx.accessibleWineries.length > 1 ? (
-            <div className="flex items-center gap-2">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-[var(--color-ivory)]/45">
+              Portal
+            </span>
+            {ctx.accessibleWineries.length > 1 ? (
               <WinerySwitcher wineries={ctx.accessibleWineries} activeId={ctx.winery.id} />
-              <span className="font-serif-display text-lg">· Portal</span>
-            </div>
-          ) : (
-            <Link href="/portal" className="font-serif-display text-lg">
-              {ctx.winery.name} · Portal
-            </Link>
-          )}
-          <nav className="flex items-center gap-5 text-sm">
+            ) : (
+              <Link href="/portal" className="font-serif-display text-lg leading-tight">
+                {ctx.winery.name}
+              </Link>
+            )}
+          </div>
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
             <Link href="/portal" className="hover:text-[var(--color-gold)]">
               Dashboard
             </Link>
