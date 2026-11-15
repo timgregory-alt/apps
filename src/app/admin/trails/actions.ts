@@ -6,6 +6,38 @@ import { isCurrentUserAdmin } from "@/lib/admin";
 
 export type TrailActionResult = { error: string } | void;
 
+/** Creates a new, empty trail — shows up as "Coming soon" on the Explore
+ * page automatically (zero wineries mapped) until wineries are dragged
+ * onto it from /admin/trails. */
+export async function createTrailAction(formData: FormData): Promise<TrailActionResult> {
+  if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
+
+  const name = String(formData.get("name") ?? "").trim();
+  const slug = String(formData.get("slug") ?? "")
+    .trim()
+    .toLowerCase();
+  const region = String(formData.get("region") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  if (!name) return { error: "Name is required" };
+  if (!slug) return { error: "Slug is required" };
+  if (!region) return { error: "Region is required" };
+
+  const supabase = await createClient();
+  const { data: maxRow } = await supabase
+    .from("trails")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const sortOrder = (maxRow?.sort_order ?? 0) + 1;
+
+  const { error } = await supabase.from("trails").insert({ name, slug, region, description, sort_order: sortOrder });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/trails");
+  revalidatePath("/explore");
+}
+
 export async function renameTrailAction(trailId: string, name: string): Promise<TrailActionResult> {
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 

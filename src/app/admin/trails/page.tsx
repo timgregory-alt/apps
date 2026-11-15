@@ -1,5 +1,6 @@
 import { getAllTrailsAdmin, getAllTrailAssignmentsAdmin, getAllWineriesAdmin } from "@/lib/admin";
 import { TrailBoard } from "@/components/admin/TrailBoard";
+import { AddTrailForm } from "@/components/admin/AddTrailForm";
 
 export default async function AdminTrailsPage() {
   const [trails, assignments, wineries] = await Promise.all([
@@ -18,6 +19,8 @@ export default async function AdminTrailsPage() {
           wineries show up under Unassigned automatically — nothing here needs a code change.
         </p>
       </div>
+
+      <AddTrailForm />
 
       <TrailBoard trails={trails} wineries={wineries} assignments={assignments} />
     </div>
