@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getWineryStaffContext } from "@/lib/portal";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { WinerySwitcher } from "@/components/portal/WinerySwitcher";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getWineryStaffContext();
@@ -34,9 +35,16 @@ export default async function PortalLayout({ children }: { children: React.React
     <div className="min-h-dvh bg-[var(--color-ivory-deep)]">
       <header className="border-b border-[var(--color-line)] bg-[var(--color-charcoal)] px-6 py-4 text-[var(--color-ivory)]">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Link href="/portal" className="font-serif-display text-lg">
-            {ctx.winery.name} · Portal
-          </Link>
+          {ctx.accessibleWineries.length > 1 ? (
+            <div className="flex items-center gap-2">
+              <WinerySwitcher wineries={ctx.accessibleWineries} activeId={ctx.winery.id} />
+              <span className="font-serif-display text-lg">· Portal</span>
+            </div>
+          ) : (
+            <Link href="/portal" className="font-serif-display text-lg">
+              {ctx.winery.name} · Portal
+            </Link>
+          )}
           <nav className="flex items-center gap-5 text-sm">
             <Link href="/portal" className="hover:text-[var(--color-gold)]">
               Dashboard

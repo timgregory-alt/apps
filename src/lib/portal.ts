@@ -1,20 +1,32 @@
 import "server-only";
 import zipcodes from "zipcodes";
+import { cookies } from "next/headers";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { AGE_GROUPS, type AgeGroup } from "@/lib/utils";
 import type { Winery, WineryFeedback } from "@/lib/types";
+
+/** Which of a staff member's accessible wineries the portal currently shows
+ * — set by the winery switcher in the portal header. Unset or stale (no
+ * longer accessible) falls back to profiles.winery_id, then to whichever
+ * winery comes first. */
+export const ACTIVE_PORTAL_WINERY_COOKIE = "portal_active_winery_id";
 
 export interface WineryStaffContext {
   userId: string;
   name: string | null;
   email: string | null;
+  /** The winery this portal session is currently showing. */
   winery: Winery;
+  /** Every winery this profile has staff access to — more than one means
+   * the portal header shows a switcher. Most staff only ever have one. */
+  accessibleWineries: Winery[];
 }
 
-/** Resolves the signed-in user's winery-portal context (their linked
- * winery, plus their own name/email for a "Welcome" greeting), or null if
- * they're not a winery-staff account. Every /portal page and Server Action
- * gates on this the same way admin pages gate on isCurrentUserAdmin(). */
+/** Resolves the signed-in user's winery-portal context (their currently
+ * selected winery, every winery they can switch to, plus their own
+ * name/email for a "Welcome" greeting), or null if they're not a
+ * winery-staff account. Every /portal page and Server Action gates on this
+ * the same way admin pages gate on isCurrentUserAdmin(). */
 export async function getWineryStaffContext(): Promise<WineryStaffContext | null> {
   if (!isSupabaseConfigured) return null;
   try {
@@ -29,26 +41,54 @@ export async function getWineryStaffContext(): Promise<WineryStaffContext | null
       .select("winery_id, name, email")
       .eq("id", user.id)
       .maybeSingle();
-    if (!profile?.winery_id) return null;
+    if (!profile) return null;
 
-    const { data: winery } = await supabase
-      .from("wineries")
-      .select("*")
-      .eq("id", profile.winery_id)
-      .maybeSingle();
-    if (!winery) return null;
+    const { data: accessRows } = await supabase
+      .from("winery_staff_access")
+      .select("wineries(*)")
+      .eq("profile_id", user.id);
+    const accessibleWineries = (accessRows ?? [])
+      .map((r) => r.wineries as unknown as Winery)
+      .filter((w): w is Winery => !!w)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    if (accessibleWineries.length === 0) return null;
 
-    return { userId: user.id, name: profile.name, email: profile.email, winery: winery as Winery };
+    const cookieStore = await cookies();
+    const selectedId = cookieStore.get(ACTIVE_PORTAL_WINERY_COOKIE)?.value;
+    const winery =
+      accessibleWineries.find((w) => w.id === selectedId) ??
+      accessibleWineries.find((w) => w.id === profile.winery_id) ??
+      accessibleWineries[0];
+
+    return { userId: user.id, name: profile.name, email: profile.email, winery, accessibleWineries };
   } catch {
     return null;
   }
 }
 
-/** For Server Actions: confirms the signed-in user is staff for exactly
- * this winery — never trust a wineryId passed from the client alone. */
+/** For Server Actions: confirms the signed-in user is staff for this
+ * winery — never trust a wineryId passed from the client alone. Checks
+ * every winery the profile has access to, not just whichever one the
+ * portal happens to be showing right now. */
 export async function isCurrentUserStaffFor(wineryId: string): Promise<boolean> {
-  const ctx = await getWineryStaffContext();
-  return ctx?.winery.id === wineryId;
+  if (!isSupabaseConfigured) return false;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data } = await supabase
+      .from("winery_staff_access")
+      .select("winery_id")
+      .eq("profile_id", user.id)
+      .eq("winery_id", wineryId)
+      .maybeSingle();
+    return !!data;
+  } catch {
+    return false;
+  }
 }
 
 export interface RepeatGuestStats {

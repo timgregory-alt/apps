@@ -378,17 +378,26 @@ export interface WineryStaffAccount {
 }
 
 /** Accounts with portal access to one winery — never guests, only profiles
- * an admin has explicitly linked via winery_id. */
+ * an admin has explicitly granted via winery_staff_access. A profile can
+ * have access to more than one winery (e.g. Big Creek's two locations
+ * under one login), so this reads the grant table rather than
+ * profiles.winery_id, which only ever reflects one "primary" winery. */
 export async function getWineryStaffAdmin(wineryId: string): Promise<WineryStaffAccount[]> {
   if (!isSupabaseConfigured) return [];
   try {
     const supabase = await createClient();
     const { data } = await supabase
-      .from("profiles")
-      .select("id, email, name, created_at")
+      .from("winery_staff_access")
+      .select("created_at, profiles(id, email, name)")
       .eq("winery_id", wineryId)
       .order("created_at", { ascending: true });
-    return (data as WineryStaffAccount[]) ?? [];
+
+    return (data ?? [])
+      .map((row) => {
+        const profile = row.profiles as unknown as { id: UUID; email: string | null; name: string | null } | null;
+        return profile ? { id: profile.id, email: profile.email, name: profile.name, created_at: row.created_at } : null;
+      })
+      .filter((row): row is WineryStaffAccount => !!row);
   } catch {
     return [];
   }

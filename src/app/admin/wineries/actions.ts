@@ -288,14 +288,26 @@ export async function inviteWineryStaffAction(wineryId: string, email: string): 
   const supabase = await createClient();
   const { data: existing } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, winery_id")
     .ilike("email", trimmed)
     .maybeSingle();
 
   if (existing) {
+    // Grants access to this winery without disturbing any other winery
+    // they already have access to (e.g. Big Creek's two locations under
+    // one login) — profiles.winery_id only gets set here when they didn't
+    // already have a primary winery.
+    const { error: accessError } = await supabase
+      .from("winery_staff_access")
+      .upsert({ profile_id: existing.id, winery_id: wineryId }, { onConflict: "profile_id,winery_id" });
+    if (accessError) return { error: accessError.message };
+
     const { error } = await supabase
       .from("profiles")
-      .update({ winery_id: wineryId, is_staff_account: true })
+      .update({
+        is_staff_account: true,
+        ...(existing.winery_id ? {} : { winery_id: wineryId }),
+      })
       .eq("id", existing.id);
     if (error) return { error: error.message };
     revalidatePath(`/admin/wineries/${wineryId}`);
@@ -323,12 +335,15 @@ export async function resendWineryStaffInviteAction(wineryId: string, profileId:
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("email")
-    .eq("id", profileId)
+  const { data: access } = await supabase
+    .from("winery_staff_access")
+    .select("profile_id")
+    .eq("profile_id", profileId)
     .eq("winery_id", wineryId)
     .maybeSingle();
+  if (!access) return { error: "Could not find that account" };
+
+  const { data: profile } = await supabase.from("profiles").select("email").eq("id", profileId).maybeSingle();
   if (!profile?.email) return { error: "Could not find that account" };
 
   const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
@@ -392,18 +407,43 @@ export async function deleteWineryPermanentlyAction(wineryId: string): Promise<W
   revalidatePath("/my-trail");
 }
 
-/** Removes portal access without deleting the account — they stay a
- * regular signed-in user, just no longer linked to this winery. */
+/** Removes portal access to this one winery without deleting the account —
+ * they stay a regular signed-in user, and keep access to any other winery
+ * they're also staff for. If the revoked winery was their primary
+ * (profiles.winery_id), promotes another remaining access grant to primary,
+ * or clears it if this was their only one. */
 export async function revokeWineryStaffAction(wineryId: string, profileId: string): Promise<WineryActionResult> {
   if (!(await isCurrentUserAdmin())) return { error: "Not authorized" };
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("profiles")
-    .update({ winery_id: null })
-    .eq("id", profileId)
+  const { error: deleteError } = await supabase
+    .from("winery_staff_access")
+    .delete()
+    .eq("profile_id", profileId)
     .eq("winery_id", wineryId);
-  if (error) return { error: error.message };
+  if (deleteError) return { error: deleteError.message };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("winery_id")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (profile?.winery_id === wineryId) {
+    const { data: remaining } = await supabase
+      .from("winery_staff_access")
+      .select("winery_id")
+      .eq("profile_id", profileId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ winery_id: remaining?.winery_id ?? null })
+      .eq("id", profileId);
+    if (error) return { error: error.message };
+  }
 
   revalidatePath(`/admin/wineries/${wineryId}`);
 }
