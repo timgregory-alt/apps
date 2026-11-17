@@ -768,18 +768,25 @@ const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = { total: 0, last7Days: 0, 
 
 /** Every homepage visit — organic traffic and anyone arriving via a QR code
  * or tracked link alike — minus known bots/crawlers/link-preview fetchers
- * (see isBotUserAgent). Rows logged before user_agent capture was added have
- * no value to check and are kept, since we never had a way to tell for
- * those. */
+ * (see isBotUserAgent) and minus any visit logged while signed in as an
+ * admin or winery-staff account (your own testing/browsing, not a real
+ * guest). Rows logged before user_agent capture was added have no value to
+ * check and are kept, since we never had a way to tell for those. A
+ * signed-out self-visit (not logged in while testing) can't be filtered
+ * this way — there's no id to match it against. */
 export async function getHomePageViewStats(): Promise<HomePageViewStats> {
   if (!isSupabaseConfigured) return EMPTY_HOME_PAGE_VIEW_STATS;
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.from("home_page_views").select("user_agent, created_at, source");
+    const [{ data, error }, { data: staffProfiles }] = await Promise.all([
+      supabase.from("home_page_views").select("user_agent, created_at, source, user_id"),
+      supabase.from("profiles").select("id").or("is_admin.eq.true,is_staff_account.eq.true"),
+    ]);
     if (error || !data) throw error;
 
+    const staffIds = new Set((staffProfiles ?? []).map((p) => p.id));
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const human = data.filter((row) => !isBotUserAgent(row.user_agent));
+    const human = data.filter((row) => !isBotUserAgent(row.user_agent) && !(row.user_id && staffIds.has(row.user_id)));
     const last7Days = human.filter((row) => new Date(row.created_at).getTime() >= sevenDaysAgo).length;
 
     const bySource: Record<string, number> = {};
