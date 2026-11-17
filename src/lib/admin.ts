@@ -1,6 +1,6 @@
 import "server-only";
 import zipcodes from "zipcodes";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { createClient, createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { SEED_WINERIES, SEED_WINES, SEED_REWARD_TIERS } from "@/lib/seed-data";
 import { calculateAge, ageGroupFor, AGE_GROUPS } from "@/lib/utils";
 import { isBotUserAgent } from "@/lib/bot-detection";
@@ -411,6 +411,10 @@ export interface WineryStaffAccount {
   email: string | null;
   name: string | null;
   created_at: string;
+  /** From Supabase Auth, not profiles — null means invited but never
+   * actually signed in. Useful for telling "has portal access" apart from
+   * "is actually using it," especially for a less tech-comfortable owner. */
+  last_sign_in_at: string | null;
 }
 
 /** Accounts with portal access to one winery — never guests, only profiles
@@ -428,14 +432,78 @@ export async function getWineryStaffAdmin(wineryId: string): Promise<WineryStaff
       .eq("winery_id", wineryId)
       .order("created_at", { ascending: true });
 
-    return (data ?? [])
+    const rows = (data ?? [])
       .map((row) => {
         const profile = row.profiles as unknown as { id: UUID; email: string | null; name: string | null } | null;
         return profile ? { id: profile.id, email: profile.email, name: profile.name, created_at: row.created_at } : null;
       })
-      .filter((row): row is WineryStaffAccount => !!row);
+      .filter((row): row is Omit<WineryStaffAccount, "last_sign_in_at"> => !!row);
+
+    // Last-sign-in lives in Supabase Auth, not profiles — one lookup per
+    // staff member via the admin API. Winery staff lists are small (a
+    // handful of people), so this is cheap even done one at a time.
+    const adminClient = await createAdminClient();
+    const withLastSignIn = await Promise.all(
+      rows.map(async (row) => {
+        try {
+          const { data: userData } = await adminClient.auth.admin.getUserById(row.id);
+          return { ...row, last_sign_in_at: userData.user?.last_sign_in_at ?? null };
+        } catch {
+          return { ...row, last_sign_in_at: null };
+        }
+      })
+    );
+    return withLastSignIn;
   } catch {
     return [];
+  }
+}
+
+export interface WineryStaffLoginSummary {
+  staffCount: number;
+  /** Most recent sign-in across every staff member with access to this
+   * winery — null if nobody invited there has ever actually signed in. */
+  mostRecentSignIn: string | null;
+}
+
+/** One summary per winery (keyed by winery id) for the Wineries list —
+ * lets an admin see at a glance which locations have staff who've actually
+ * logged into the portal versus ones that were invited and went quiet,
+ * without clicking into each winery's own Portal Access panel. */
+export async function getWineryStaffLoginSummaryAdmin(): Promise<Record<string, WineryStaffLoginSummary>> {
+  if (!isSupabaseConfigured) return {};
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("winery_staff_access").select("winery_id, profile_id");
+    if (!data || data.length === 0) return {};
+
+    const uniqueProfileIds = [...new Set(data.map((r) => r.profile_id))];
+    const adminClient = await createAdminClient();
+    const lastSignInByProfile = new Map<string, string | null>();
+    await Promise.all(
+      uniqueProfileIds.map(async (id) => {
+        try {
+          const { data: userData } = await adminClient.auth.admin.getUserById(id);
+          lastSignInByProfile.set(id, userData.user?.last_sign_in_at ?? null);
+        } catch {
+          lastSignInByProfile.set(id, null);
+        }
+      })
+    );
+
+    const summary: Record<string, WineryStaffLoginSummary> = {};
+    data.forEach((row) => {
+      const entry = summary[row.winery_id] ?? { staffCount: 0, mostRecentSignIn: null };
+      entry.staffCount += 1;
+      const signIn = lastSignInByProfile.get(row.profile_id) ?? null;
+      if (signIn && (!entry.mostRecentSignIn || signIn > entry.mostRecentSignIn)) {
+        entry.mostRecentSignIn = signIn;
+      }
+      summary[row.winery_id] = entry;
+    });
+    return summary;
+  } catch {
+    return {};
   }
 }
 

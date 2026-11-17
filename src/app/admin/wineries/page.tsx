@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { getAdminStats, getAllWineriesAdmin } from "@/lib/admin";
+import { getAdminStats, getAllWineriesAdmin, getWineryStaffLoginSummaryAdmin } from "@/lib/admin";
 import { RemoveWineryButton } from "@/components/admin/RemoveWineryButton";
+import { formatCheckinDate } from "@/lib/utils";
 
 export default async function AdminWineriesPage() {
-  const [wineries, stats] = await Promise.all([getAllWineriesAdmin(), getAdminStats()]);
+  const [wineries, stats, staffLogins] = await Promise.all([
+    getAllWineriesAdmin(),
+    getAdminStats(),
+    getWineryStaffLoginSummaryAdmin(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,6 +48,19 @@ export default async function AdminWineriesPage() {
               <p className="font-medium text-[var(--color-charcoal)]">{w.name}</p>
               <p className="text-xs text-[var(--color-charcoal)]/55">
                 {w.city}, {w.state} · {stats.checkinsByWinery[w.id] ?? 0} check-ins
+              </p>
+              <p
+                className={`mt-0.5 text-xs ${
+                  staffLogins[w.id]?.mostRecentSignIn
+                    ? "text-[var(--color-charcoal)]/45"
+                    : "text-[var(--color-burgundy)]"
+                }`}
+              >
+                {!staffLogins[w.id]
+                  ? "No staff invited yet"
+                  : staffLogins[w.id].mostRecentSignIn
+                    ? `Staff last signed in ${formatCheckinDate(staffLogins[w.id].mostRecentSignIn!)}`
+                    : `${staffLogins[w.id].staffCount} staff invited — never signed in`}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">

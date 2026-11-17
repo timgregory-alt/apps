@@ -7,6 +7,7 @@ import {
   revokeWineryStaffAction,
   resendWineryStaffInviteAction,
 } from "@/app/admin/wineries/actions";
+import { formatCheckinDate } from "@/lib/utils";
 import type { WineryStaffAccount } from "@/lib/admin";
 
 export function PortalAccessPanel({
@@ -72,6 +73,15 @@ export function PortalAccessPanel({
               <div className="min-w-0">
                 <p className="truncate text-sm text-[var(--color-charcoal)]">{s.email}</p>
                 {s.name && <p className="truncate text-xs text-[var(--color-charcoal)]/50">{s.name}</p>}
+                <p
+                  className={`truncate text-xs ${
+                    s.last_sign_in_at ? "text-[var(--color-charcoal)]/45" : "text-[var(--color-burgundy)]"
+                  }`}
+                >
+                  {s.last_sign_in_at
+                    ? `Last signed in ${formatCheckinDate(s.last_sign_in_at)}`
+                    : "Invited — never signed in"}
+                </p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 <button
