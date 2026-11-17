@@ -243,6 +243,24 @@ export default async function AdminDashboardPage() {
             {homePageViewStats.last7Days.toLocaleString()} / {gatedActionAttemptStats.last7Days.toLocaleString()}{" "}
             in the last 7 days
           </p>
+          {Object.keys(homePageViewStats.bySource).length > 0 && (
+            <div className="mt-4 border-t border-[var(--color-line)] pt-3 text-left">
+              <p className="text-[0.6rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                Views by Source
+              </p>
+              <ul className="mt-1.5 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
+                {Object.entries(homePageViewStats.bySource)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([source, count]) => (
+                    <li key={source} className="flex items-center justify-between">
+                      <span>{source}</span>
+                      <span className="font-medium text-[var(--color-charcoal)]">{count}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
           {Object.keys(gatedActionAttemptStats.byAction).length > 0 && (
             <ul className="mt-3 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
               {Object.entries(gatedActionAttemptStats.byAction)

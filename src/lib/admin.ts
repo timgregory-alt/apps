@@ -757,9 +757,14 @@ export async function getWineryFeedbackAdmin(): Promise<WineryFeedbackEntry[]> {
 export interface HomePageViewStats {
   total: number;
   last7Days: number;
+  /** Bot-filtered view counts grouped by the ?src= tag the visit arrived
+   * with — "organic" for no tag at all, "qr" for the general app QR code,
+   * or a tracked link's own slug (see tracked_links). This is the "where
+   * are these views actually coming from" breakdown. */
+  bySource: Record<string, number>;
 }
 
-const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = { total: 0, last7Days: 0 };
+const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = { total: 0, last7Days: 0, bySource: {} };
 
 /** Every homepage visit — organic traffic and anyone arriving via a QR code
  * or tracked link alike — minus known bots/crawlers/link-preview fetchers
@@ -770,13 +775,20 @@ export async function getHomePageViewStats(): Promise<HomePageViewStats> {
   if (!isSupabaseConfigured) return EMPTY_HOME_PAGE_VIEW_STATS;
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.from("home_page_views").select("user_agent, created_at");
+    const { data, error } = await supabase.from("home_page_views").select("user_agent, created_at, source");
     if (error || !data) throw error;
 
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const human = data.filter((row) => !isBotUserAgent(row.user_agent));
     const last7Days = human.filter((row) => new Date(row.created_at).getTime() >= sevenDaysAgo).length;
-    return { total: human.length, last7Days };
+
+    const bySource: Record<string, number> = {};
+    human.forEach((row) => {
+      const key = row.source ?? "organic";
+      bySource[key] = (bySource[key] ?? 0) + 1;
+    });
+
+    return { total: human.length, last7Days, bySource };
   } catch {
     return EMPTY_HOME_PAGE_VIEW_STATS;
   }
