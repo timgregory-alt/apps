@@ -25,6 +25,7 @@ import { TrailPicker } from "@/components/trail/TrailPicker";
 import { TrailCoverFrame } from "@/components/ui/TrailCoverFrame";
 import { UpcomingEventsSection } from "@/components/events/UpcomingEventsSection";
 import { VineyardVideoBackground } from "@/components/explore/VineyardVideoBackground";
+import { SignupPromptPopup } from "@/components/auth/SignupPromptPopup";
 
 export default async function HomePage({
   searchParams,
@@ -168,6 +169,8 @@ export default async function HomePage({
         </div>
       )}
       </main>
+
+      {!user && <SignupPromptPopup />}
     </>
   );
 }
