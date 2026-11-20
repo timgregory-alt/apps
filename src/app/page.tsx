@@ -37,9 +37,15 @@ export default async function HomePage({
   const profile = user ? await getProfile(user.id) : null;
   // Read here, not inside after() — headers() is a request-bound API Next.js
   // forbids calling once the response may have already started streaming.
-  const userAgent = (await headers()).get("user-agent");
+  const requestHeaders = await headers();
+  const userAgent = requestHeaders.get("user-agent");
+  // Set by Vercel's edge network on every request — a passive, no-prompt
+  // way to see which country a visit came from, unlike the browser's
+  // Geolocation API (which needs a permission prompt and precise GPS, the
+  // kind of friction we only ask for at check-in, never just for browsing).
+  const country = requestHeaders.get("x-vercel-ip-country");
 
-  after(() => logHomePageView(src ?? null, user?.id ?? null, userAgent));
+  after(() => logHomePageView(src ?? null, user?.id ?? null, userAgent, country));
   const trails = await getAllTrails();
   const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
   const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;

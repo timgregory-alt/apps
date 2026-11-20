@@ -261,6 +261,24 @@ export default async function AdminDashboardPage() {
             </div>
           )}
 
+          {Object.keys(homePageViewStats.byCountry).length > 0 && (
+            <div className="mt-4 border-t border-[var(--color-line)] pt-3 text-left">
+              <p className="text-[0.6rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                Views by Country
+              </p>
+              <ul className="mt-1.5 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
+                {Object.entries(homePageViewStats.byCountry)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([country, count]) => (
+                    <li key={country} className="flex items-center justify-between">
+                      <span>{country}</span>
+                      <span className="font-medium text-[var(--color-charcoal)]">{count}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
           {Object.keys(gatedActionAttemptStats.byAction).length > 0 && (
             <ul className="mt-3 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
               {Object.entries(gatedActionAttemptStats.byAction)

@@ -169,7 +169,8 @@ export async function logWineryPageView(
 export async function logHomePageView(
   source: string | null,
   userId: string | null,
-  userAgent: string | null = null
+  userAgent: string | null = null,
+  country: string | null = null
 ): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
@@ -178,7 +179,7 @@ export async function logHomePageView(
     const supabase = await createAdminClient();
     const { error } = await supabase
       .from("home_page_views")
-      .insert({ user_id: userId, source, user_agent: userAgent });
+      .insert({ user_id: userId, source, user_agent: userAgent, country });
     if (error) console.error("logHomePageView insert failed:", error.message);
   } catch (err) {
     console.error("logHomePageView threw:", err);
