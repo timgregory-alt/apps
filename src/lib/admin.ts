@@ -166,9 +166,10 @@ export async function getAdminStats(): Promise<AdminStats> {
       { count: totalCompletions },
       { data: clicks },
       { data: shares },
-      { data: views },
+      { data: rawViews },
       { data: guestBirthDates },
       { data: guestSubscriberFlags },
+      { data: staffProfiles },
     ] = await Promise.all([
       supabase
         .from("profiles")
@@ -179,7 +180,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       supabase.from("trail_completions").select("*", { count: "exact", head: true }),
       supabase.from("wine_club_clicks").select("winery_id"),
       supabase.from("share_events").select("share_type, winery_id"),
-      supabase.from("winery_page_views").select("winery_id, source"),
+      supabase.from("winery_page_views").select("winery_id, source, user_agent, user_id"),
       supabase
         .from("profiles")
         .select("birth_date")
@@ -191,7 +192,17 @@ export async function getAdminStats(): Promise<AdminStats> {
         .select("id, is_subscriber")
         .eq("is_staff_account", false)
         .eq("is_admin", false),
+      supabase.from("profiles").select("id").or("is_admin.eq.true,is_staff_account.eq.true"),
     ]);
+
+    // Same two filters as getHomePageViewStats — a winery's own QR-scan
+    // count (shown free in their portal) and these site-wide page-view
+    // stats were never protected from crawler noise or admin/staff self-
+    // visits the way the homepage count is.
+    const staffIds = new Set((staffProfiles ?? []).map((p) => p.id));
+    const views = (rawViews ?? []).filter(
+      (v) => !isBotUserAgent(v.user_agent) && !(v.user_id && staffIds.has(v.user_id))
+    );
 
     const checkinsByWinery: Record<string, number> = {};
     // A guest can now check in at the same winery more than once (one per
@@ -232,11 +243,11 @@ export async function getAdminStats(): Promise<AdminStats> {
 
     const pageViewsByWinery: Record<string, number> = {};
     const qrScansByWinery: Record<string, number> = {};
-    (views ?? []).forEach((v) => {
+    views.forEach((v) => {
       pageViewsByWinery[v.winery_id] = (pageViewsByWinery[v.winery_id] ?? 0) + 1;
       if (v.source === "qr") qrScansByWinery[v.winery_id] = (qrScansByWinery[v.winery_id] ?? 0) + 1;
     });
-    const totalQrScans = (views ?? []).filter((v) => v.source === "qr").length;
+    const totalQrScans = views.filter((v) => v.source === "qr").length;
 
     // Distinct checked-in guests who are current Premium subscribers —
     // site-wide and per-winery, so a winery can see what share of their
@@ -279,7 +290,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       totalCompletions: totalCompletions ?? 0,
       totalWineClubClicks: (clicks ?? []).length,
       totalShareEvents: (shares ?? []).length,
-      totalPageViews: (views ?? []).length,
+      totalPageViews: views.length,
       totalQrScans,
       checkinsByWinery,
       wineClubClicksByWinery,

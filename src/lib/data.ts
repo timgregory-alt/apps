@@ -143,7 +143,8 @@ export async function getPrimaryTrailSlugForWinery(wineryId: string): Promise<st
 export async function logWineryPageView(
   wineryId: string,
   userId: string | null,
-  source: string | null = null
+  source: string | null = null,
+  userAgent: string | null = null
 ): Promise<void> {
   if (!isSupabaseConfigured) return;
   try {
@@ -152,7 +153,9 @@ export async function logWineryPageView(
     // the regular client reads cookies() internally to resolve the request's
     // session, which silently threw and dropped every page-view ping.
     const supabase = await createAdminClient();
-    const { error } = await supabase.from("winery_page_views").insert({ winery_id: wineryId, user_id: userId, source });
+    const { error } = await supabase
+      .from("winery_page_views")
+      .insert({ winery_id: wineryId, user_id: userId, source, user_agent: userAgent });
     if (error) console.error("logWineryPageView insert failed:", error.message);
   } catch (err) {
     console.error("logWineryPageView threw:", err);

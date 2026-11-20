@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { after } from "next/server";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import {
   getCurrentUser,
@@ -54,8 +55,11 @@ export default async function WineryDetailPage({
   const user = await getCurrentUser();
   const profile = user ? await getProfile(user.id) : null;
   const isSubscriber = profile?.is_subscriber ?? false;
+  // Read here, not inside after() — headers() is a request-bound API Next.js
+  // forbids calling once the response may have already started streaming.
+  const userAgent = (await headers()).get("user-agent");
 
-  after(() => logWineryPageView(winery.id, user?.id ?? null, src === "qr" ? "qr" : null));
+  after(() => logWineryPageView(winery.id, user?.id ?? null, src === "qr" ? "qr" : null, userAgent));
 
   const trailSlug = await getPrimaryTrailSlugForWinery(winery.id);
   const [wineries, allWines, customTastings, hoursSeasons, weeklyHours] = await Promise.all([
