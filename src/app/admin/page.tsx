@@ -261,24 +261,6 @@ export default async function AdminDashboardPage() {
             </div>
           )}
 
-          {Object.keys(homePageViewStats.byCountry).length > 0 && (
-            <div className="mt-4 border-t border-[var(--color-line)] pt-3 text-left">
-              <p className="text-[0.6rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
-                Views by Country
-              </p>
-              <ul className="mt-1.5 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
-                {Object.entries(homePageViewStats.byCountry)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([country, count]) => (
-                    <li key={country} className="flex items-center justify-between">
-                      <span>{country}</span>
-                      <span className="font-medium text-[var(--color-charcoal)]">{count}</span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
-
           {Object.keys(gatedActionAttemptStats.byAction).length > 0 && (
             <ul className="mt-3 flex flex-col gap-0.5 text-xs text-[var(--color-charcoal)]/55">
               {Object.entries(gatedActionAttemptStats.byAction)
@@ -292,6 +274,50 @@ export default async function AdminDashboardPage() {
             </ul>
           )}
         </div>
+
+        {(Object.keys(homePageViewStats.byCountry).length > 0 || Object.keys(homePageViewStats.byCity).length > 0) && (
+          <div className="min-w-[260px] max-w-xs flex-1 rounded-2xl border border-[var(--color-line)] bg-white p-5">
+            <p className="text-center text-xs font-medium uppercase tracking-wide text-[var(--color-charcoal)]/50">
+              Views by Location
+            </p>
+            <p className="mt-2 text-center text-xs text-[var(--color-charcoal)]/45">
+              Where homepage visits are actually coming from — bots and staff already filtered out.
+            </p>
+
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[0.6rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                  Country
+                </p>
+                <ul className="mt-1.5 flex max-h-56 flex-col gap-0.5 overflow-y-auto text-xs text-[var(--color-charcoal)]/55">
+                  {Object.entries(homePageViewStats.byCountry)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([country, count]) => (
+                      <li key={country} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{country}</span>
+                        <span className="shrink-0 font-medium text-[var(--color-charcoal)]">{count}</span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-[0.6rem] font-medium uppercase tracking-wide text-[var(--color-charcoal)]/45">
+                  City
+                </p>
+                <ul className="mt-1.5 flex max-h-56 flex-col gap-0.5 overflow-y-auto text-xs text-[var(--color-charcoal)]/55">
+                  {Object.entries(homePageViewStats.byCity)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([city, count]) => (
+                      <li key={city} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{city}</span>
+                        <span className="shrink-0 font-medium text-[var(--color-charcoal)]">{count}</span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

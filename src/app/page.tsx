@@ -44,8 +44,18 @@ export default async function HomePage({
   // Geolocation API (which needs a permission prompt and precise GPS, the
   // kind of friction we only ask for at check-in, never just for browsing).
   const country = requestHeaders.get("x-vercel-ip-country");
+  // City names can contain spaces/special characters, so Vercel URI-encodes
+  // this one (e.g. "Chapel%20Hill") — decode defensively since a malformed
+  // value would otherwise throw and take the whole render down with it.
+  const rawCity = requestHeaders.get("x-vercel-ip-city");
+  let city: string | null = null;
+  try {
+    city = rawCity ? decodeURIComponent(rawCity) : null;
+  } catch {
+    city = rawCity;
+  }
 
-  after(() => logHomePageView(src ?? null, user?.id ?? null, userAgent, country));
+  after(() => logHomePageView(src ?? null, user?.id ?? null, userAgent, country, city));
   const trails = await getAllTrails();
   const selectedTrail = trails.find((t) => t.slug === trailParam) ?? trails.find((t) => t.slug === DEFAULT_TRAIL_SLUG);
   const selectedSlug = selectedTrail?.slug ?? DEFAULT_TRAIL_SLUG;

@@ -778,9 +778,17 @@ export interface HomePageViewStats {
    * "Unknown" covers rows from before this was captured, or any request
    * that arrives without the header (e.g. local/non-Vercel environments). */
   byCountry: Record<string, number>;
+  /** Same idea as byCountry, from Vercel's x-vercel-ip-city header. */
+  byCity: Record<string, number>;
 }
 
-const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = { total: 0, last7Days: 0, bySource: {}, byCountry: {} };
+const EMPTY_HOME_PAGE_VIEW_STATS: HomePageViewStats = {
+  total: 0,
+  last7Days: 0,
+  bySource: {},
+  byCountry: {},
+  byCity: {},
+};
 
 /** Every homepage visit — organic traffic and anyone arriving via a QR code
  * or tracked link alike — minus known bots/crawlers/link-preview fetchers
@@ -795,7 +803,7 @@ export async function getHomePageViewStats(): Promise<HomePageViewStats> {
   try {
     const supabase = await createClient();
     const [{ data, error }, { data: staffProfiles }] = await Promise.all([
-      supabase.from("home_page_views").select("user_agent, created_at, source, user_id, country"),
+      supabase.from("home_page_views").select("user_agent, created_at, source, user_id, country, city"),
       supabase.from("profiles").select("id").or("is_admin.eq.true,is_staff_account.eq.true"),
     ]);
     if (error || !data) throw error;
@@ -807,14 +815,17 @@ export async function getHomePageViewStats(): Promise<HomePageViewStats> {
 
     const bySource: Record<string, number> = {};
     const byCountry: Record<string, number> = {};
+    const byCity: Record<string, number> = {};
     human.forEach((row) => {
       const sourceKey = row.source ?? "organic";
       bySource[sourceKey] = (bySource[sourceKey] ?? 0) + 1;
       const countryKey = row.country ?? "Unknown";
       byCountry[countryKey] = (byCountry[countryKey] ?? 0) + 1;
+      const cityKey = row.city ?? "Unknown";
+      byCity[cityKey] = (byCity[cityKey] ?? 0) + 1;
     });
 
-    return { total: human.length, last7Days, bySource, byCountry };
+    return { total: human.length, last7Days, bySource, byCountry, byCity };
   } catch {
     return EMPTY_HOME_PAGE_VIEW_STATS;
   }
