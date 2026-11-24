@@ -775,10 +775,11 @@ export interface HomePageViewStats {
   bySource: Record<string, number>;
   /** Bot-filtered view counts grouped by country (from Vercel's
    * x-vercel-ip-country header, captured passively — no permission prompt).
-   * "Unknown" covers rows from before this was captured, or any request
-   * that arrives without the header (e.g. local/non-Vercel environments). */
+   * Limited to US views only — this app only serves Tennessee wineries, so
+   * non-US traffic that slips past bot detection is noise (VPNs, scrapers,
+   * stray bots) rather than real prospective visitors worth breaking out. */
   byCountry: Record<string, number>;
-  /** Same idea as byCountry, from Vercel's x-vercel-ip-city header. */
+  /** Same idea as byCountry (US-only), from Vercel's x-vercel-ip-city header. */
   byCity: Record<string, number>;
 }
 
@@ -819,8 +820,9 @@ export async function getHomePageViewStats(): Promise<HomePageViewStats> {
     human.forEach((row) => {
       const sourceKey = row.source ?? "organic";
       bySource[sourceKey] = (bySource[sourceKey] ?? 0) + 1;
-      const countryKey = row.country ?? "Unknown";
-      byCountry[countryKey] = (byCountry[countryKey] ?? 0) + 1;
+      // Country/city breakdown is US-only — see the HomePageViewStats comment.
+      if (row.country !== "US") return;
+      byCountry[row.country] = (byCountry[row.country] ?? 0) + 1;
       const cityKey = row.city ?? "Unknown";
       byCity[cityKey] = (byCity[cityKey] ?? 0) + 1;
     });
